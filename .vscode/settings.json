@@ -1,0 +1,75 @@
+{
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
+    "files.watcherExclude": {
+        "**/venv/**": true
+    },
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--ignore=E501,E203,W503,B902"
+    ],
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "-l",
+        "160"
+    ],
+    "python.pythonPath": "venv/bin/python",
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}/src"
+    ],
+    "python.workspaceSymbols.rebuildOnFileSave": true,
+    "python.testing.pytestEnabled": true,
+    "editor.formatOnSave": true,
+    "cSpell.words": [
+        "DEPS",
+        "MFLAGS",
+        "Makefiles",
+        "XDIST",
+        "chdir",
+        "chmod",
+        "datefmt",
+        "devenv",
+        "DGRAM",
+        "dynod",
+        "getuid",
+        "getpwuid",
+        "grpc",
+        "ifdef",
+        "ifndef",
+        "ifneq",
+        "INET",
+        "isort",
+        "mkdir",
+        "msecs",
+        "nargs",
+        "noqa",
+        "noreqs",
+        "proto",
+        "protobuf",
+        "protoc",
+        "protos",
+        "pycache",
+        "pylint",
+        "pytest",
+        "pyvenv",
+        "sdist",
+        "skel",
+        "strftime",
+        "sysdeps",
+        "toxml",
+        "venv"
+    ],
+    "cSpell.enableFiletypes": [
+        "makefile",
+        "proto3"
+    ],
+    "cSpell.allowCompoundWords": true,
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/src"
+    ]
+}
