@@ -1,4 +1,3 @@
-import logging
 import sys
 import traceback
 from typing import List
@@ -16,11 +15,12 @@ def nmk(argv: List[str]) -> int:
         # Load build model
         NmkModel(args)
 
-        # Trigger build
+        # TODO Trigger build
+        args.logger.info("Nothing to do")
         out = 0
     except Exception as e:
-        logging.error(e)
-        logging.debug("".join(traceback.format_tb(e.__traceback__)))
+        args.logger.error(e)
+        args.logger.debug("".join(traceback.format_tb(e.__traceback__)))
         out = 1
     return out
 

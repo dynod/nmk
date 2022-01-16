@@ -55,3 +55,9 @@ build: $(PYTHON_DIST)
 $(PYTHON_DIST): $(VENV) $(SETUP) $(FLAKE_REPORT) $(PYTHON_FILES)
 	$(IN_VENV) python setup.py sdist --dist-dir $(ARTIFACTS)
 	$(IN_VENV) pip install $(PYTHON_DIST)
+
+# Test
+.PHONY: tests
+tests:
+	rm -Rf $(OUT)/tests
+	$(IN_VENV) pytest --cov-fail-under=100

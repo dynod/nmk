@@ -13,6 +13,11 @@ flake8-string-format
 flake8-pep3101
 flake8-bugbear
 
+# Tests
+pytest-xdist
+pytest-cov
+pytest-multilog
+
 # Dependencies
 argcomplete
 coloredlogs

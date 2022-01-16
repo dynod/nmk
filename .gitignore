@@ -3,3 +3,5 @@ out/
 .eggs/
 *.egg-info/
 setup.cfg
+*.pyc
+__pycache__

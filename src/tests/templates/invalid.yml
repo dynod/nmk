@@ -1,0 +1,5 @@
+test:
+    - some string
+    - "some unclosed quoted string
+    - 78
+    - False

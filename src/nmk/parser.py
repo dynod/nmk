@@ -86,4 +86,7 @@ class NmkParser:
             # Colored logs install
             coloredlogs.install(level=args.log_level, fmt=LOG_FORMAT)
 
+        # Prepare root nmk logger
+        args.logger = logging.getLogger("nmk")
+
         return args
