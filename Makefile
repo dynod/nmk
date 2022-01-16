@@ -9,11 +9,11 @@ SRC := src
 OUT := out
 FLAKE_REPORT := $(OUT)/flake-report/index.html
 PYTHON_FILES := $(shell find $(SRC) -name '*.py')
-#GIT_VERSION := $(shell git describe --tags 2>/dev/null || true)
-GIT_VERSION := 0.0.0
+GIT_VERSION := $(shell git describe --tags 2>/dev/null || true)
 VERSION := $(shell echo "$(GIT_VERSION)" | sed -e "s/\(.*\)-\([0-9]*\)-\(.*\)/\1.post\2+\3/")
 ARTIFACTS := $(OUT)/artifacts
 PYTHON_DIST := $(ARTIFACTS)/nmk-$(VERSION).tar.gz
+SETUP := setup.cfg
 
 # Default target
 .PHONY: default
@@ -35,18 +35,15 @@ $(VENV): $(REQS)
 clean-venv:
 	rm -Rf $(VENV)
 
-# Black
-.PHONY: black
-black:
-	$(IN_VENV) black -l 160 $(SRC)
-
-# Isort
-.PHONY: isort
-isort:
-	$(IN_VENV) isort $(SRC)
+# Setup file
+.PHONY: $(SETUP)
+$(SETUP):
+	cat template-$(SETUP) | sed -e "s/{VERSION}/$(VERSION)/g" > $(SETUP)
 
 # Flake8
 $(FLAKE_REPORT): $(PYTHON_FILES)
+	$(IN_VENV) black -l 160 $(SRC)
+	$(IN_VENV) isort $(SRC)
 	rm -Rf `dirname $(FLAKE_REPORT)`
 	mkdir -p `dirname $(FLAKE_REPORT)`
 	$(IN_VENV) flake8 $(SRC)
@@ -54,5 +51,6 @@ $(FLAKE_REPORT): $(PYTHON_FILES)
 # Build
 .PHONY: build
 build: $(PYTHON_DIST)
-$(PYTHON_DIST): $(PYTHON_FILES) $(VENV) black isort $(FLAKE_REPORT)
+$(PYTHON_DIST): $(VENV) $(SETUP) $(FLAKE_REPORT) $(PYTHON_FILES)
 	$(IN_VENV) python setup.py sdist --dist-dir $(ARTIFACTS)
+	$(IN_VENV) pip install $(PYTHON_DIST)

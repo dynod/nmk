@@ -2,3 +2,4 @@ venv/
 out/
 .eggs/
 *.egg-info/
+setup.cfg
