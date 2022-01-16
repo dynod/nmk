@@ -1,0 +1,8 @@
+# nmk model grammar definition
+type: object
+additionalProperties: false
+properties:
+
+    # artifact name
+    artifact:
+        type: string

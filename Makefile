@@ -29,6 +29,7 @@ $(VENV): $(REQS)
 	python3 -m venv $(VENV)
 	$(IN_VENV) pip install pip --upgrade
 	$(IN_VENV) pip install -r $(REQS)
+	touch venv
 
 # Venv clean
 .PHONY: clean-venv
