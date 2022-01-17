@@ -5,7 +5,7 @@ from tests.utils import NmkTester
 
 class TestBasics(NmkTester):
     def test_project_not_found(self):
-        self.nmk(Path("/missing/project.yml"), expected_error="Project file not found: /missing/project.yml")
+        self.nmk(Path("/missing/project.yml"), expected_error="While loading /missing/project.yml: Project file not found")
 
     def test_simplest_project_with_logs(self):
         expected_log = self.test_folder / "some.log"
@@ -18,7 +18,7 @@ class TestBasics(NmkTester):
         self.check_logs("Nothing to do")
 
     def test_invalid_yml(self):
-        self.nmk("invalid.yml", expected_error="Project '{project}' is malformed: ")
+        self.nmk("invalid.yml", expected_error="While loading {project}: Project is malformed: ")
 
     def test_empty_validation_fails(self):
-        self.nmk("empty.yml", expected_error="Project '{project}' contains invalid data: ")
+        self.nmk("empty.yml", expected_error="While loading {project}: Project contains invalid data: ")

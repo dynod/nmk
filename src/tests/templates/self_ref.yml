@@ -1,0 +1,3 @@
+refs:
+    # Self reference (will be simply ignored)
+    - self_ref.yml

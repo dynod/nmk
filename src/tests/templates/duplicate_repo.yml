@@ -1,0 +1,7 @@
+refs:
+    - somefile.yml
+    # Duplicate repo
+    - someRepo:
+        remote: https://github.com/a/b
+    - someRepo:
+        remote: https://github.com/c/d

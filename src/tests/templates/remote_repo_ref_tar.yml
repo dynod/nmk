@@ -1,0 +1,5 @@
+refs:
+    # Valid reference
+    - <someRepo>/pytest-multilog-1.2/README.md
+    - someRepo:
+        remote: https://github.com/dynod/pytest-multilog/archive/refs/tags/1.2.tar.gz

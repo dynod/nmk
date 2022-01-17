@@ -2,6 +2,7 @@ import sys
 import traceback
 from typing import List
 
+from nmk.logs import NmkLogger
 from nmk.model import NmkModel
 from nmk.parser import NmkParser
 
@@ -16,11 +17,11 @@ def nmk(argv: List[str]) -> int:
         NmkModel(args)
 
         # TODO Trigger build
-        args.logger.info("Nothing to do")
+        NmkLogger.info("checkered_flag", "Nothing to do")
         out = 0
     except Exception as e:
-        args.logger.error(e)
-        args.logger.debug("".join(traceback.format_tb(e.__traceback__)))
+        list(map(NmkLogger.error, str(e).split("\n")))
+        list(map(NmkLogger.debug, "".join(traceback.format_tb(e.__traceback__)).split("\n")))
         out = 1
     return out
 

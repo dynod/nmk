@@ -1,0 +1,8 @@
+refs:
+    # Valid reference
+    - simplest.yml
+    # Unknown reference in a valid local repo
+    - <someRepo>/sub/unknownRef.yml
+    - someRepo:
+        remote: https://github.com/dynod/nmk/archive/refs/heads/main.zip
+        local: .

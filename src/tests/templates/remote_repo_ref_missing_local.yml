@@ -1,0 +1,6 @@
+refs:
+    # Valid reference
+    - <someRepo>/nmk-main/src/tests/templates/invalid.yml
+    - someRepo:
+        remote: https://github.com/dynod/nmk/archive/refs/heads/main.zip
+        local: /some/unknown/folder

@@ -5,12 +5,9 @@ from pathlib import Path
 from typing import List
 
 import argcomplete
-import coloredlogs
 
 from nmk import __version__
-
-# Displayed logs format
-LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+from nmk.logs import NmkLogger
 
 
 class NmkParser:
@@ -73,20 +70,7 @@ class NmkParser:
         # Store start of build timestamp
         args.start_time = datetime.now()
 
-        # Setup logging (if not disabled)
-        if not args.no_logs:
-            if len(args.log_file):
-                # Handle output log file (generate it from pattern, and create parent folder if needed)
-                log_file = Path(args.log_file.format(out=args.output, time=args.start_time.strftime("%Y-%m-%d-%H-%M-%S")))
-                log_file.parent.mkdir(parents=True, exist_ok=True)
-                logging.basicConfig(
-                    force=True, level=logging.DEBUG, format=LOG_FORMAT, datefmt=coloredlogs.DEFAULT_DATE_FORMAT, filename=log_file, filemode="w"
-                )
-
-            # Colored logs install
-            coloredlogs.install(level=args.log_level, fmt=LOG_FORMAT)
-
-        # Prepare root nmk logger
-        args.logger = logging.getLogger("nmk")
+        # Setup logging
+        NmkLogger.setup(args)
 
         return args

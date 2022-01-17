@@ -30,4 +30,4 @@ class NmkTester(TestHelper):
             assert rc == 0, f"Unexpected nmk rc: {rc}"
         else:
             assert rc != 0, f"Unexpected nmk rc: {rc}"
-            self.check_logs(f"nmk] ERROR {expected_error.format(project=project)}")
+            self.check_logs(f"nmk] ERROR 💀 - {expected_error.format(project=project)}")
