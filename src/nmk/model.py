@@ -144,4 +144,4 @@ class NmkModel:
     def raise_prettier_error(self, e: Exception, file_path: Path, ref_from: List[str] = None):
         if str(e).startswith(ERROR_PREFIX):
             raise e
-        raise Exception(f"{ERROR_PREFIX}{file_path}: {e}" + (("\n" + "\n".join(ref_from)) if ref_from is not None else ""))
+        raise Exception(f"{ERROR_PREFIX}{file_path}: {e}" + (("\n" + "\n".join(ref_from)) if ref_from is not None else "")).with_traceback(e.__traceback__)

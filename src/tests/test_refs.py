@@ -28,6 +28,14 @@ class TestRefs(NmkTester):
             expected_error=f"While loading {self.test_folder}/out/nmk-cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project is malformed: ",
         )
 
+    def test_repo_already_exists(self):
+        # Fake cache folder: download won't occur
+        (self.test_folder / "out/nmk-cache/b38e130bed1f28a29781827a5548ac2bdb981eaf").mkdir(parents=True)
+        self.nmk(
+            "remote_repo_ref_no_local.yml",
+            expected_error=f"While loading {self.test_folder}/out/nmk-cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project file not found",
+        )
+
     def test_repo_unknown_local(self):
         self.nmk(
             "remote_repo_ref_missing_local.yml",
@@ -42,3 +50,12 @@ class TestRefs(NmkTester):
             "remote_repo_ref_tar.yml",
             expected_error=f"While loading {self.test_folder}/out/nmk-cache/02458d1c7568151e56277b3a981b53ad01ce3666/pytest-multilog-1.2/README.md: Project is malformed: ",
         )
+
+    def test_ref_bad_format(self):
+        self.nmk("remote_repo_ref_bad_format1.yml", expected_error="While loading {project}: Unsupported repo remote syntax: http://foo!bar!12")
+        self.nmk("remote_repo_ref_bad_format2.yml", expected_error="While loading {project}: Unsupported repo remote syntax: http://foo!")
+        self.nmk("remote_repo_ref_bad_format3.yml", expected_error="While loading {project}: Unsupported repo remote syntax: !http://foo")
+
+    def test_ref_sub_folder(self):
+        self.nmk("remote_repo_ref_valid.yml")
+        self.check_logs("Nothing to do")
