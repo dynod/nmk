@@ -59,3 +59,8 @@ class TestRefs(NmkTester):
     def test_ref_sub_folder(self):
         self.nmk("remote_repo_ref_valid.yml")
         self.check_logs("Nothing to do")
+
+    def test_clear_cache(self):
+        (self.nmk_out / "nmk-cache").mkdir(parents=True)
+        self.nmk("remote_repo_ref_valid.yml", extra_args=["--no-cache"])
+        self.check_logs(["Nothing to do", "Clear references cache"])

@@ -48,6 +48,10 @@ class NmkParser:
         ).completer = argcomplete.completers.FilesCompleter(directories=True)
         lg.add_argument("--no-logs", action="store_true", default=False, help="disable logging")
 
+        # Cache
+        cg = self.parser.add_argument_group("cache options")
+        cg.add_argument("--no-cache", action="store_true", default=False, help="clear cache before resolving references")
+
         # Output
         og = self.parser.add_argument_group("output options")
         og.add_argument(

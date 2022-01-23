@@ -1,3 +1,4 @@
+import shutil
 from argparse import Namespace
 from dataclasses import dataclass
 from functools import lru_cache
@@ -123,10 +124,16 @@ class NmkModelFile:
 
 class NmkModel:
     def __init__(self, args: Namespace):
+        # Prepare repo cache
+        self.repo_cache: Path = args.output / "nmk-cache"
+        if args.no_cache and self.repo_cache.is_dir():
+            NmkLogger.debug("Clear references cache")
+            shutil.rmtree(self.repo_cache)
+
         # Iterate recursively on model files
         self.files = {}
         try:
-            self.load_model([NmkModelFile(args.project, args.output / "nmk-cache")])
+            self.load_model([NmkModelFile(args.project, self.repo_cache)])
         except Exception as e:
             self.raise_prettier_error(e, args.project)
 
