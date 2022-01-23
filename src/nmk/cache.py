@@ -31,7 +31,7 @@ def cache_remote(root: Path, remote: str) -> Path:
     if not repo_path.exists():
         # First download?
         global first_download
-        if first_download:
+        if first_download:  # pragma: no branch
             first_download = False
             NmkLogger.info("arrow_double_down", "Caching remote references...")
 

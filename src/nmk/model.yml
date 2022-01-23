@@ -8,18 +8,23 @@ properties:
         type: array
         items:
             oneOf:
-                # A reference is either a relative path to a model file (potentially including repo name)
+                # A reference is either a relative path to a model file (potentially including repo name)...
                 - type: string
-                # A repository reference
+                # ... or a repository reference
                 - type: object
                   additionalProperties:
-                    type: object
-                    required:
-                        - remote
-                    properties:
-                        # Repository remote reference
-                        remote:
-                            type: string
-                        # Repository local reference
-                        local:
-                            type: string
+                    oneOf:
+                        # A repository reference is either simply a remote URL...
+                        - type: string
+                        # ... or an object containing the remote URL, + other details
+                        - type: object
+                          additionalProperties: false
+                          required:
+                            - remote
+                          properties:
+                            # Repository remote reference
+                            remote:
+                                type: string
+                            # Repository local reference
+                            local:
+                                type: string

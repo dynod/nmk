@@ -1,5 +1,4 @@
 refs:
     # Invalid reference
     - <someRepo>/foo.yml
-    - someRepo:
-        remote: "!http://foo"
+    - someRepo: "!http://foo"

@@ -26,7 +26,7 @@ class NmkModelK:
 class NmkRepo:
     name: str
     remote: str
-    local: Path
+    local: Path = None
 
 
 @lru_cache(maxsize=None)
@@ -103,8 +103,17 @@ class NmkModelFile:
         if self._repos is None:
             self._repos = {}
             for repo_dict in filter(lambda r: isinstance(r, dict), self.model[NmkModelK.REFS]):
+                # Instantiate new repos
+                new_repos = {}
+                for k, r in repo_dict.items():
+                    if isinstance(r, dict):
+                        # Full repo item, with all details
+                        new_repos[k] = NmkRepo(k, r[NmkModelK.REMOTE], Path(r[NmkModelK.LOCAL]) if NmkModelK.LOCAL in r else None)
+                    else:
+                        # Simple repo item, with only remote reference
+                        new_repos[k] = NmkRepo(k, r)
+
                 # Handle possible duplicates (if using distinct dictionaries in distinct array items)
-                new_repos = {k: NmkRepo(k, r[NmkModelK.REMOTE], Path(r[NmkModelK.LOCAL]) if NmkModelK.LOCAL in r else None) for k, r in repo_dict.items()}
                 conflicts = list(filter(lambda k: k in self._repos, new_repos.keys()))
                 assert len(conflicts) == 0, f"Duplicate repo names: {', '.join(conflicts)}"
                 self._repos.update(new_repos)
