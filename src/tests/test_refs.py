@@ -64,3 +64,6 @@ class TestRefs(NmkTester):
         (self.nmk_out / "nmk-cache").mkdir(parents=True)
         self.nmk("remote_repo_ref_valid.yml", extra_args=["--no-cache"])
         self.check_logs(["Nothing to do", "Clear references cache"])
+
+    def test_invalid_url(self):
+        self.nmk("remote_repo_bad_url.yml", expected_error="While loading {project}: File is not a zip file")

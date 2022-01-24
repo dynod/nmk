@@ -1,0 +1,4 @@
+refs:
+    # Invalid reference
+    - <someRepo>/foo.yml
+    - someRepo: https://github.com/dynod/nmk/fake.zip
