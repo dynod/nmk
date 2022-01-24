@@ -25,21 +25,21 @@ class TestRefs(NmkTester):
     def test_repo_no_local(self):
         self.nmk(
             "remote_repo_ref_no_local.yml",
-            expected_error=f"While loading {self.test_folder}/out/nmk-cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project is malformed: ",
+            expected_error=f"While loading {self.test_folder}/nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project is malformed: ",
         )
 
     def test_repo_already_exists(self):
         # Fake cache folder: download won't occur
-        (self.test_folder / "out/nmk-cache/b38e130bed1f28a29781827a5548ac2bdb981eaf").mkdir(parents=True)
+        (self.test_folder / "nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf").mkdir(parents=True)
         self.nmk(
             "remote_repo_ref_no_local.yml",
-            expected_error=f"While loading {self.test_folder}/out/nmk-cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project file not found",
+            expected_error=f"While loading {self.test_folder}/nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project file not found",
         )
 
     def test_repo_unknown_local(self):
         self.nmk(
             "remote_repo_ref_missing_local.yml",
-            expected_error=f"While loading {self.test_folder}/out/nmk-cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project is malformed: ",
+            expected_error=f"While loading {self.test_folder}/nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project is malformed: ",
         )
 
     def test_repo_unknown_format(self):
@@ -48,7 +48,7 @@ class TestRefs(NmkTester):
     def test_unknown_tar_ref(self):
         self.nmk(
             "remote_repo_ref_tar.yml",
-            expected_error=f"While loading {self.test_folder}/out/nmk-cache/02458d1c7568151e56277b3a981b53ad01ce3666/pytest-multilog-1.2/README.md: Project is malformed: ",
+            expected_error=f"While loading {self.test_folder}/nmk/cache/02458d1c7568151e56277b3a981b53ad01ce3666/pytest-multilog-1.2/README.md: Project is malformed: ",
         )
 
     def test_ref_bad_format(self):
@@ -61,9 +61,9 @@ class TestRefs(NmkTester):
         self.check_logs("Nothing to do")
 
     def test_clear_cache(self):
-        (self.nmk_out / "nmk-cache").mkdir(parents=True)
+        (self.nmk_cache / "cache").mkdir(parents=True)
         self.nmk("remote_repo_ref_valid.yml", extra_args=["--no-cache"])
-        self.check_logs(["Nothing to do", "Clear references cache"])
+        self.check_logs(["Nothing to do", "Cache cleared"])
 
     def test_invalid_url(self):
         self.nmk("remote_repo_bad_url.yml", expected_error="While loading {project}: File is not a zip file")

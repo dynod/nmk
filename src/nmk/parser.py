@@ -1,4 +1,5 @@
 import logging
+import shutil
 from argparse import ZERO_OR_MORE, ArgumentParser, Namespace
 from datetime import datetime
 from pathlib import Path
@@ -44,19 +45,16 @@ class NmkParser:
             help="verbose mode (all messages, including debug ones)",
         )
         lg.add_argument(
-            "--log-file", metavar="L", default="{out}/{time}-nmk.log", help="write logs to LOG_FILE (default: {out}/{time}-nmk.log)"
+            "--log-file", metavar="L", default="{cache}/nmk.log", help="write logs to L (default: {cache}/nmk.log)"
         ).completer = argcomplete.completers.FilesCompleter(directories=True)
         lg.add_argument("--no-logs", action="store_true", default=False, help="disable logging")
 
-        # Cache
+        # Cache folder
         cg = self.parser.add_argument_group("cache options")
-        cg.add_argument("--no-cache", action="store_true", default=False, help="clear cache before resolving references")
-
-        # Output
-        og = self.parser.add_argument_group("output options")
-        og.add_argument(
-            "-o", "--output", metavar="O", type=Path, default=Path("out"), help="build output directory (default: out)"
+        cg.add_argument(
+            "-c", "--cache", metavar="C", type=Path, default=Path(".nmk"), help="cache folder (default: .nmk)"
         ).completer = argcomplete.completers.DirectoriesCompleter()
+        cg.add_argument("--no-cache", action="store_true", default=False, help="clear cache before resolving references")
 
         # Project
         pg = self.parser.add_argument_group("project options")
@@ -73,6 +71,10 @@ class NmkParser:
 
         # Store start of build timestamp
         args.start_time = datetime.now()
+
+        # Handle cache clear
+        if args.no_cache and args.cache.is_dir():
+            shutil.rmtree(args.cache)
 
         # Setup logging
         NmkLogger.setup(args)

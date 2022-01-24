@@ -5,3 +5,4 @@ out/
 setup.cfg
 *.pyc
 __pycache__
+.nmk/

@@ -1,5 +1,6 @@
 import logging
 from argparse import Namespace
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 import coloredlogs
@@ -22,17 +23,21 @@ class NmkLogger:
         if not args.no_logs:
             if len(args.log_file):
                 # Handle output log file (generate it from pattern, and create parent folder if needed)
-                log_file = Path(args.log_file.format(out=args.output, time=args.start_time.strftime("%Y-%m-%d-%H-%M-%S")))
+                logging.basicConfig(force=True, level=logging.DEBUG)
+                log_file = Path(args.log_file.format(cache=args.cache))
                 log_file.parent.mkdir(parents=True, exist_ok=True)
-                logging.basicConfig(
-                    force=True, level=logging.DEBUG, format=LOG_FORMAT_DEBUG, datefmt=coloredlogs.DEFAULT_DATE_FORMAT, filename=log_file, filemode="w"
-                )
+                handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5)
+                handler.setFormatter(logging.Formatter(LOG_FORMAT_DEBUG, datefmt=coloredlogs.DEFAULT_DATE_FORMAT))
+                logging.getLogger().addHandler(handler)
 
             # Colored logs install
             coloredlogs.install(level=args.log_level, fmt=LOG_FORMAT if args.log_level > logging.DEBUG else LOG_FORMAT_DEBUG)
 
         # First log line
-        cls.debug(f"nmk version {__version__}")
+        cls.debug(f"----- nmk version {__version__} -----")
+        cls.debug(f"called with args: {args}")
+        if args.no_cache:
+            cls.debug("Cache cleared!")
 
     @classmethod
     def log(cls, level: int, emoji: str, line: str):

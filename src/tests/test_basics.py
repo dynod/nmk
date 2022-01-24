@@ -14,7 +14,7 @@ class TestBasics(NmkTester):
 
     def test_simplest_project_without_logs(self):
         self.nmk("simplest.yml", extra_args=["--log-file", ""], with_logs=True)
-        assert not self.nmk_out.exists()
+        assert not self.nmk_cache.exists()
         self.check_logs("Nothing to do")
 
     def test_invalid_yml(self):

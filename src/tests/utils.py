@@ -8,8 +8,8 @@ from nmk.__main__ import nmk
 
 class NmkTester(TestHelper):
     @property
-    def nmk_out(self) -> Path:
-        return self.test_folder / "out"
+    def nmk_cache(self) -> Path:
+        return self.test_folder / "nmk"
 
     def template(self, name: str):
         return Path(__file__).parent / "templates" / name
@@ -18,7 +18,7 @@ class NmkTester(TestHelper):
         # Prepare args and run nmk
         if isinstance(project, str):
             project = self.template(project)
-        args = ["-o", self.nmk_out.as_posix(), "-p", project.as_posix()]
+        args = ["-c", self.nmk_cache.as_posix(), "-p", project.as_posix()]
         if not with_logs:
             args.append("--no-logs")
         if extra_args is not None:
