@@ -8,9 +8,9 @@ properties:
         type: array
         items:
             oneOf:
-                # A reference is either a relative path to a model file (potentially including repo name)...
+                # A reference is either a relative path/direct URL/repo relative to a model file...
                 - type: string
-                # ... or a repository reference
+                # ... or a repository definition
                 - type: object
                   additionalProperties:
                     oneOf:

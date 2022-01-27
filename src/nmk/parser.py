@@ -59,7 +59,7 @@ class NmkParser:
         # Project
         pg = self.parser.add_argument_group("project options")
         pg.add_argument(
-            "-p", "--project", metavar="P", type=Path, default=Path("nmk.yml"), help="project file (default: nmk.yml)"
+            "-p", "--project", metavar="P", default="nmk.yml", help="project file (default: nmk.yml)"
         ).completer = argcomplete.completers.FilesCompleter(allowednames=["*.yml", "*.yaml"], directories=True)
 
         # Handle completion

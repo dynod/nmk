@@ -16,9 +16,11 @@ class NmkTester(TestHelper):
 
     def nmk(self, project: Union[Path, str], with_logs: bool = False, extra_args: List[str] = None, expected_error: str = None):
         # Prepare args and run nmk
-        if isinstance(project, str):
+        if isinstance(project, str) and not project.startswith("http"):
             project = self.template(project)
-        args = ["-c", self.nmk_cache.as_posix(), "-p", project.as_posix()]
+        if isinstance(project, Path):
+            project = project.as_posix()
+        args = ["-c", self.nmk_cache.as_posix(), "-p", project]
         if not with_logs:
             args.append("--no-logs")
         if extra_args is not None:

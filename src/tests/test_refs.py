@@ -25,7 +25,7 @@ class TestRefs(NmkTester):
     def test_repo_no_local(self):
         self.nmk(
             "remote_repo_ref_no_local.yml",
-            expected_error=f"While loading {self.test_folder}/nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project is malformed: ",
+            expected_error="While loading https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main/src/tests/templates/invalid.yml: Project is malformed: ",
         )
 
     def test_repo_already_exists(self):
@@ -33,28 +33,31 @@ class TestRefs(NmkTester):
         (self.test_folder / "nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf").mkdir(parents=True)
         self.nmk(
             "remote_repo_ref_no_local.yml",
-            expected_error=f"While loading {self.test_folder}/nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project file not found",
+            expected_error="While loading https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main/src/tests/templates/invalid.yml: Project file not found",
         )
 
     def test_repo_unknown_local(self):
         self.nmk(
             "remote_repo_ref_missing_local.yml",
-            expected_error=f"While loading {self.test_folder}/nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf/nmk-main/src/tests/templates/invalid.yml: Project is malformed: ",
+            expected_error="While loading https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main/src/tests/templates/invalid.yml: Project is malformed: ",
         )
 
     def test_repo_unknown_format(self):
-        self.nmk("remote_repo_ref_unknown_format.yml", expected_error="While loading {project}: Unsupported repo remote archive format: .foo")
+        self.nmk(
+            "remote_repo_ref_unknown_format.yml",
+            expected_error="While loading https://github.com/dynod/nmk/archive/refs/heads/main.foo!nmk-main/src/tests/templates/invalid.yml: Unsupported remote file format: .foo",
+        )
 
     def test_unknown_tar_ref(self):
         self.nmk(
             "remote_repo_ref_tar.yml",
-            expected_error=f"While loading {self.test_folder}/nmk/cache/02458d1c7568151e56277b3a981b53ad01ce3666/pytest-multilog-1.2/README.md: Project is malformed: ",
+            expected_error="While loading https://github.com/dynod/pytest-multilog/archive/refs/tags/1.2.tar.gz!pytest-multilog-1.2/README.md: Project is malformed: ",
         )
 
     def test_ref_bad_format(self):
-        self.nmk("remote_repo_ref_bad_format1.yml", expected_error="While loading {project}: Unsupported repo remote syntax: http://foo!bar!12")
-        self.nmk("remote_repo_ref_bad_format2.yml", expected_error="While loading {project}: Unsupported repo remote syntax: http://foo!")
-        self.nmk("remote_repo_ref_bad_format3.yml", expected_error="While loading {project}: Unsupported repo remote syntax: !http://foo")
+        self.nmk("remote_repo_ref_bad_format1.yml", expected_error="While loading http://foo!bar!12/foo.yml: Unsupported repo remote syntax: http://foo!bar!12")
+        self.nmk("remote_repo_ref_bad_format2.yml", expected_error="While loading http://foo!/foo.yml: Unsupported remote file format:  ")
+        self.nmk("remote_repo_ref_bad_format3.yml", expected_error="While loading !http://foo/foo.yml: Project file not found")
 
     def test_ref_sub_folder(self):
         self.nmk("remote_repo_ref_valid.yml")
@@ -66,4 +69,22 @@ class TestRefs(NmkTester):
         self.check_logs(["Nothing to do", "Cache cleared"])
 
     def test_invalid_url(self):
-        self.nmk("remote_repo_bad_url.yml", expected_error="While loading {project}: File is not a zip file")
+        self.nmk("remote_repo_bad_url.yml", expected_error="While loading https://github.com/dynod/nmk/fake.zip!foo.yml: File is not a zip file")
+
+    def test_direct_url_ref_raw(self):
+        self.nmk("https://github.com/dynod/nmk/raw/main/src/tests/templates/simplest.yml")
+        self.check_logs("Nothing to do")
+
+    def test_direct_url_ref_zip(self):
+        self.nmk("https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main/src/tests/templates/simplest.yml")
+        self.check_logs("Nothing to do")
+
+        # Another reference from the same URL
+        self.nmk(
+            "https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main/src/tests/templates/invalid.yml",
+            expected_error="While loading https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main/src/tests/templates/invalid.yml: Project is malformed:",
+        )
+
+        # Check only one repo cached
+        cache_folders = list(filter(lambda d: d.is_dir() and not d.name.startswith("."), (self.nmk_cache / "cache").glob("*")))
+        assert len(cache_folders) == 1

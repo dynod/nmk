@@ -3,7 +3,7 @@ import traceback
 from typing import List
 
 from nmk.logs import NmkLogger
-from nmk.model import NmkModel
+from nmk.model.loader import NmkModel
 from nmk.parser import NmkParser
 
 

@@ -1,4 +1,3 @@
-from argparse import Namespace
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -7,11 +6,8 @@ from typing import Dict, List
 import jsonschema
 import yaml
 
-from nmk.cache import cache_remote
 from nmk.logs import NmkLogger
-
-# Loading error prefix
-ERROR_PREFIX = "While loading "
+from nmk.model.cache import cache_remote
 
 
 # Model keys
@@ -40,10 +36,12 @@ def load_schema() -> dict:
 
 # Recursive model file loader
 class NmkModelFile:
-    def __init__(self, file: Path, repo_cache: Path):
-        # Load YAML model
-        self.file = file
+    def __init__(self, project_ref: str, repo_cache: Path):
+        # Resolve local file from project reference
         self.repo_cache = repo_cache
+        self.file = self.resolve_project(project_ref)
+
+        # Load YAML model
         assert self.file.is_file(), "Project file not found"
         NmkLogger.debug(f"Loading model from {self.file}")
         try:
@@ -61,6 +59,17 @@ class NmkModelFile:
         # Cached items
         self._repos = None
 
+    def resolve_project(self, project_ref: str) -> Path:
+        # Look at first segment
+        project_path = Path(project_ref)
+        schema_candidate = project_path.parts[0]
+        if schema_candidate in ["http:", "https:"]:
+            # Direct HTTP reference
+            return cache_remote(self.repo_cache, project_ref)
+
+        # Default case: assumed to be a local path
+        return project_path
+
     def resolve_ref(self, ref: str) -> str:
         # Repo relative reference?
         for r_name, r in self.repos.items():
@@ -73,25 +82,25 @@ class NmkModelFile:
         # Relative local reference?
         return self.make_absolute(Path(ref))
 
-    def make_absolute(self, p: Path) -> Path:
+    def make_absolute(self, p: Path) -> str:
         # Make relative to current file, if needed
         if not p.is_absolute():
             p = self.file.parent / p
         NmkLogger.warning(f"Absolute path (not portable) used in project: {p}")
-        return p
+        return str(p)
 
-    def resolve_repo_ref(self, ref: str, repo: NmkRepo) -> Path:
+    def resolve_repo_ref(self, ref: str, repo: NmkRepo) -> str:
         # Reckon relative part of the reference
         rel_ref = Path(*list(Path(ref).parts)[1:])
 
         # Local path exists?
         if repo.local is not None:
-            local_repo_dir = self.make_absolute(repo.local)
+            local_repo_dir = Path(self.make_absolute(repo.local))
             if local_repo_dir.is_dir():
-                return local_repo_dir / rel_ref
+                return str(local_repo_dir / rel_ref)
 
         # Nothing found locally: go with remote reference
-        return cache_remote(self.repo_cache, repo.remote) / rel_ref
+        return f"{repo.remote}{'!' if '!' not in repo.remote else '/'}{rel_ref}"
 
     @property
     def refs(self) -> List[str]:
@@ -119,41 +128,3 @@ class NmkModelFile:
                 self._repos.update(new_repos)
 
         return self._repos
-
-
-class NmkModel:
-    def __init__(self, args: Namespace):
-        # Prepare repo cache
-        self.repo_cache: Path = args.cache / "cache"
-
-        # Iterate recursively on model files
-        self.files = {}
-        try:
-            self.load_model([NmkModelFile(args.project, self.repo_cache)])
-        except Exception as e:
-            self.raise_prettier_error(e, args.project)
-
-    def load_model(self, files: List[NmkModelFile], ref_from: List[str] = None):
-        # Remember known files
-        self.files.update({f.file: f for f in files})
-
-        # Iterate on loaded files
-        for file in files:
-            try:
-                # Recursively load model from new references
-                new_ref = (ref_from if ref_from is not None else []) + [f" --> referenced from {file.file}"]
-                new_files = []
-                for ref_file_path in filter(lambda f: f not in self.files, file.refs):
-                    try:
-                        new_files.append(NmkModelFile(ref_file_path, file.repo_cache))
-                    except Exception as e:
-                        self.raise_prettier_error(e, ref_file_path, new_ref)
-                self.load_model(new_files, new_ref)
-            except Exception as e:
-                # Add details to loading error
-                self.raise_prettier_error(e, file.file, ref_from)
-
-    def raise_prettier_error(self, e: Exception, file_path: Path, ref_from: List[str] = None):
-        if str(e).startswith(ERROR_PREFIX):
-            raise e
-        raise Exception(f"{ERROR_PREFIX}{file_path}: {e}" + (("\n" + "\n".join(ref_from)) if ref_from is not None else "")).with_traceback(e.__traceback__)
