@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -8,6 +9,13 @@ import yaml
 
 from nmk.logs import NmkLogger
 from nmk.model.cache import cache_remote
+
+# Known URL schemes
+GITHUB_SCHEME = "github:"
+URL_SCHEMES = ["http:", "https:", GITHUB_SCHEME]
+
+# Github URL extraction pattern
+GITHUB_PATTERN = re.compile("github://([^ /]+)/([^ /]+)/([^ /]+)(/.+)?")
 
 
 # Model keys
@@ -62,13 +70,31 @@ class NmkModelFile:
     def resolve_project(self, project_ref: str) -> Path:
         # Look at first segment
         project_path = Path(project_ref)
-        schema_candidate = project_path.parts[0]
-        if schema_candidate in ["http:", "https:"]:
-            # Direct HTTP reference
-            return cache_remote(self.repo_cache, project_ref)
+        scheme_candidate = project_path.parts[0]
+        if not project_path.is_absolute() and scheme_candidate in URL_SCHEMES:
+            # Cache-able reference
+            return cache_remote(self.repo_cache, self.convert_url(project_ref))
 
         # Default case: assumed to be a local path
         return project_path
+
+    def convert_url(self, url: str) -> str:
+        # Github-like URL
+        if url.startswith(GITHUB_SCHEME):
+            m = GITHUB_PATTERN.match(url)
+            assert m is not None, f"Invalid github:// URL: {url}"
+            # Pattern groups:
+            # 1: people
+            # 2: repo
+            # 3: version -> tag is start with a digit, assume branch otherwise
+            # 4: sub-path (optional)
+            people, repo, version, subpath = tuple(m.groups())
+            first_char = version[0]
+            is_tag = first_char >= "0" and first_char <= "9"
+            return f"https://github.com/{people}/{repo}/archive/refs/{'tags' if is_tag else 'heads'}/{version}.zip!{repo}-{version}{subpath}"
+
+        # Default: no conversion
+        return url
 
     def resolve_ref(self, ref: str) -> str:
         # Repo relative reference?

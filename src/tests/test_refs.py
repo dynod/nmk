@@ -75,8 +75,8 @@ class TestRefs(NmkTester):
         self.nmk("https://github.com/dynod/nmk/raw/main/src/tests/templates/simplest.yml")
         self.check_logs("Nothing to do")
 
-    def test_direct_url_ref_zip(self):
-        self.nmk("https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main/src/tests/templates/simplest.yml")
+    def test_github_url(self):
+        self.nmk("github://dynod/nmk/main/src/tests/templates/simplest.yml")
         self.check_logs("Nothing to do")
 
         # Another reference from the same URL

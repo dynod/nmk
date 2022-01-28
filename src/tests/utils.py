@@ -16,7 +16,7 @@ class NmkTester(TestHelper):
 
     def nmk(self, project: Union[Path, str], with_logs: bool = False, extra_args: List[str] = None, expected_error: str = None):
         # Prepare args and run nmk
-        if isinstance(project, str) and not project.startswith("http"):
+        if isinstance(project, str) and not project.startswith("http") and not project.startswith("github"):
             project = self.template(project)
         if isinstance(project, Path):
             project = project.as_posix()
