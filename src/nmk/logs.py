@@ -40,21 +40,21 @@ class NmkLogger:
             cls.debug("Cache cleared!")
 
     @classmethod
-    def log(cls, level: int, emoji: str, line: str):
-        cls.LOG.log(level, f"{Emoji(emoji)} - {line}")
+    def __log(cls, level: int, emoji: str, line: str):
+        cls.LOG.log(level, f"{Emoji(emoji)} - {line}", stacklevel=3)
 
     @classmethod
     def info(cls, emoji: str, line: str):
-        cls.log(logging.INFO, emoji, line)
+        cls.__log(logging.INFO, emoji, line)
 
     @classmethod
     def debug(cls, line: str):
-        cls.log(logging.DEBUG, "bug", line)
+        cls.__log(logging.DEBUG, "bug", line)
 
     @classmethod
     def error(cls, line: str):
-        cls.log(logging.ERROR, "skull", line)
+        cls.__log(logging.ERROR, "skull", line)
 
     @classmethod
     def warning(cls, line: str):
-        cls.log(logging.WARNING, "exclamation", line)
+        cls.__log(logging.WARNING, "exclamation", line)

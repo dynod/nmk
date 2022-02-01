@@ -1,0 +1,71 @@
+import importlib
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, Union
+
+from nmk.logs import NmkLogger
+from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkScalarConfig
+
+# Class separator
+CLASS_SEP = "."
+
+
+@dataclass
+class NmkModel:
+    files: Dict[Path, object] = field(default_factory=dict)
+    config: Dict[str, NmkConfig] = field(default_factory=dict)
+
+    def add_config(self, name: str, path: Path, init_value: Union[str, int, bool, list, dict] = None, resolver: object = None):
+        # Real value?
+        is_list = is_dict = False
+        if init_value is not None:
+            # Yes: with real value read from file
+            NmkLogger.debug(f"New static config {name} with value '{init_value}'")
+            cfg = NmkScalarConfig(name, self, path, init_value)
+            is_list = isinstance(init_value, list)
+            is_dict = isinstance(init_value, dict)
+            new_type = type(init_value)
+        else:
+            # No: with resolver
+            assert resolver is not None, f"Internal error: resolver is not set for config {name}"
+            NmkLogger.debug(f"New dynamic config {name} with resolver class {type(resolver).__name__}")
+            cfg = NmkResolvedConfig(name, self, path, resolver)
+            new_type = cfg.value_type
+
+        # Overriding?
+        if name in self.config:
+            # Check for type change
+            NmkLogger.debug(f"Overriding config {name}")
+            old_type = self.config[name].value_type
+            assert new_type == old_type, f"Unexpected type change for config {name} ({old_type.__name__} --> {new_type.__name__})"
+
+        # Add config to model
+        if is_list or is_dict:
+            if name not in self.config or isinstance(self.config[name], NmkResolvedConfig):
+                # Add multiple config holder (or replace previously installed resolver)
+                self.config[name] = NmkListConfig(name, self, path) if is_list else NmkDictConfig(name, self, path)
+
+            # Add new value to be merged in fine
+            self.config[name].scalar_list.append(cfg)
+        else:
+            # Update value
+            self.config[name] = cfg
+
+    def load_class(self, qualified_class: str, expected_type: object) -> object:
+        assert CLASS_SEP in qualified_class, f"Invalid resolver class qualified name: {qualified_class} (missing separator: {CLASS_SEP})"
+        class_parts = qualified_class.split(CLASS_SEP)
+        try:
+            # Load specified class
+            mod_name = CLASS_SEP.join(class_parts[:-1])
+            cls_name = class_parts[-1]
+            mod = importlib.import_module(mod_name)
+            assert hasattr(mod, cls_name), f"Can't find class {cls_name} in module {mod_name}"
+            out = getattr(mod, cls_name)(self)
+        except Exception as e:
+            raise Exception(f"Can't instantiate resolver class {qualified_class}: {e}")
+
+        # Verify type is as expected
+        assert isinstance(
+            out, expected_type
+        ), f"Unexpected type for loaded class {qualified_class}: got {type(out).__name__}, expecting {expected_type.__name__} subclass"
+        return out

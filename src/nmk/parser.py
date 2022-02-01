@@ -62,6 +62,11 @@ class NmkParser:
             "-p", "--project", metavar="P", default="nmk.yml", help="project file (default: nmk.yml)"
         ).completer = argcomplete.completers.FilesCompleter(allowednames=["*.yml", "*.yaml"], directories=True)
 
+        # Config
+        cg = self.parser.add_argument_group("config options")
+        cg.add_argument("--config", metavar="JSON", help="contribute to config from json fragment")
+        cg.add_argument("--print", metavar="K", action="append", help="print required config item(s) and exit")
+
         # Handle completion
         argcomplete.autocomplete(self.parser)
 

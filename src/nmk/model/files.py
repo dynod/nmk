@@ -7,8 +7,11 @@ from typing import Dict, List
 import jsonschema
 import yaml
 
+from nmk.errors import NmkFileLoadingError
 from nmk.logs import NmkLogger
 from nmk.model.cache import cache_remote
+from nmk.model.model import NmkModel
+from nmk.model.resolver import NmkConfigResolver
 
 # Known URL schemes
 GITHUB_SCHEME = "github:"
@@ -23,6 +26,8 @@ class NmkModelK:
     REFS = "refs"
     REMOTE = "remote"
     LOCAL = "local"
+    CONFIG = "config"
+    RESOLVER = "__resolver__"
 
 
 # Data class for repository reference
@@ -44,28 +49,50 @@ def load_schema() -> dict:
 
 # Recursive model file loader
 class NmkModelFile:
-    def __init__(self, project_ref: str, repo_cache: Path):
-        # Resolve local file from project reference
-        self.repo_cache = repo_cache
-        self.file = self.resolve_project(project_ref)
-
-        # Load YAML model
-        assert self.file.is_file(), "Project file not found"
-        NmkLogger.debug(f"Loading model from {self.file}")
-        try:
-            with self.file.open() as f:
-                self.model = yaml.full_load(f)
-        except Exception as e:
-            raise Exception(f"Project is malformed: {e}")
-
-        # Validate model against grammar
-        try:
-            jsonschema.validate(self.model, load_schema())
-        except Exception as e:
-            raise Exception(f"Project contains invalid data: {e}")
-
-        # Cached items
+    def __init__(self, project_ref: str, repo_cache: Path, model: NmkModel, refs: List[str]):
+        # Init properties
         self._repos = None
+        self.repo_cache = repo_cache
+
+        try:
+            # Resolve local file from project reference
+            self.file = self.resolve_project(project_ref)
+
+            # Remember file in model (if not already done)
+            if self.file in model.files:
+                # Already known file
+                NmkLogger.debug(f"{self.file} file already loaded, ignore...")
+                return
+            model.files[self.file] = self
+
+            # Load YAML model
+            assert self.file.is_file(), "Project file not found"
+            NmkLogger.debug(f"Loading model from {self.file}")
+            try:
+                with self.file.open() as f:
+                    self.model = yaml.full_load(f)
+            except Exception as e:
+                raise Exception(f"Project is malformed: {e}")
+
+            # Validate model against grammar
+            try:
+                jsonschema.validate(self.model, load_schema())
+            except Exception as e:
+                raise Exception(f"Project contains invalid data: {e}")
+
+            # Load references
+            for ref_file_path in self.refs:
+                NmkModelFile(ref_file_path, self.repo_cache, model, refs + [project_ref])
+
+            # Load config
+            self.load_config(model)
+
+        except Exception as e:
+            if isinstance(e, NmkFileLoadingError):
+                raise e
+            raise NmkFileLoadingError(
+                project_ref, str(e) + (("\n" + "\n".join(map(lambda r: f" --> referenced from {r}", refs))) if len(refs) else "")
+            ).with_traceback(e.__traceback__)
 
     def resolve_project(self, project_ref: str) -> Path:
         # Look at first segment
@@ -129,15 +156,19 @@ class NmkModelFile:
         return f"{repo.remote}{'!' if '!' not in repo.remote else '/'}{rel_ref}"
 
     @property
+    def all_refs(self) -> List[str]:
+        return self.model[NmkModelK.REFS] if NmkModelK.REFS in self.model else []
+
+    @property
     def refs(self) -> List[str]:
-        return list(map(self.resolve_ref, filter(lambda r: isinstance(r, str), self.model[NmkModelK.REFS])))
+        return list(map(self.resolve_ref, filter(lambda r: isinstance(r, str), self.all_refs)))
 
     @property
     def repos(self) -> Dict[str, NmkRepo]:
         # Lazy loading
         if self._repos is None:
             self._repos = {}
-            for repo_dict in filter(lambda r: isinstance(r, dict), self.model[NmkModelK.REFS]):
+            for repo_dict in filter(lambda r: isinstance(r, dict), self.all_refs):
                 # Instantiate new repos
                 new_repos = {}
                 for k, r in repo_dict.items():
@@ -154,3 +185,18 @@ class NmkModelFile:
                 self._repos.update(new_repos)
 
         return self._repos
+
+    def load_config(self, model: NmkModel):
+        # Is this file providing config items?
+        if NmkModelK.CONFIG not in self.model:
+            return
+
+        # Iterate on config items
+        for name, candidate in self.model[NmkModelK.CONFIG].items():
+            # Complex item?
+            if isinstance(candidate, dict) and NmkModelK.RESOLVER in candidate:
+                # With a resolver
+                model.add_config(name, self.file.parent, resolver=model.load_class(candidate[NmkModelK.RESOLVER], NmkConfigResolver))
+            else:
+                # Simple config item, direct add
+                model.add_config(name, self.file.parent, candidate)

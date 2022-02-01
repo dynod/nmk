@@ -1,0 +1,13 @@
+config:
+    someVolatile:
+        __resolver__: tests.sample_resolvers.VolatileResolver
+    someNonVolatile:
+        __resolver__: tests.sample_resolvers.NonVolatileResolver
+    someResolved:
+        __resolver__: tests.sample_resolvers.GrabbingResolver
+    someList:
+        - 1
+        - 2
+    someDict:
+        a: 1
+        b: 2

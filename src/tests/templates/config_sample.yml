@@ -1,0 +1,10 @@
+config:
+    someString: abcd
+    someInt: 1234
+    someBool: false
+    someList:
+      - abc
+      - def
+    someDict:
+        adc: def
+        ghi: jkl

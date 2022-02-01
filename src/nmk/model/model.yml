@@ -28,3 +28,16 @@ properties:
                             # Repository local reference
                             local:
                                 type: string
+
+    # configuration
+    config:
+        type: object
+        additionalProperties:
+          oneOf:
+            # Simple scalar/array/dict config items
+            - type: string
+            - type: boolean
+            - type: integer
+            - type: array
+            - type: object
+              additionalProperties: true

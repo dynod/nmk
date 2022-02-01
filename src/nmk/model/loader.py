@@ -1,46 +1,47 @@
+import json
+import logging
 from argparse import Namespace
 from pathlib import Path
-from typing import List
 
-from nmk.model.items import NmkModelFile
+from nmk.errors import NmkStopHereError
+from nmk.logs import NmkLogger
+from nmk.model.files import NmkModelFile
+from nmk.model.model import NmkModel
 
-# Loading error prefix
-ERROR_PREFIX = "While loading "
 
-
-class NmkModel:
+class NmkLoader:
     def __init__(self, args: Namespace):
-        # Prepare repo cache
+        # Prepare repo cache and empty model
         self.repo_cache: Path = args.cache / "cache"
+        self.model = NmkModel()
 
-        # Iterate recursively on model files
-        self.files = {}
+        # Load json fragment from config arg, if any
         try:
-            self.load_model([NmkModelFile(args.project, self.repo_cache)])
+            override_config = json.loads(args.config) if args.config is not None else {}
         except Exception as e:
-            self.raise_prettier_error(e, args.project)
+            raise Exception(f"Invalid Json fragment for --config option: {e}")
+        assert isinstance(override_config, dict), "Json fragment for --config option must be an object"
 
-    def load_model(self, files: List[NmkModelFile], ref_from: List[str] = None):
-        # Remember known files
-        self.files.update({str(f.file): f for f in files})
+        # Init recursive files loading loop
+        NmkModelFile(args.project, self.repo_cache, self.model, [])
 
-        # Iterate on loaded files
-        for file in files:
-            try:
-                # Recursively load model from new references
-                new_ref = (ref_from if ref_from is not None else []) + [f" --> referenced from {file.file}"]
-                new_files = []
-                for ref_file_path in filter(lambda f: f not in self.files, file.refs):
-                    try:
-                        new_files.append(NmkModelFile(ref_file_path, file.repo_cache))
-                    except Exception as e:
-                        self.raise_prettier_error(e, ref_file_path, new_ref)
-                self.load_model(new_files, new_ref)
-            except Exception as e:
-                # Add details to loading error
-                self.raise_prettier_error(e, file.file, ref_from)
+        # Override model config with command-line values
+        if len(override_config):
+            NmkLogger.debug("Overriding config from --config option")
+            for k, v in override_config.items():
+                self.model.add_config(k, None, v)
 
-    def raise_prettier_error(self, e: Exception, file_path: Path, ref_from: List[str] = None):
-        if str(e).startswith(ERROR_PREFIX):
-            raise e
-        raise Exception(f"{ERROR_PREFIX}{file_path}: {e}" + (("\n" + "\n".join(ref_from)) if ref_from is not None else "")).with_traceback(e.__traceback__)
+        # Print config is required
+        if args.print is not None and len(args.print):
+            for k in args.print:
+                assert k in self.model.config, f"Unknown config item key: {k}"
+            dump_dict = json.dumps({k: c.value for k, c in filter(lambda t: t[0] in args.print, self.model.config.items())}, indent=-1).replace("\n", " ")
+            if args.log_level >= logging.WARNING:
+                # Quiet mode
+                print(dump_dict)
+            else:
+                # Normal mode
+                NmkLogger.info("newspaper", f"Config dump: {dump_dict}")
+
+            # Stop here
+            raise NmkStopHereError()

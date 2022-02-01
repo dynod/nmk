@@ -1,0 +1,3 @@
+config:
+    someResolved:
+        __resolver__: tests.failling_resolvers.BadTypeResolver
