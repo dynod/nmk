@@ -1,0 +1,5 @@
+config:
+    someConfig: _<someString>_<someInt>_
+    someString: abc/<someOtherString>/def
+    someInt: 123
+    someOtherString: ghi

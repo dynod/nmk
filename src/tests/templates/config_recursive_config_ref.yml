@@ -1,0 +1,4 @@
+config:
+    someConfig: _<someOtherVar>_<someInt>_
+    someInt: 123
+    someOtherVar: /<someConfig>/

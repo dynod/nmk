@@ -1,0 +1,3 @@
+config:
+    someConfig: _<someUnknownVar>_<someInt>_
+    someInt: 123

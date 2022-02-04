@@ -105,3 +105,28 @@ class TestConfig(NmkTester):
         self.check_logs(
             'Config dump: { "someResolved": { "0": { "someList": [ 1, 2 ], "someDict": { "a": 1, "b": 2 }, "someVolatile": 1, "someNonVolatile": 1 }, "1": { "someList": [ 1, 2 ], "someDict": { "a": 1, "b": 2 }, "someVolatile": 2, "someNonVolatile": 1 } } }'
         )
+
+    def test_config_resolver_with_python_path(self):
+        self.nmk("config_python_path_resolver.yml", extra_args=["--print", "someResolved"])
+        self.check_logs('Config dump: { "someResolved": "my dynamic value from python path" }')
+
+    def test_config_resolver_with_unknown_python_path(self):
+        self.nmk("config_unknown_python_path_resolver.yml", expected_error="While loading {project}: Contributed python path is not found:")
+
+    def test_config_recursive_resolve(self):
+        self.nmk("config_recursive.yml", extra_args=["--print", "someConfig"])
+        self.check_logs('Config dump: { "someConfig": "_abc/ghi/def_123_" }')
+
+    def test_config_unknown_reference(self):
+        self.nmk(
+            "config_unknown_config_ref.yml",
+            extra_args=["--print", "someConfig"],
+            expected_error="Unknown 'someUnknownVar' config referenced from 'someConfig' config",
+        )
+
+    def test_config_recursive_reference(self):
+        self.nmk(
+            "config_recursive_config_ref.yml",
+            extra_args=["--print", "someConfig"],
+            expected_error="Cyclic string substitution: resolving (again!) 'someConfig' config from 'someOtherVar' config",
+        )

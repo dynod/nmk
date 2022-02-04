@@ -1,13 +1,26 @@
 import importlib
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 from nmk.logs import NmkLogger
-from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkScalarConfig
+from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkStaticConfig
+from nmk.model.keys import NmkRootConfig
 
 # Class separator
 CLASS_SEP = "."
+
+
+def contribute_python_path(paths: List[str]):
+    # Extra paths?
+    added_paths = [p for p in paths if p not in sys.path]
+    if len(added_paths):
+        NmkLogger.debug(f"Contributed python paths: {added_paths}")
+        for added_path in added_paths:
+            # Path must be a directory
+            assert Path(added_path).is_dir(), f"Contributed python path is not found: {added_path}"
+            sys.path.append(added_path)
 
 
 @dataclass
@@ -21,7 +34,7 @@ class NmkModel:
         if init_value is not None:
             # Yes: with real value read from file
             NmkLogger.debug(f"New static config {name} with value '{init_value}'")
-            cfg = NmkScalarConfig(name, self, path, init_value)
+            cfg = NmkStaticConfig(name, self, path, init_value)
             is_list = isinstance(init_value, list)
             is_dict = isinstance(init_value, dict)
             new_type = type(init_value)
@@ -46,7 +59,7 @@ class NmkModel:
                 self.config[name] = NmkListConfig(name, self, path) if is_list else NmkDictConfig(name, self, path)
 
             # Add new value to be merged in fine
-            self.config[name].scalar_list.append(cfg)
+            self.config[name].static_list.append(cfg)
         else:
             # Update value
             self.config[name] = cfg
@@ -54,6 +67,10 @@ class NmkModel:
     def load_class(self, qualified_class: str, expected_type: object) -> object:
         assert CLASS_SEP in qualified_class, f"Invalid resolver class qualified name: {qualified_class} (missing separator: {CLASS_SEP})"
         class_parts = qualified_class.split(CLASS_SEP)
+
+        # Contribute to python path
+        contribute_python_path(self.config[NmkRootConfig.PYTHON_PATH].resolve(False))
+
         try:
             # Load specified class
             mod_name = CLASS_SEP.join(class_parts[:-1])

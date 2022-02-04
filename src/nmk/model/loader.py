@@ -6,6 +6,7 @@ from pathlib import Path
 from nmk.errors import NmkStopHereError
 from nmk.logs import NmkLogger
 from nmk.model.files import NmkModelFile
+from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 
 
@@ -14,6 +15,10 @@ class NmkLoader:
         # Prepare repo cache and empty model
         self.repo_cache: Path = args.cache / "cache"
         self.model = NmkModel()
+
+        # Add "root" config items
+        self.model.add_config(NmkRootConfig.PYTHON_PATH, None, [])
+        self.model.add_config(NmkRootConfig.BASE_DIR, None, "")
 
         # Load json fragment from config arg, if any
         try:
