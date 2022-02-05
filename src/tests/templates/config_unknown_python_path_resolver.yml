@@ -1,5 +1,5 @@
 config:
     pythonPath:
-        - <BASEDIR>/missing/folder
+        - ${BASEDIR}/missing/folder
     someResolved:
         __resolver__: contributed_resolvers.StrResolver

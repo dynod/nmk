@@ -7,7 +7,7 @@ from typing import Callable, List, Set, Union
 from nmk.model.keys import NmkRootConfig
 
 # Pattern to locate config reference in string
-CONFIG_REF_PATTERN = re.compile("<([^ >]+)>")
+CONFIG_REF_PATTERN = re.compile(r"\$\{([^ \}]+)\}")
 
 # Pattern to recognize final config items
 FINAL_ITEM_PATTERN = re.compile("^[A-Z0-9_]+$")
