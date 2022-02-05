@@ -1,0 +1,10 @@
+config:
+    someString: def
+    someInt: 567
+    someBool: true
+    someList:
+      - ghi
+    someDict:
+        adc: foo
+        bar: zzz
+    BASEDIR: some other value

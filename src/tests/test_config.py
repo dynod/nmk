@@ -130,3 +130,6 @@ class TestConfig(NmkTester):
             extra_args=["--print", "someConfig"],
             expected_error="Cyclic string substitution: resolving (again!) 'someConfig' config from 'someOtherVar' config",
         )
+
+    def test_config_override_final(self):
+        self.nmk("config_override_final.yml", expected_error="While loading {project}: Can't override final config BASEDIR")

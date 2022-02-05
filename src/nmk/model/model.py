@@ -46,15 +46,21 @@ class NmkModel:
             new_type = cfg.value_type
 
         # Overriding?
-        if name in self.config:
-            # Check for type change
+        old_config = self.config[name] if name in self.config else None
+        if old_config is not None:
             NmkLogger.debug(f"Overriding config {name}")
+            old_config = self.config[name]
+
+            # Check for final
+            assert not old_config.is_final, f"Can't override final config {name}"
+
+            # Check for type change
             old_type = self.config[name].value_type
             assert new_type == old_type, f"Unexpected type change for config {name} ({old_type.__name__} --> {new_type.__name__})"
 
         # Add config to model
         if is_list or is_dict:
-            if name not in self.config or isinstance(self.config[name], NmkResolvedConfig):
+            if old_config is None or isinstance(old_config, NmkResolvedConfig):
                 # Add multiple config holder (or replace previously installed resolver)
                 self.config[name] = NmkListConfig(name, self, path) if is_list else NmkDictConfig(name, self, path)
 

@@ -9,12 +9,19 @@ from nmk.model.keys import NmkRootConfig
 # Pattern to locate config reference in string
 CONFIG_REF_PATTERN = re.compile("<([^ >]+)>")
 
+# Pattern to recognize final config items
+FINAL_ITEM_PATTERN = re.compile("^[A-Z0-9_]+$")
+
 
 @dataclass
 class NmkConfig(ABC):
     name: str
     model: object
     path: Path
+
+    @property
+    def is_final(self) -> bool:
+        return FINAL_ITEM_PATTERN.match(self.name) is not None
 
     @property
     def value(self) -> Union[str, int, bool, list, dict]:
