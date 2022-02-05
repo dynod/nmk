@@ -1,13 +1,14 @@
 import logging
 import shutil
+import sys
 from argparse import ZERO_OR_MORE, ArgumentParser, Namespace
-from datetime import datetime
 from pathlib import Path
 from typing import List
 
 import argcomplete
 
 from nmk import __version__
+from nmk.errors import NmkNoLogsError
 from nmk.logs import NmkLogger
 
 
@@ -45,16 +46,16 @@ class NmkParser:
             help="verbose mode (all messages, including debug ones)",
         )
         lg.add_argument(
-            "--log-file", metavar="L", default="{cache}/nmk.log", help="write logs to L (default: {cache}/nmk.log)"
+            "--log-file", metavar="L", default="{ROOTDIR}/.nmk/nmk.log", help="write logs to L (default: {ROOTDIR}/.nmk/nmk.log)"
         ).completer = argcomplete.completers.FilesCompleter(directories=True)
         lg.add_argument("--no-logs", action="store_true", default=False, help="disable logging")
 
-        # Cache folder
-        cg = self.parser.add_argument_group("cache options")
-        cg.add_argument(
-            "-c", "--cache", metavar="C", type=Path, default=Path(".nmk"), help="cache folder (default: .nmk)"
+        # Root folder
+        rg = self.parser.add_argument_group("root folder options")
+        rg.add_argument(
+            "-r", "--root", metavar="R", type=Path, default=None, help="root folder (default: virtual env parent)"
         ).completer = argcomplete.completers.DirectoriesCompleter()
-        cg.add_argument("--no-cache", action="store_true", default=False, help="clear cache before resolving references")
+        rg.add_argument("--no-cache", action="store_true", default=False, help="clear cache before resolving references")
 
         # Project
         pg = self.parser.add_argument_group("project options")
@@ -74,12 +75,21 @@ class NmkParser:
         # Parse arguments
         args = self.parser.parse_args(argv)
 
-        # Store start of build timestamp
-        args.start_time = datetime.now()
+        # Handle root folder
+        if args.root is None:  # pragma: no cover
+            # By default, root dir is the parent folder of currently running venv
+            if sys.prefix == sys.base_prefix:
+                raise NmkNoLogsError("nmk must run from a virtual env; can't find root dir")
+            args.root = Path(sys.prefix).parent
+        else:
+            # Verify custom root
+            if not args.root.is_dir():
+                raise NmkNoLogsError(f"specified root directory not found: {args.root}")
 
         # Handle cache clear
-        if args.no_cache and args.cache.is_dir():
-            shutil.rmtree(args.cache)
+        args.nmk_dir = args.root / ".nmk"
+        if args.no_cache and args.nmk_dir.is_dir():
+            shutil.rmtree(args.nmk_dir)
 
         # Setup logging
         NmkLogger.setup(args)

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from nmk.errors import NmkStopHereError
 from nmk.logs import NmkLogger
+from nmk.model.config import NmkConfig
 from nmk.model.files import NmkModelFile
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
@@ -13,12 +14,17 @@ from nmk.model.model import NmkModel
 class NmkLoader:
     def __init__(self, args: Namespace):
         # Prepare repo cache and empty model
-        self.repo_cache: Path = args.cache / "cache"
-        self.model = NmkModel()
+        self.repo_cache: Path = args.nmk_dir / "cache"
+        self.model = NmkModel(args)
 
-        # Add "root" config items
-        self.model.add_config(NmkRootConfig.PYTHON_PATH, None, [])
-        self.model.add_config(NmkRootConfig.BASE_DIR, None, "")
+        # Add built-in config items
+        for name, value in {
+            NmkRootConfig.PYTHON_PATH: [],
+            NmkRootConfig.BASE_DIR: "",  # Useless while directly referenced (must identify current project file parent dir)
+            NmkRootConfig.ROOT_DIR: args.root.resolve(),
+            NmkRootConfig.PROJECT_DIR: "",  # Will be updated as soon as initial project is loaded
+        }.items():
+            self.model.add_config(name, None, value)
 
         # Load json fragment from config arg, if any
         try:
@@ -40,7 +46,14 @@ class NmkLoader:
         if args.print is not None and len(args.print):
             for k in args.print:
                 assert k in self.model.config, f"Unknown config item key: {k}"
-            dump_dict = json.dumps({k: c.value for k, c in filter(lambda t: t[0] in args.print, self.model.config.items())}, indent=-1).replace("\n", " ")
+
+            def prepare_for_json(c: NmkConfig):
+                v = c.value
+                return v if c.value_type in [int, str, bool, list, dict] else str(v)
+
+            dump_dict = json.dumps({k: prepare_for_json(c) for k, c in filter(lambda t: t[0] in args.print, self.model.config.items())}, indent=-1).replace(
+                "\n", " "
+            )
             if args.log_level >= logging.WARNING:
                 # Quiet mode
                 print(dump_dict)

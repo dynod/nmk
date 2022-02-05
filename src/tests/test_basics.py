@@ -22,3 +22,6 @@ class TestBasics(NmkTester):
 
     def test_empty_validation_fails(self):
         self.nmk("empty.yml", expected_error="While loading {project}: Project contains invalid data: ")
+
+    def test_root_not_found(self):
+        self.nmk("empty.yml", extra_args=["--root", "/missing/folder"], expected_rc=1)

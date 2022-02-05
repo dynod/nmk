@@ -10,6 +10,7 @@ import yaml
 from nmk.errors import NmkFileLoadingError
 from nmk.logs import NmkLogger
 from nmk.model.cache import cache_remote
+from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkConfigResolver
 
@@ -57,6 +58,12 @@ class NmkModelFile:
         try:
             # Resolve local file from project reference
             self.file = self.resolve_project(project_ref)
+
+            # Remember project dir if first file
+            if not len(refs):
+                p_dir = self.file.parent.resolve()
+                NmkLogger.debug(f"{NmkRootConfig.PROJECT_DIR} updated to {p_dir}")
+                model.config[NmkRootConfig.PROJECT_DIR].static_value = p_dir
 
             # Remember file in model (if not already done)
             if self.file in model.files:

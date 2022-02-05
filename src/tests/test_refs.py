@@ -30,7 +30,7 @@ class TestRefs(NmkTester):
 
     def test_repo_already_exists(self):
         # Fake cache folder: download won't occur
-        (self.test_folder / "nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf").mkdir(parents=True)
+        (self.test_folder / ".nmk/cache/b38e130bed1f28a29781827a5548ac2bdb981eaf").mkdir(parents=True)
         self.nmk(
             "remote_repo_ref_no_local.yml",
             expected_error="While loading https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main/src/tests/templates/invalid.yml: Project file not found",

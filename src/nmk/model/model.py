@@ -1,5 +1,6 @@
 import importlib
 import sys
+from argparse import Namespace
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Union
@@ -25,6 +26,7 @@ def contribute_python_path(paths: List[str]):
 
 @dataclass
 class NmkModel:
+    args: Namespace
     files: Dict[Path, object] = field(default_factory=dict)
     config: Dict[str, NmkConfig] = field(default_factory=dict)
 
