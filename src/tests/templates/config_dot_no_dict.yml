@@ -1,0 +1,3 @@
+config:
+    tryDotRef: _${someString.abc}_
+    someString: abcdef

@@ -3,3 +3,4 @@ class NmkRootConfig:
     BASE_DIR = "BASEDIR"
     ROOT_DIR = "ROOTDIR"
     PROJECT_DIR = "PROJECTDIR"
+    ENV = "ENV"

@@ -1,0 +1,2 @@
+config:
+    tryDotRef: _${ENV.HOME}_

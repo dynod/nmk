@@ -1,0 +1,4 @@
+config:
+    tryDotRef: _${someDict.abc}_
+    someDict:
+        foo: bar

@@ -63,10 +63,30 @@ class NmkConfig(ABC):
                     # Resolve current path
                     ref_value = str(path if path is not None else self.path)
                 else:
+                    # Handle doted references (for dicts)
+                    if "." in ref_name:
+                        segments = ref_name.split(".")
+                        ref_name = segments[0]
+                    else:
+                        segments = None
+
                     # Resolve from config
                     assert ref_name not in resolved_from, f"Cyclic string substitution: resolving (again!) '{ref_name}' config from '{self.name}' config"
                     assert ref_name in self.model.config, f"Unknown '{ref_name}' config referenced from '{self.name}' config"
+
+                    # Resolve reference
                     ref_value = self.model.config[ref_name].resolve(cache, resolved_from)
+
+                    # Doted reference?
+                    if segments is not None:
+                        # Iterate on segments as long as we get dicts
+                        v = ref_value
+                        for segment in segments[1:]:
+                            assert isinstance(v, dict), f"Doted reference from {self.name} used for {ref_name} value, which is not a dict"
+                            assert len(segment), f"Empty doted reference segment from {self.name} for {ref_name} value"
+                            assert segment in v, f"Unknown dict key {segment} in doted reference from {self.name} for {ref_name} value"
+                            v = v[segment]
+                        ref_value = v
 
                 # Replace with resolved value
                 begin, end = m.span(0)

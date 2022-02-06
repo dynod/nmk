@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from argparse import Namespace
 from pathlib import Path
 
@@ -23,6 +24,7 @@ class NmkLoader:
             NmkRootConfig.BASE_DIR: "",  # Useless while directly referenced (must identify current project file parent dir)
             NmkRootConfig.ROOT_DIR: args.root.resolve(),
             NmkRootConfig.PROJECT_DIR: "",  # Will be updated as soon as initial project is loaded
+            NmkRootConfig.ENV: {k: v for k, v in os.environ.items()},
         }.items():
             self.model.add_config(name, None, value)
 

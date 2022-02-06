@@ -1,3 +1,5 @@
+import os
+
 from tests.utils import NmkTester
 
 
@@ -137,3 +139,28 @@ class TestConfig(NmkTester):
     def test_config_builtin(self):
         self.nmk("simplest.yml", extra_args=["--print", "ROOTDIR", "--print", "PROJECTDIR", "--print", "BASEDIR"])
         self.check_logs(f'Config dump: {{ "BASEDIR": "", "ROOTDIR": "{self.test_folder}", "PROJECTDIR": "{self.templates_root}" }}')
+
+    def test_config_dot_no_dict(self):
+        self.nmk(
+            "config_dot_no_dict.yml",
+            extra_args=["--print", "tryDotRef"],
+            expected_error="Doted reference from tryDotRef used for someString value, which is not a dict",
+        )
+
+    def test_config_dot_empty_segment(self):
+        self.nmk(
+            "config_dot_empty_segment.yml",
+            extra_args=["--print", "tryDotRef"],
+            expected_error="Empty doted reference segment from tryDotRef for someDict value",
+        )
+
+    def test_config_dot_unknown_key(self):
+        self.nmk(
+            "config_dot_unknown_key.yml",
+            extra_args=["--print", "tryDotRef"],
+            expected_error="Unknown dict key abc in doted reference from tryDotRef for someDict value",
+        )
+
+    def test_config_dot_ok(self):
+        self.nmk("config_dot_ok.yml", extra_args=["--print", "tryDotRef"])
+        self.check_logs(f'Config dump: {{ "tryDotRef": "_{os.environ["HOME"]}_" }}')
