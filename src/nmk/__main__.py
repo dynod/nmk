@@ -2,6 +2,7 @@ import sys
 import traceback
 from typing import List
 
+from nmk.build import NmkBuild
 from nmk.errors import NmkNoLogsError, NmkStopHereError
 from nmk.logs import NmkLogger
 from nmk.model.loader import NmkLoader
@@ -22,10 +23,13 @@ def nmk(argv: List[str]) -> int:
     if out == 0:
         try:
             # Load build model
-            NmkLoader(args)
+            model = NmkLoader(args).model
 
-            # TODO Trigger build
-            NmkLogger.info("checkered_flag", "Nothing to do")
+            # Trigger build
+            if NmkBuild(model).build():
+                NmkLogger.info("checkered_flag", "Done")
+            else:
+                NmkLogger.info("checkered_flag", "Nothing to do")
         except Exception as e:
             if not isinstance(e, NmkStopHereError):
                 list(map(NmkLogger.error, str(e).split("\n")))
@@ -35,7 +39,7 @@ def nmk(argv: List[str]) -> int:
 
 
 def main() -> int:  # pragma: no cover
-    return nmk(sys.argv)
+    return nmk(sys.argv[1:])
 
 
 if __name__ == "__main__":  # pragma: no cover

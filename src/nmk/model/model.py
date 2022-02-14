@@ -8,6 +8,7 @@ from typing import Dict, List, Union
 from nmk.logs import NmkLogger
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkStaticConfig
 from nmk.model.keys import NmkRootConfig
+from nmk.model.task import NmkTask
 
 # Class separator
 CLASS_SEP = "."
@@ -29,8 +30,10 @@ class NmkModel:
     args: Namespace
     files: Dict[Path, object] = field(default_factory=dict)
     config: Dict[str, NmkConfig] = field(default_factory=dict)
+    tasks: Dict[str, NmkTask] = field(default_factory=dict)
+    default_task: NmkTask = None
 
-    def add_config(self, name: str, path: Path, init_value: Union[str, int, bool, list, dict] = None, resolver: object = None):
+    def add_config(self, name: str, path: Path, init_value: Union[str, int, bool, list, dict] = None, resolver: object = None) -> NmkConfig:
         # Real value?
         is_list = is_dict = False
         if init_value is not None:
@@ -72,8 +75,10 @@ class NmkModel:
             # Update value
             self.config[name] = cfg
 
+        return self.config[name]
+
     def load_class(self, qualified_class: str, expected_type: object) -> object:
-        assert CLASS_SEP in qualified_class, f"Invalid resolver class qualified name: {qualified_class} (missing separator: {CLASS_SEP})"
+        assert CLASS_SEP in qualified_class, f"Invalid class qualified name: {qualified_class} (missing separator: {CLASS_SEP})"
         class_parts = qualified_class.split(CLASS_SEP)
 
         # Contribute to python path
@@ -87,10 +92,25 @@ class NmkModel:
             assert hasattr(mod, cls_name), f"Can't find class {cls_name} in module {mod_name}"
             out = getattr(mod, cls_name)(self)
         except Exception as e:
-            raise Exception(f"Can't instantiate resolver class {qualified_class}: {e}")
+            raise Exception(f"Can't instantiate class {qualified_class}: {e}")
 
         # Verify type is as expected
         assert isinstance(
             out, expected_type
         ), f"Unexpected type for loaded class {qualified_class}: got {type(out).__name__}, expecting {expected_type.__name__} subclass"
         return out
+
+    def add_task(self, task: NmkTask):
+        NmkLogger.debug(f"{'Override' if task.name in self.tasks else 'New'} task {task.name}")
+
+        # Shortcut to task model in builder
+        if task.builder is not None:
+            task.builder.update_task(task)
+
+        # Store in model
+        self.tasks[task.name] = task
+
+    def set_default_task(self, name: str):
+        # Just point to default task
+        NmkLogger.debug(f"New default task: {name}")
+        self.default_task = self.tasks[name]

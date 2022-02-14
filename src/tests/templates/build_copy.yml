@@ -1,0 +1,8 @@
+tasks:
+    sampleBuild:
+        description: Copy
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.CopyBuilder
+        input: ${test_folder}/someInput.txt
+        output: ${test_folder}/someOutput.txt
+        default: true

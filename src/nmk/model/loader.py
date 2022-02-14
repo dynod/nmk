@@ -44,6 +44,9 @@ class NmkLoader:
             for k, v in override_config.items():
                 self.model.add_config(k, None, v)
 
+        # Validate tasks after full loading process
+        self.validate_tasks()
+
         # Print config is required
         if args.print is not None and len(args.print):
             for k in args.print:
@@ -65,3 +68,13 @@ class NmkLoader:
 
             # Stop here
             raise NmkStopHereError()
+
+    def validate_tasks(self):
+        # Iterate on tasks
+        for task in self.model.tasks.values():
+            # Resolve references
+            task._resolve_subtasks()
+            task._resolve_contribs()
+
+            # Verify required configuration
+            task._verify_config()

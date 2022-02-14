@@ -1,0 +1,19 @@
+tasks:
+    taskA:
+        description: taskA
+        emoji: hammer_and_wrench
+        deps:
+            - taskB
+        default: True
+
+    taskB:
+        description: taskB
+        emoji: hammer_and_wrench
+        deps:
+            - taskC
+
+    taskC:
+        description: taskC
+        emoji: hammer_and_wrench
+        deps:
+            - taskA

@@ -1,0 +1,15 @@
+tasks:
+    someTask:
+        description: main task
+        emoji: hammer_and_wrench
+        default: True
+
+    contribB:
+        description: appended task
+        emoji: hammer_and_wrench
+        appendToDeps: someTask
+
+    contribA:
+        description: prepended task
+        emoji: hammer_and_wrench
+        prependToDeps: someTask

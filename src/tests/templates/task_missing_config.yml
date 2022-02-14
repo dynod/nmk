@@ -1,0 +1,6 @@
+tasks:
+    someTask:
+        builder: tests.sample_tasks.SampleBuilder
+        default: true
+        requiredConfig:
+            missingOne: str

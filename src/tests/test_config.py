@@ -61,21 +61,21 @@ class TestConfig(NmkTester):
         self.nmk("config_sample.yml", extra_args=["--config", '{"someList":65}'], expected_error="Unexpected type change for config someList (list --> int)")
 
     def test_config_invalid_resolver(self):
-        self.nmk("config_invalid_resolver.yml", expected_error="While loading {project}: Invalid resolver class qualified name: AbcDef (missing separator: .)")
+        self.nmk("config_invalid_resolver.yml", expected_error="While loading {project}: Invalid class qualified name: AbcDef (missing separator: .)")
 
     def test_config_unknown_module_resolver(self):
-        self.nmk("config_unknown_resolver.yml", expected_error="While loading {project}: Can't instantiate resolver class foo.bar.SomeResolver:")
+        self.nmk("config_unknown_resolver.yml", expected_error="While loading {project}: Can't instantiate class foo.bar.SomeResolver:")
 
     def test_config_unknown_class_resolver(self):
         self.nmk(
             "config_unknown_class_resolver.yml",
-            expected_error="While loading {project}: Can't instantiate resolver class tests.failling_resolvers.UnknownResolver: Can't find class UnknownResolver in module tests.failling_resolvers",
+            expected_error="While loading {project}: Can't instantiate class tests.failling_resolvers.UnknownResolver: Can't find class UnknownResolver in module tests.failling_resolvers",
         )
 
     def test_config_exception_resolver(self):
         self.nmk(
             "config_exception_resolver.yml",
-            expected_error="While loading {project}: Can't instantiate resolver class tests.failling_resolvers.FaillingResolver: Can't instantiate abstract class FaillingResolver",
+            expected_error="While loading {project}: Can't instantiate class tests.failling_resolvers.FaillingResolver: Can't instantiate abstract class FaillingResolver",
         )
 
     def test_config_bad_type_resolver(self):

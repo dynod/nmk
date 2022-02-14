@@ -1,0 +1,9 @@
+tasks:
+    someTask:
+        builder: tests.sample_tasks.SampleBuilder
+        default: true
+        requiredConfig:
+            stringOne: str
+
+config:
+    stringOne: 123

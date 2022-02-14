@@ -1,0 +1,6 @@
+tasks:
+    sampleBuild:
+        description: Failling one!
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.ErrorBuilder
+        default: true

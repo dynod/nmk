@@ -1,0 +1,7 @@
+tasks:
+    sampleBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.SampleBuilder
+        output: ${test_folder}/someOutput.txt
+        default: true

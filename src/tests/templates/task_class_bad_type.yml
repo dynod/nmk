@@ -1,0 +1,3 @@
+tasks:
+    dummy:
+        builder: tests.sample_resolvers.StrResolver

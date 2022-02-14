@@ -36,3 +36,20 @@ class NmkTester(TestHelper):
         assert rc == expected_rc, f"Unexpected nmk rc: {rc}"
         if expected_error is not None:
             self.check_logs(f"nmk] ERROR 💀 - {expected_error.format(project=project)}")
+
+    def check_logs_order(self, expected: List[str]):
+        # Get logs content
+        with self.test_logs.open("r") as f:
+            lines = f.readlines()
+
+            # Verify all patterns are found in logs, in specified order
+            start_index = 0
+            not_found_patterns = list(expected)
+            for expected_pattern in expected:
+                for current_index, line_to_check in enumerate(lines[start_index:], start_index):
+                    if expected_pattern in line_to_check:
+                        # Line found!
+                        start_index = current_index + 1
+                        not_found_patterns.remove(expected_pattern)
+                        break
+            assert len(not_found_patterns) == 0, f"Missing patterns: {not_found_patterns}"

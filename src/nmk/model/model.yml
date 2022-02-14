@@ -41,3 +41,68 @@ properties:
             - type: array
             - type: object
               additionalProperties: true
+
+    # tasks
+    tasks:
+        type: object
+        additionalProperties:
+            type: object
+            additionalProperties: false
+            properties:
+                # Task builder implementation class, if any
+                builder:
+                    type: string
+                # Emoji (for prettier logs!)
+                emoji:
+                    type: string
+                # One line description, for online help
+                description:
+                    type: string
+                # Task inputs
+                input:
+                    $ref: "#/$defs/stringRefs"
+                # Task outputs
+                output:
+                    $ref: "#/$defs/stringRefs"
+                # Dependencies:
+                # - children deps
+                deps:
+                    type: array
+                    items:
+                        type: string
+                # - parent dep (append after the existing ones)
+                appendToDeps:
+                    type: string
+                # - parent dep (prepend before the existing ones)
+                prependToDeps:
+                    type: string
+                # Default task
+                default:
+                    type: boolean
+                # Required configuration items
+                requiredConfig:
+                    type: object
+                    additionalProperties:
+                        # Simple type definition (no default value)
+                        $ref: "#/$defs/typeString"
+
+$defs:
+    # Reference string(s), i.e. either:
+    # - a string
+    # - an array of strings
+    stringRefs:
+        oneOf:
+            - type: string
+            - type: array
+              items:
+                  type: string
+
+    # Config type string
+    typeString:
+        type: string
+        enum:
+            - str
+            - int
+            - bool
+            - list
+            - dict

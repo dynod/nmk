@@ -68,6 +68,10 @@ class NmkParser:
         cg.add_argument("--config", metavar="JSON", help="contribute to config from json fragment")
         cg.add_argument("--print", metavar="K", action="append", help="print required config item(s) and exit")
 
+        # Build
+        bg = self.parser.add_argument_group("build options")
+        bg.add_argument("--dry-run", action="store_true", default=False, help="list tasks to be executed and exit")
+
         # Handle completion
         argcomplete.autocomplete(self.parser)
 

@@ -2,6 +2,7 @@ import logging
 from argparse import Namespace
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import Union
 
 import coloredlogs
 from rich.emoji import Emoji
@@ -40,8 +41,8 @@ class NmkLogger:
             cls.debug("Cache cleared!")
 
     @classmethod
-    def __log(cls, level: int, emoji: str, line: str):
-        cls.LOG.log(level, f"{Emoji(emoji)} - {line}", stacklevel=3)
+    def __log(cls, level: int, emoji: Union[str, Emoji], line: str):
+        cls.LOG.log(level, f"{Emoji(emoji) if isinstance(emoji, str) else emoji} - {line}", stacklevel=3)
 
     @classmethod
     def info(cls, emoji: str, line: str):

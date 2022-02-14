@@ -2,17 +2,20 @@ import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List
+from typing import Callable, Dict, List
 
 import jsonschema
 import yaml
+from rich.emoji import Emoji
 
 from nmk.errors import NmkFileLoadingError
 from nmk.logs import NmkLogger
+from nmk.model.builder import NmkTaskBuilder
 from nmk.model.cache import cache_remote
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkConfigResolver
+from nmk.model.task import NmkTask
 
 # Known URL schemes
 GITHUB_SCHEME = "github:"
@@ -20,6 +23,9 @@ URL_SCHEMES = ["http:", "https:", GITHUB_SCHEME]
 
 # Github URL extraction pattern
 GITHUB_PATTERN = re.compile("github://([^ /]+)/([^ /]+)/([^ /]+)(/.+)?")
+
+# Type names for required config
+TYPE_NAMES = {t.__name__: t for t in [str, int, bool, list, dict]}
 
 
 # Model keys
@@ -29,6 +35,17 @@ class NmkModelK:
     LOCAL = "local"
     CONFIG = "config"
     RESOLVER = "__resolver__"
+    TASKS = "tasks"
+    DESCRIPTION = "description"
+    EMOJI = "emoji"
+    BUILDER = "builder"
+    REQUIRED_CONFIG = "requiredConfig"
+    DEFAULT = "default"
+    DEPS = "deps"
+    APPEND_TO = "appendToDeps"
+    PREPEND_TO = "prependToDeps"
+    INPUT = "input"
+    OUTPUT = "output"
 
 
 # Data class for repository reference
@@ -93,6 +110,9 @@ class NmkModelFile:
 
             # Load config
             self.load_config(model)
+
+            # Load tasks
+            self.load_tasks(model)
 
         except Exception as e:
             if isinstance(e, NmkFileLoadingError):
@@ -207,3 +227,45 @@ class NmkModelFile:
             else:
                 # Simple config item, direct add
                 model.add_config(name, self.file.parent, candidate)
+
+    def load_tasks(self, model: NmkModel):
+        # Is this file providing config items?
+        if NmkModelK.TASKS not in self.model:
+            return
+
+        # Iterate on task items
+        for name, candidate in self.model[NmkModelK.TASKS].items():
+            # Contribute to model
+            model.add_task(
+                NmkTask(
+                    name,
+                    self.load_property(candidate, NmkModelK.DESCRIPTION),
+                    self.load_property(candidate, NmkModelK.EMOJI, mapper=Emoji),
+                    self.load_property(candidate, NmkModelK.BUILDER, mapper=lambda cls: model.load_class(cls, NmkTaskBuilder)),
+                    self.load_property(candidate, NmkModelK.REQUIRED_CONFIG, {}, mapper=self.load_req_config),
+                    self.load_property(candidate, NmkModelK.DEPS, [], mapper=lambda dp: [i for n, i in enumerate(dp) if i not in dp[:n]]),  # Remove duplicates
+                    self.load_property(candidate, NmkModelK.APPEND_TO),
+                    self.load_property(candidate, NmkModelK.PREPEND_TO),
+                    self.load_property(candidate, NmkModelK.INPUT, [], mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.INPUT, model)),
+                    self.load_property(candidate, NmkModelK.OUTPUT, [], mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.OUTPUT, model)),
+                    model,
+                ),
+            )
+
+            # If declared as default task, remember it in model
+            if self.load_property(candidate, NmkModelK.DEFAULT, False):
+                model.set_default_task(name)
+
+    def load_property(self, candidate: dict, key: str, default=None, mapper: Callable = None):
+        # Load value from yml model (if any, otherwise handle default value), and potentially map it
+        mapper = mapper if mapper is not None else lambda x: x
+        value = candidate[key] if key in candidate else default
+        return mapper(value) if value is not None else None
+
+    def load_str_list_cfg(self, v, task_name: str, in_out: str, model: NmkModel) -> List[str]:
+        # Add string list config
+        return model.add_config(f"task_{task_name}_{in_out}", self.file.parent, v if isinstance(v, list) else [v])
+
+    def load_req_config(self, config: dict) -> dict:
+        # Map type names to real types
+        return {n: TYPE_NAMES[t] for n, t in config.items()}
