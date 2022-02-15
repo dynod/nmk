@@ -19,11 +19,12 @@ class NmkLoader:
         self.model = NmkModel(args)
 
         # Add built-in config items
+        root = args.root.resolve()
         for name, value in {
             NmkRootConfig.PYTHON_PATH: [],
             NmkRootConfig.BASE_DIR: "",  # Useless while directly referenced (must identify current project file parent dir)
-            NmkRootConfig.ROOT_DIR: args.root.resolve(),
-            NmkRootConfig.CACHE_DIR: "${ROOTDIR}/.nmk",
+            NmkRootConfig.ROOT_DIR: root,
+            NmkRootConfig.CACHE_DIR: root / ".nmk",
             NmkRootConfig.PROJECT_DIR: "",  # Will be updated as soon as initial project is loaded
             NmkRootConfig.ENV: {k: v for k, v in os.environ.items()},
         }.items():
