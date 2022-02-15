@@ -23,6 +23,7 @@ class NmkLoader:
             NmkRootConfig.PYTHON_PATH: [],
             NmkRootConfig.BASE_DIR: "",  # Useless while directly referenced (must identify current project file parent dir)
             NmkRootConfig.ROOT_DIR: args.root.resolve(),
+            NmkRootConfig.CACHE_DIR: "${ROOTDIR}/.nmk",
             NmkRootConfig.PROJECT_DIR: "",  # Will be updated as soon as initial project is loaded
             NmkRootConfig.ENV: {k: v for k, v in os.environ.items()},
         }.items():

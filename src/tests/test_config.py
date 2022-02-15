@@ -137,8 +137,10 @@ class TestConfig(NmkTester):
         self.nmk("config_override_final.yml", expected_error="While loading {project}: Can't override final config BASEDIR")
 
     def test_config_builtin(self):
-        self.nmk("simplest.yml", extra_args=["--print", "ROOTDIR", "--print", "PROJECTDIR", "--print", "BASEDIR"])
-        self.check_logs(f'Config dump: {{ "BASEDIR": "", "ROOTDIR": "{self.test_folder}", "PROJECTDIR": "{self.templates_root}" }}')
+        self.nmk("simplest.yml", extra_args=["--print", "ROOTDIR", "--print", "CACHEDIR", "--print", "PROJECTDIR", "--print", "BASEDIR"])
+        self.check_logs(
+            f'Config dump: {{ "BASEDIR": "", "ROOTDIR": "{self.test_folder}", "CACHEDIR": "{self.test_folder}/.nmk", "PROJECTDIR": "{self.templates_root}" }}'
+        )
 
     def test_config_dot_no_dict(self):
         self.nmk(
