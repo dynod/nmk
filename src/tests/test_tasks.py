@@ -19,7 +19,7 @@ class TestTasks(NmkTester):
 
     def test_contributing_dep(self):
         self.nmk("task_contributing_dep.yml", extra_args=["--dry-run"])
-        self.check_logs_order(["[contribA] prepended task", "[contribB] appended task", "[someTask] main task", "3 built tasks"])
+        self.check_logs_order(["prepended task", "appended task", "main task", "3 built tasks"])
 
     def test_cyclic_dep(self):
         self.nmk("task_cyclic_dep.yml", expected_error="Cyclic dependency: taskA referenced from tasks taskA -> taskB -> taskC")

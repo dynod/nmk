@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import List
 
-from nmk.logs import NmkLogger
+from nmk.logs import NmkLogger, NmkLogWrapper
 from nmk.model.model import NmkModel
 from nmk.model.task import NmkTask
 
@@ -45,48 +45,53 @@ class NmkBuild:
             self.ordered_tasks.append(task)
 
     def build(self) -> bool:
-        # Do the build
-        NmkLogger.debug("Starting the build!")
-        for task in self.ordered_tasks:
-            if self.model.args.dry_run:
-                # Dry-run mode: don't call builder, just log
-                self.task_prolog(task)
-            elif self.needs_build(task):
-                # Task needs to be (re)built
-                self.task_build(task)
-            else:
-                # Task skipped
-                NmkLogger.debug(f"Task {task.name} skipped, nothing to do")
+        # Something to build?
+        if len(self.ordered_tasks):
+            # Do the build
+            NmkLogger.debug("Starting the build!")
+            max_task_len = max(map(lambda t: len(t.name), self.ordered_tasks))
+            for task in self.ordered_tasks:
+                build_logger = NmkLogWrapper(logging.getLogger(("." * (max_task_len - len(task.name))) + task.name))
+                if self.model.args.dry_run:
+                    # Dry-run mode: don't call builder, just log
+                    self.task_prolog(task, build_logger)
+                elif self.needs_build(task, build_logger):
+                    # Task needs to be (re)built
+                    self.task_build(task, build_logger)
+                else:
+                    # Task skipped
+                    build_logger.debug("Task skipped, nothing to do")
 
         # Something done?
         NmkLogger.debug(f"{self.built_tasks} built tasks")
         return self.built_tasks > 0
 
-    def task_prolog(self, task: NmkTask):
+    def task_prolog(self, task: NmkTask, build_logger: NmkLogWrapper):
         self.built_tasks += 1
-        NmkLogger.log(logging.DEBUG if task.silent else logging.INFO, task.emoji, f"[{task.name}] {task.description}")
+        build_logger.log(logging.DEBUG if task.silent else logging.INFO, task.emoji, task.description)
 
-    def task_build(self, task: NmkTask):
+    def task_build(self, task: NmkTask, build_logger: NmkLogWrapper):
         # Prolog
-        self.task_prolog(task)
+        self.task_prolog(task, build_logger)
 
         # And build...
         try:
+            task.builder.update_logger(build_logger)
             task.builder.build()
         except Exception as e:
             raise Exception(f"An error occurred during task {task.name} build: {e}").with_traceback(e.__traceback__)
 
-    def needs_build(self, task: NmkTask):
+    def needs_build(self, task: NmkTask, build_logger: NmkLogWrapper):
         # Check if task needs to be built
 
         # No builder = nothing to build
         if task.builder is None:
-            NmkLogger.debug(f"Task {task.name} doesn't have a builder defined")
+            build_logger.debug("Task doesn't have a builder defined")
             return False
 
         # Always build if task doesn't have inputs or outputs (no way to know if something has changed)
         if len(task.inputs) == 0 or len(task.outputs) == 0:
-            NmkLogger.debug(f"Task {task.name} misses either inputs or outputs")
+            build_logger.debug("Task misses either inputs or outputs")
             return True
 
         # All inputs must exist
@@ -100,8 +105,8 @@ class NmkBuild:
         output_max = min(out_updates.keys())
         if input_max > output_max:
             # At least one input has been modified after the oldest output
-            NmkLogger.debug(
-                f"(Re)Build task {task.name}: input ({in_updates[input_max]} - {datetime.fromtimestamp(input_max).strftime(TIME_FORMAT)}) "
+            build_logger.debug(
+                f"(Re)Build task: input ({in_updates[input_max]} - {datetime.fromtimestamp(input_max).strftime(TIME_FORMAT)}) "
                 + f"is more recent than output ({out_updates[output_max]} - {datetime.fromtimestamp(output_max).strftime(TIME_FORMAT)})"
             )
             return True

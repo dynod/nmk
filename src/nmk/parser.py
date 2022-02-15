@@ -9,7 +9,7 @@ import argcomplete
 
 from nmk import __version__
 from nmk.errors import NmkNoLogsError
-from nmk.logs import NmkLogger
+from nmk.logs import logging_setup
 
 
 class NmkParser:
@@ -96,6 +96,6 @@ class NmkParser:
             shutil.rmtree(args.nmk_dir)
 
         # Setup logging
-        NmkLogger.setup(args)
+        logging_setup(args)
 
         return args

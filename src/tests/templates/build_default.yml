@@ -1,7 +1,7 @@
 tasks:
     parentTask:
         description: The parent task
-        emoji: hammer_and_wrench
+        emoji: ":hammer_and_wrench: "
         default: True
         deps:
             - subA
@@ -9,11 +9,11 @@ tasks:
 
     subB:
         description: My B task
-        emoji: hammer_and_wrench
+        emoji: ":hammer_and_wrench: "
         deps:
             - subA
 
     subA:
         description: My A task
-        emoji: hammer_and_wrench
+        emoji: ":hammer_and_wrench: "
         silent: true

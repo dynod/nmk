@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from rich.emoji import Emoji
+from rich.text import Text
 
 from nmk.model.config import NmkListConfig
 
@@ -12,7 +13,7 @@ class NmkTask:
     name: str
     description: str
     silent: bool
-    emoji: Emoji
+    emoji: Union[Emoji, Text]
     builder: object
     required_config: Dict[str, object]
     _deps: List[str]

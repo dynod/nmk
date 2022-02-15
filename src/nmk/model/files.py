@@ -2,11 +2,12 @@ import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Union
 
 import jsonschema
 import yaml
 from rich.emoji import Emoji
+from rich.text import Text
 
 from nmk.errors import NmkFileLoadingError
 from nmk.logs import NmkLogger
@@ -242,7 +243,7 @@ class NmkModelFile:
                     name,
                     self.load_property(candidate, NmkModelK.DESCRIPTION),
                     self.load_property(candidate, NmkModelK.SILENT, False),
-                    self.load_property(candidate, NmkModelK.EMOJI, mapper=Emoji),
+                    self.load_property(candidate, NmkModelK.EMOJI, mapper=self.load_emoji),
                     self.load_property(candidate, NmkModelK.BUILDER, mapper=lambda cls: model.load_class(cls, NmkTaskBuilder)),
                     self.load_property(candidate, NmkModelK.REQUIRED_CONFIG, {}, mapper=self.load_req_config),
                     self.load_property(candidate, NmkModelK.DEPS, [], mapper=lambda dp: [i for n, i in enumerate(dp) if i not in dp[:n]]),  # Remove duplicates
@@ -257,6 +258,10 @@ class NmkModelFile:
             # If declared as default task, remember it in model
             if self.load_property(candidate, NmkModelK.DEFAULT, False):
                 model.set_default_task(name)
+
+    def load_emoji(self, candidate: str) -> Union[Emoji, Text]:
+        # May be a renderable text
+        return Text.from_markup(candidate) if ":" in candidate else Emoji(candidate)
 
     def load_property(self, candidate: dict, key: str, default=None, mapper: Callable = None):
         # Load value from yml model (if any, otherwise handle default value), and potentially map it
