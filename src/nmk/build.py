@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import List
 
@@ -63,7 +64,7 @@ class NmkBuild:
 
     def task_prolog(self, task: NmkTask):
         self.built_tasks += 1
-        NmkLogger.info(task.emoji, f"[{task.name}] {task.description}")
+        NmkLogger.log(logging.DEBUG if task.silent else logging.INFO, task.emoji, f"[{task.name}] {task.description}")
 
     def task_build(self, task: NmkTask):
         # Prolog

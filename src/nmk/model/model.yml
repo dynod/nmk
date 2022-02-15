@@ -58,6 +58,9 @@ properties:
                 # One line description, for online help
                 description:
                     type: string
+                # Silent task: no logs by default
+                silent:
+                    type: boolean
                 # Task inputs
                 input:
                     $ref: "#/$defs/stringRefs"

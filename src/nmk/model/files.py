@@ -46,6 +46,7 @@ class NmkModelK:
     PREPEND_TO = "prependToDeps"
     INPUT = "input"
     OUTPUT = "output"
+    SILENT = "silent"
 
 
 # Data class for repository reference
@@ -240,6 +241,7 @@ class NmkModelFile:
                 NmkTask(
                     name,
                     self.load_property(candidate, NmkModelK.DESCRIPTION),
+                    self.load_property(candidate, NmkModelK.SILENT, False),
                     self.load_property(candidate, NmkModelK.EMOJI, mapper=Emoji),
                     self.load_property(candidate, NmkModelK.BUILDER, mapper=lambda cls: model.load_class(cls, NmkTaskBuilder)),
                     self.load_property(candidate, NmkModelK.REQUIRED_CONFIG, {}, mapper=self.load_req_config),

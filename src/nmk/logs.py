@@ -45,6 +45,10 @@ class NmkLogger:
         cls.LOG.log(level, f"{Emoji(emoji) if isinstance(emoji, str) else emoji} - {line}", stacklevel=3)
 
     @classmethod
+    def log(cls, level: int, emoji: str, line: str):
+        cls.__log(level, emoji, line)
+
+    @classmethod
     def info(cls, emoji: str, line: str):
         cls.__log(logging.INFO, emoji, line)
 

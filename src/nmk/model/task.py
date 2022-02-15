@@ -11,6 +11,7 @@ from nmk.model.config import NmkListConfig
 class NmkTask:
     name: str
     description: str
+    silent: bool
     emoji: Emoji
     builder: object
     required_config: Dict[str, object]

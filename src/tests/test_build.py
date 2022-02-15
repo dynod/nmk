@@ -7,7 +7,7 @@ class TestBuild(NmkTester):
 
     def test_dry_run_default(self):
         self.nmk("build_default.yml", extra_args=["--dry-run"])
-        self.check_logs_order(["[subA] My A task", "[subB] My B task", "[parentTask] The parent task", "3 built tasks"])
+        self.check_logs_order(["DEBUG 🛠 - [subA] My A task", "INFO 🛠 - [subB] My B task", "[parentTask] The parent task", "3 built tasks"])
 
     def test_dry_run_specified(self):
         self.nmk("build_default.yml", extra_args=["--dry-run", "subA"])

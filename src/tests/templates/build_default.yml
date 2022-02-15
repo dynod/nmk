@@ -16,3 +16,4 @@ tasks:
     subA:
         description: My A task
         emoji: hammer_and_wrench
+        silent: true
