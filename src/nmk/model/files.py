@@ -166,7 +166,8 @@ class NmkModelFile:
         # Make relative to current file, if needed
         if not p.is_absolute():
             p = self.file.parent / p
-        NmkLogger.warning(f"Absolute path (not portable) used in project: {p}")
+        else:
+            NmkLogger.warning(f"Absolute path (not portable) used in project: {p}")
         return str(p)
 
     def resolve_repo_ref(self, ref: str, repo: NmkRepo) -> str:

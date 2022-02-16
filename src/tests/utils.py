@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 from typing import List, Union
 
@@ -17,6 +18,13 @@ class NmkTester(TestHelper):
 
     def template(self, name: str) -> Path:
         return self.templates_root / name
+
+    def prepare_project(self, name: str) -> Path:
+        # Copy template in test folder
+        src = self.template(name)
+        dst = self.test_folder / src.name
+        shutil.copyfile(src, dst)
+        return dst
 
     def nmk(self, project: Union[Path, str], with_logs: bool = False, extra_args: List[str] = None, expected_error: str = None, expected_rc: int = 0):
         # Prepare args and run nmk
