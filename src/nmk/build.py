@@ -51,7 +51,7 @@ class NmkBuild:
             NmkLogger.debug("Starting the build!")
             max_task_len = max(map(lambda t: len(t.name), self.ordered_tasks))
             for task in self.ordered_tasks:
-                build_logger = NmkLogWrapper(logging.getLogger(("." * (max_task_len - len(task.name))) + task.name))
+                build_logger = NmkLogWrapper(logging.getLogger((" " * (max_task_len - len(task.name))) + f"[{task.name}]"))
                 if self.model.args.dry_run:
                     # Dry-run mode: don't call builder, just log
                     self.task_prolog(task, build_logger)

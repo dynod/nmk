@@ -11,8 +11,8 @@ from rich.text import Text
 from nmk import __version__
 
 # Displayed logs format
-LOG_FORMAT = "%(asctime)s (%(levelname).1s) [%(name)s] %(message)s"
-LOG_FORMAT_DEBUG = "%(asctime)s.%(msecs)03d (%(levelname).1s) [%(name)s] %(message)s - %(filename)s:%(funcName)s:%(lineno)d"
+LOG_FORMAT = "%(asctime)s (%(levelname).1s) %(name)s %(message)s"
+LOG_FORMAT_DEBUG = "%(asctime)s.%(msecs)03d (%(levelname).1s) %(name)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d"
 
 
 # Main logger instance

@@ -7,15 +7,15 @@ class TestBuild(NmkTester):
 
     def test_dry_run_default(self):
         self.nmk("build_default.yml", extra_args=["--dry-run"])
-        self.check_logs_order(["subA] DEBUG 🛠  - My A task", "subB] INFO 🛠  - My B task", "parentTask] INFO 🛠  - The parent task", "3 built tasks"])
+        self.check_logs_order(["subA]] DEBUG 🛠  - My A task", "subB]] INFO 🛠  - My B task", "parentTask]] INFO 🛠  - The parent task", "3 built tasks"])
 
     def test_dry_run_specified(self):
         self.nmk("build_default.yml", extra_args=["--dry-run", "subA"])
-        self.check_logs_order(["subA] DEBUG 🛠  - My A task", "1 built tasks"])
+        self.check_logs_order(["subA]] DEBUG 🛠  - My A task", "1 built tasks"])
 
     def test_no_builder(self):
         self.nmk("build_default.yml", extra_args=["subA"])
-        self.check_logs_order(["subA] DEBUG 🐛 - Task skipped, nothing to do", "0 built tasks"])
+        self.check_logs_order(["subA]] DEBUG 🐛 - Task skipped, nothing to do", "0 built tasks"])
 
     def test_no_inputs(self):
         output = self.test_folder / "someOutput.txt"
