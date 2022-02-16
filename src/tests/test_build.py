@@ -14,8 +14,12 @@ class TestBuild(NmkTester):
         self.check_logs_order(["subA]] DEBUG 🛠  - My A task", "1 built tasks"])
 
     def test_no_builder(self):
+        self.nmk("build_default.yml", extra_args=["subB"])
+        self.check_logs_order(["subB]] DEBUG 🐛 - Task skipped, nothing to do", "1 built tasks"])
+
+    def test_build_params(self):
         self.nmk("build_default.yml", extra_args=["subA"])
-        self.check_logs_order(["subA]] DEBUG 🐛 - Task skipped, nothing to do", "0 built tasks"])
+        self.check_logs("foo:bar bar:123 ref:azerty")
 
     def test_no_inputs(self):
         output = self.test_folder / "someOutput.txt"

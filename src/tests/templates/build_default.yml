@@ -17,3 +17,11 @@ tasks:
         description: My A task
         emoji: ":hammer_and_wrench: "
         silent: true
+        params:
+            foo: bar
+            bar: 123
+            ref: ${config}
+        builder: tests.sample_tasks.ParamBuilder
+
+config:
+    config: azerty

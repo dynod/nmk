@@ -77,6 +77,3 @@ class NmkLoader:
             # Resolve references
             task._resolve_subtasks()
             task._resolve_contribs()
-
-            # Verify required configuration
-            task._verify_config()

@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import List, Union
 
 from rich.emoji import Emoji
 from rich.text import Text
 
-from nmk.model.config import NmkListConfig
+from nmk.model.config import NmkDictConfig, NmkListConfig
 
 
 @dataclass
@@ -15,7 +15,7 @@ class NmkTask:
     silent: bool
     emoji: Union[Emoji, Text]
     builder: object
-    required_config: Dict[str, object]
+    params: NmkDictConfig
     _deps: List[str]
     _append_to: str
     _prepend_to: str
@@ -73,12 +73,3 @@ class NmkTask:
     @property
     def outputs(self) -> List[Path]:
         return self._resolve_files("_outputs")
-
-    def _verify_config(self):
-        # Make sure all required config items exist, with the correct type
-        for cfg_name, cfg_type in self.required_config.items():
-            assert cfg_name in self.model.config, f"Task {self.name} requires missing config item {cfg_name}"
-            actual_type = self.model.config[cfg_name].value_type
-            assert (
-                actual_type == cfg_type
-            ), f"Task {self.name} requires config item {cfg_name} of type {cfg_type.__name__}, but got type is {actual_type.__name__}"

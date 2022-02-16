@@ -26,3 +26,9 @@ class CopyBuilder(NmkTaskBuilder):
 class ErrorBuilder(NmkTaskBuilder):
     def build(self):
         raise Exception("Some error happened!")
+
+
+class ParamBuilder(NmkTaskBuilder):
+    def build(self, foo: str, bar: int, ref: str):
+        # Log param values
+        self.logger.debug(f"foo:{foo} bar:{bar} ref:{ref}")

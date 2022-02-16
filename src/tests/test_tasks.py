@@ -23,9 +23,3 @@ class TestTasks(NmkTester):
 
     def test_cyclic_dep(self):
         self.nmk("task_cyclic_dep.yml", expected_error="Cyclic dependency: taskA referenced from tasks taskA -> taskB -> taskC")
-
-    def test_missing_required_config(self):
-        self.nmk("task_missing_config.yml", expected_error="Task someTask requires missing config item missingOne")
-
-    def test_bad_type_required_config(self):
-        self.nmk("task_bad_type_config.yml", expected_error="Task someTask requires config item stringOne of type str, but got type is int")

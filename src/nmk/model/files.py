@@ -13,6 +13,7 @@ from nmk.errors import NmkFileLoadingError
 from nmk.logs import NmkLogger
 from nmk.model.builder import NmkTaskBuilder
 from nmk.model.cache import cache_remote
+from nmk.model.config import NmkDictConfig, NmkListConfig
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkConfigResolver
@@ -24,9 +25,6 @@ URL_SCHEMES = ["http:", "https:", GITHUB_SCHEME]
 
 # Github URL extraction pattern
 GITHUB_PATTERN = re.compile("github://([^ /]+)/([^ /]+)/([^ /]+)(/.+)?")
-
-# Type names for required config
-TYPE_NAMES = {t.__name__: t for t in [str, int, bool, list, dict]}
 
 
 # Model keys
@@ -40,7 +38,7 @@ class NmkModelK:
     DESCRIPTION = "description"
     EMOJI = "emoji"
     BUILDER = "builder"
-    REQUIRED_CONFIG = "requiredConfig"
+    PARAMS = "params"
     DEFAULT = "default"
     DEPS = "deps"
     APPEND_TO = "appendToDeps"
@@ -245,7 +243,7 @@ class NmkModelFile:
                     self.load_property(candidate, NmkModelK.SILENT, False),
                     self.load_property(candidate, NmkModelK.EMOJI, mapper=self.load_emoji),
                     self.load_property(candidate, NmkModelK.BUILDER, mapper=lambda cls: model.load_class(cls, NmkTaskBuilder)),
-                    self.load_property(candidate, NmkModelK.REQUIRED_CONFIG, {}, mapper=self.load_req_config),
+                    self.load_property(candidate, NmkModelK.PARAMS, {}, mapper=lambda v: self.load_param_dict(v, name, model)),
                     self.load_property(candidate, NmkModelK.DEPS, [], mapper=lambda dp: [i for n, i in enumerate(dp) if i not in dp[:n]]),  # Remove duplicates
                     self.load_property(candidate, NmkModelK.APPEND_TO),
                     self.load_property(candidate, NmkModelK.PREPEND_TO),
@@ -269,10 +267,10 @@ class NmkModelFile:
         value = candidate[key] if key in candidate else default
         return mapper(value) if value is not None else None
 
-    def load_str_list_cfg(self, v, task_name: str, in_out: str, model: NmkModel) -> List[str]:
+    def load_str_list_cfg(self, v: list, task_name: str, in_out: str, model: NmkModel) -> NmkListConfig:
         # Add string list config
         return model.add_config(f"task_{task_name}_{in_out}", self.file.parent, v if isinstance(v, list) else [v])
 
-    def load_req_config(self, config: dict) -> dict:
-        # Map type names to real types
-        return {n: TYPE_NAMES[t] for n, t in config.items()}
+    def load_param_dict(self, v: dict, task_name: str, model: NmkModel) -> NmkDictConfig:
+        # Map builder parameters
+        return model.add_config(f"task_{task_name}_params", self.file.parent, v)
