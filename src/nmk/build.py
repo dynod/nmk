@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 from nmk.logs import NmkLogger, NmkLogWrapper
+from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.task import NmkTask
 
@@ -101,8 +102,11 @@ class NmkBuild:
         missing_inputs = list(filter(lambda p: not p.is_file(), task.inputs))
         assert len(missing_inputs) == 0, f"Task {task.name} miss following inputs:\n" + "\n".join(map(lambda p: f" - {p}", missing_inputs))
 
+        # Add all project files to existing inputs
+        all_inputs = set(task.inputs + self.model.config[NmkRootConfig.PROJECT_FILES].value)
+
         # Check modification times
-        in_updates = {p.stat().st_mtime: p for p in task.inputs}
+        in_updates = {p.stat().st_mtime: p for p in all_inputs}
         out_updates = {p.stat().st_mtime if p.is_file() else 0: p for p in task.outputs}
         input_max = max(in_updates.keys())
         output_max = min(out_updates.keys())

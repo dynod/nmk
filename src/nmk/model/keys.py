@@ -4,4 +4,5 @@ class NmkRootConfig:
     ROOT_DIR = "ROOTDIR"
     CACHE_DIR = "CACHEDIR"
     PROJECT_DIR = "PROJECTDIR"
+    PROJECT_FILES = "PROJECTFILES"
     ENV = "ENV"

@@ -36,19 +36,23 @@ class TestBuild(NmkTester):
         test_output = self.test_folder / "someOutput.txt"
 
         # Missing input
-        self.nmk(
-            "build_copy.yml", extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'], expected_error="Task sampleBuild miss following inputs:"
-        )
+        project_file = self.prepare_project("build_copy.yml")
+        self.nmk(project_file, extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'], expected_error="Task sampleBuild miss following inputs:")
 
-        # Build 1
+        # Build 1: input > output --> build
         test_input.touch()
-        self.nmk("build_copy.yml", extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
+        self.nmk(project_file, extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
         self.check_logs(f"Copying {test_input} to {test_output}")
         assert test_output.is_file()
 
-        # Build 2
-        self.nmk("build_copy.yml", extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
+        # Build 2: output > input --> skip
+        self.nmk(project_file, extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
         self.check_logs("Task skipped, nothing to do")
+
+        # Build 3: project file updated --> build
+        project_file.touch()
+        self.nmk(project_file, extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
+        self.check_logs(f"(Re)Build task: input ({project_file} - ")
 
     def test_failling_build(self):
         self.nmk("build_error.yml", expected_error="An error occurred during task sampleBuild build: Some error happened!")
