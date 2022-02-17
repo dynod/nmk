@@ -18,3 +18,11 @@ class TestBasePlugin(NmkTester):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["clean"])
         self.check_logs(f"Cleaning folder: {self.test_folder}")
         assert not fake_out.exists()
+
+    def test_build(self):
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run"])
+        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "2 built tasks"])
+
+    def test_test(self):
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run", "tests"])
+        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "3 built tasks"])
