@@ -6,7 +6,7 @@ from typing import List
 import argcomplete
 
 from nmk import __version__
-from nmk.completion import TasksCompleter
+from nmk.completion import ConfigCompleter, TasksCompleter
 
 
 class NmkParser:
@@ -62,8 +62,8 @@ class NmkParser:
 
         # Config
         cg = self.parser.add_argument_group("config options")
-        cg.add_argument("--config", metavar="JSON", help="contribute to config from json fragment")
-        cg.add_argument("--print", metavar="K", action="append", help="print required config item(s) and exit")
+        cg.add_argument("--config", metavar="JSON|K=V", action="append", help="contribute or override config item(s)").completer = ConfigCompleter(False)
+        cg.add_argument("--print", metavar="K", action="append", help="print required config item(s) and exit").completer = ConfigCompleter()
 
         # Build
         bg = self.parser.add_argument_group("build options")

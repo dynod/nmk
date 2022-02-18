@@ -1,9 +1,11 @@
 import json
 import os
+import re
 import shutil
 import sys
 from argparse import Namespace
 from pathlib import Path
+from typing import List
 
 from nmk.errors import NmkNoLogsError
 from nmk.logs import NmkLogger, logging_setup
@@ -11,6 +13,9 @@ from nmk.model.config import NmkStaticConfig
 from nmk.model.files import NmkModelFile
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
+
+# Config pattern
+CONFIG_STRING_PATTERN = re.compile("^([^ =]+)=(.*)$")
 
 
 class NmkLoader:
@@ -25,8 +30,10 @@ class NmkLoader:
         # Load model
         self.load_model_from_files()
 
-        # Override config from args
-        self.override_config()
+        # Override config from args, if any
+        config_list = self.model.args.config
+        if config_list is not None and len(config_list):
+            self.override_config(config_list)
 
         # Validate tasks after full loading process
         self.validate_tasks()
@@ -52,19 +59,30 @@ class NmkLoader:
         NmkLogger.debug(f"Updating {NmkRootConfig.PROJECT_FILES} now that all files are loaded")
         self.model.config[NmkRootConfig.PROJECT_FILES] = NmkStaticConfig(NmkRootConfig.PROJECT_FILES, self.model, None, list(self.model.files.keys()))
 
-    def override_config(self):
-        # Load json fragment from config arg, if any
-        try:
-            override_config = json.loads(self.model.args.config) if self.model.args.config is not None else {}
-        except Exception as e:
-            raise Exception(f"Invalid Json fragment for --config option: {e}")
-        assert isinstance(override_config, dict), "Json fragment for --config option must be an object"
+    def override_config(self, config_list: List[str]):
+        # Iterate on config
+        for config_str in config_list:
+            override_config = {}
 
-        # Override model config with command-line values
-        if len(override_config):
-            NmkLogger.debug("Overriding config from --config option")
-            for k, v in override_config.items():
-                self.model.add_config(k, None, v)
+            # Json fragment?
+            if config_str[0] == "{":
+                # Load json fragment from config arg, if any
+                try:
+                    override_config = json.loads(config_str)
+                except Exception as e:
+                    raise Exception(f"Invalid Json fragment for --config option: {e}")
+
+            # Single config string?
+            else:
+                m = CONFIG_STRING_PATTERN.match(config_str)
+                assert m is not None, f"Config option is neither a json object nor a K=V string: {config_str}"
+                override_config = {m.group(1): m.group(2)}
+
+            # Override model config with command-line values
+            if len(override_config):
+                NmkLogger.debug(f"Overriding config from --config option ({config_str})")
+                for k, v in override_config.items():
+                    self.model.add_config(k, None, v)
 
     def finish_parsing(self, args: Namespace, with_logs: bool):
         # Handle root folder

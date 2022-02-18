@@ -1,5 +1,7 @@
 import os
 
+from nmk.completion import ConfigCompleter
+from nmk.parser import NmkParser
 from tests.utils import NmkTester
 
 
@@ -33,7 +35,7 @@ class TestConfig(NmkTester):
         self.nmk("simplest.yml", extra_args=["--config", '{"foo:'], expected_error="Invalid Json fragment for --config option: ")
 
     def test_config_invalid_json(self):
-        self.nmk("simplest.yml", extra_args=["--config", '["foo"]'], expected_error="Json fragment for --config option must be an object")
+        self.nmk("simplest.yml", extra_args=["--config", '["foo"]'], expected_error='Config option is neither a json object nor a K=V string: ["foo"]')
 
     def test_config_override(self):
         self.nmk(
@@ -51,10 +53,14 @@ class TestConfig(NmkTester):
                 "someDict",
                 "--config",
                 '{"someInt":65}',
+                "--config",
+                str({}),
+                "--config",
+                "someString=foo",
             ],
         )
         self.check_logs(
-            'Config dump: { "someString": "abcd", "someInt": 65, "someBool": false, "someList": [ "abc", "def" ], "someDict": { "adc": "def", "ghi": "jkl" } }'
+            'Config dump: { "someString": "foo", "someInt": 65, "someBool": false, "someList": [ "abc", "def" ], "someDict": { "adc": "def", "ghi": "jkl" } }'
         )
 
     def test_config_override_bad_type(self):
@@ -168,3 +174,18 @@ class TestConfig(NmkTester):
     def test_config_dot_ok(self):
         self.nmk("config_dot_ok.yml", extra_args=["--print", "tryDotRef"])
         self.check_logs(f'Config dump: {{ "tryDotRef": "_{os.environ["HOME"]}_" }}')
+
+    def test_config_completion(self):
+        # With final ones
+        configs = ConfigCompleter()(
+            "", None, None, NmkParser().parse(["--root", self.test_folder.as_posix(), "-p", self.template("config_sample.yml").as_posix()])
+        )
+        assert len(configs) == 5 + 7  # 5 provided one + 7 built-ins
+        assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict"])
+
+        # Without final ones
+        configs = ConfigCompleter(False)(
+            "", None, None, NmkParser().parse(["--root", self.test_folder.as_posix(), "-p", self.template("config_sample.yml").as_posix()])
+        )
+        assert len(configs) == 5 + 1  # 5 provided one + 1 non-final built-in
+        assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict"])

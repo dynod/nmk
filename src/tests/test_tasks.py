@@ -34,4 +34,5 @@ class TestTasks(NmkTester):
         tasks = TasksCompleter()(
             "", None, None, NmkParser().parse(["--root", self.test_folder.as_posix(), "-p", self.template("task_contributing_dep.yml").as_posix()])
         )
+        assert len(tasks) == 3
         assert all(t in tasks for t in ["someTask", "contribB", "contribA"])

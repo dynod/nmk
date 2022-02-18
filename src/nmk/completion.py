@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from argparse import Action, ArgumentParser, Namespace
 from typing import List
 
+from nmk.model.config import FINAL_ITEM_PATTERN
 from nmk.model.loader import NmkLoader
 from nmk.model.model import NmkModel
 
@@ -27,3 +28,12 @@ class TasksCompleter(ModelCompleter):
     def complete(self, model: NmkModel) -> List[str]:
         # Complete with known model tasks
         return model.tasks.keys()
+
+
+class ConfigCompleter(ModelCompleter):
+    def __init__(self, with_finals: bool = True):
+        self.with_finals = with_finals
+
+    def complete(self, model: NmkModel) -> List[str]:
+        # Complete with known config items (with or without final ones)
+        return list(filter(lambda c: self.with_finals or FINAL_ITEM_PATTERN.match(c) is None, model.config.keys()))
