@@ -68,6 +68,7 @@ class NmkParser:
         # Build
         bg = self.parser.add_argument_group("build options")
         bg.add_argument("--dry-run", action="store_true", default=False, help="list tasks to be executed and exit")
+        bg.add_argument("--force", "-f", action="store_true", default=False, help="force tasks rebuild")
 
         # Handle completion
         argcomplete.autocomplete(self.parser)

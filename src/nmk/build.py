@@ -134,6 +134,11 @@ class NmkBuild:
         missing_inputs = list(filter(lambda p: not p.is_file(), task.inputs))
         assert len(missing_inputs) == 0, f"Task {task.name} miss following inputs:\n" + "\n".join(map(lambda p: f" - {p}", missing_inputs))
 
+        # Force build?
+        if self.model.args.force:
+            build_logger.debug("Force build, don't check inputs vs outputs")
+            return True
+
         # Add all project files to existing inputs
         all_inputs = set(task.inputs + self.model.config[NmkRootConfig.PROJECT_FILES].value)
 

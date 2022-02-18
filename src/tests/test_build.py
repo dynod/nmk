@@ -24,11 +24,11 @@ class TestBuild(NmkTester):
     def test_no_inputs(self):
         output = self.test_folder / "someOutput.txt"
         assert not output.is_file()
-        self.nmk("build_no_inputs.yml", extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
+        self.nmk("build_no_inputs.yml", extra_args=["--config", f"test_folder={self.test_folder}"])
         self.check_logs(f"Ready to write some input to {output}")
         assert output.is_file()
 
-        self.nmk("build_no_inputs.yml", extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
+        self.nmk("build_no_inputs.yml", extra_args=["--config", f"test_folder={self.test_folder}"])
         self.check_logs(f"{output} already exists")
 
     def test_lazy_rebuild(self):
@@ -37,22 +37,27 @@ class TestBuild(NmkTester):
 
         # Missing input
         project_file = self.prepare_project("build_copy.yml")
-        self.nmk(project_file, extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'], expected_error="Task sampleBuild miss following inputs:")
+        self.nmk(project_file, extra_args=["--config", f"test_folder={self.test_folder}"], expected_error="Task sampleBuild miss following inputs:")
 
         # Build 1: input > output --> build
         test_input.touch()
-        self.nmk(project_file, extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
+        self.nmk(project_file, extra_args=["--config", f"test_folder={self.test_folder}"])
         self.check_logs(f"Copying {test_input} to {test_output}")
         assert test_output.is_file()
 
         # Build 2: output > input --> skip
-        self.nmk(project_file, extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
+        self.nmk(project_file, extra_args=["--config", f"test_folder={self.test_folder}"])
         self.check_logs("Task skipped, nothing to do")
 
         # Build 3: project file updated --> build
         project_file.touch()
-        self.nmk(project_file, extra_args=["--config", f'{{"test_folder": "{self.test_folder}"}}'])
+        self.nmk(project_file, extra_args=["--config", f"test_folder={self.test_folder}"])
         self.check_logs(f"(Re)Build task: input ({project_file} - ")
+
+        # Build 4: force build
+        project_file.touch()
+        self.nmk(project_file, extra_args=["--config", f"test_folder={self.test_folder}", "--force"])
+        self.check_logs("Force build, don't check inputs vs outputs")
 
     def test_failling_build(self):
         self.nmk("build_error.yml", expected_error="An error occurred during task sampleBuild build: Some error happened!")
