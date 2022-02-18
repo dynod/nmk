@@ -1,7 +1,9 @@
+import json
 import logging
 from datetime import datetime
 from typing import List
 
+from nmk.errors import NmkStopHereError
 from nmk.logs import NmkLogger, NmkLogWrapper
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
@@ -45,7 +47,37 @@ class NmkBuild:
         if task not in self.ordered_tasks:
             self.ordered_tasks.append(task)
 
+    def print_config(self, print_list: List[str]):
+        # Print config is required
+        for k in print_list:
+            assert k in self.model.config, f"Unknown config item key: {k}"
+
+        def prepare_for_json(v):
+            if isinstance(v, list):
+                return list(map(prepare_for_json, v))
+            if isinstance(v, dict):
+                return {k: prepare_for_json(v) for k, v in v.items()}
+            return v if type(v) in [int, str, bool] else str(v)
+
+        dump_dict = json.dumps({k: prepare_for_json(c.value) for k, c in filter(lambda t: t[0] in print_list, self.model.config.items())}, indent=-1).replace(
+            "\n", " "
+        )
+        if self.model.args.log_level >= logging.WARNING:
+            # Quiet mode
+            print(dump_dict)
+        else:
+            # Normal mode
+            NmkLogger.info("newspaper", f"Config dump: {dump_dict}")
+
+        # Stop here
+        raise NmkStopHereError()
+
     def build(self) -> bool:
+        # Print if necessary
+        print_list = self.model.args.print
+        if print_list is not None and len(print_list):
+            self.print_config(print_list)
+
         # Something to build?
         if len(self.ordered_tasks):
             # Do the build

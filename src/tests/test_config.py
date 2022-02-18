@@ -30,10 +30,10 @@ class TestConfig(NmkTester):
         )
 
     def test_config_invalid_fragment(self):
-        self.nmk("unknown.yml", extra_args=["--config", '{"foo:'], expected_error="Invalid Json fragment for --config option: ")
+        self.nmk("simplest.yml", extra_args=["--config", '{"foo:'], expected_error="Invalid Json fragment for --config option: ")
 
     def test_config_invalid_json(self):
-        self.nmk("unknown.yml", extra_args=["--config", '["foo"]'], expected_error="Json fragment for --config option must be an object")
+        self.nmk("simplest.yml", extra_args=["--config", '["foo"]'], expected_error="Json fragment for --config option must be an object")
 
     def test_config_override(self):
         self.nmk(

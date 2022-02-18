@@ -1,11 +1,12 @@
 import json
-import logging
 import os
+import shutil
+import sys
 from argparse import Namespace
 from pathlib import Path
 
-from nmk.errors import NmkStopHereError
-from nmk.logs import NmkLogger
+from nmk.errors import NmkNoLogsError
+from nmk.logs import NmkLogger, logging_setup
 from nmk.model.config import NmkStaticConfig
 from nmk.model.files import NmkModelFile
 from nmk.model.keys import NmkRootConfig
@@ -13,13 +14,26 @@ from nmk.model.model import NmkModel
 
 
 class NmkLoader:
-    def __init__(self, args: Namespace):
+    def __init__(self, args: Namespace, with_logs: bool = True):
+        # Finish args parsing
+        self.finish_parsing(args, with_logs)
+
         # Prepare repo cache and empty model
         self.repo_cache: Path = args.nmk_dir / "cache"
         self.model = NmkModel(args)
 
+        # Load model
+        self.load_model_from_files()
+
+        # Override config from args
+        self.override_config()
+
+        # Validate tasks after full loading process
+        self.validate_tasks()
+
+    def load_model_from_files(self):
         # Add built-in config items
-        root = args.root.resolve()
+        root = self.model.args.root.resolve()
         for name, value in {
             NmkRootConfig.PYTHON_PATH: [],
             NmkRootConfig.BASE_DIR: "",  # Useless while directly referenced (must identify current project file parent dir)
@@ -31,19 +45,20 @@ class NmkLoader:
         }.items():
             self.model.add_config(name, None, value)
 
-        # Load json fragment from config arg, if any
-        try:
-            override_config = json.loads(args.config) if args.config is not None else {}
-        except Exception as e:
-            raise Exception(f"Invalid Json fragment for --config option: {e}")
-        assert isinstance(override_config, dict), "Json fragment for --config option must be an object"
-
         # Init recursive files loading loop
-        NmkModelFile(args.project, self.repo_cache, self.model, [])
+        NmkModelFile(self.model.args.project, self.repo_cache, self.model, [])
 
         # Refresh project files list
         NmkLogger.debug(f"Updating {NmkRootConfig.PROJECT_FILES} now that all files are loaded")
         self.model.config[NmkRootConfig.PROJECT_FILES] = NmkStaticConfig(NmkRootConfig.PROJECT_FILES, self.model, None, list(self.model.files.keys()))
+
+    def override_config(self):
+        # Load json fragment from config arg, if any
+        try:
+            override_config = json.loads(self.model.args.config) if self.model.args.config is not None else {}
+        except Exception as e:
+            raise Exception(f"Invalid Json fragment for --config option: {e}")
+        assert isinstance(override_config, dict), "Json fragment for --config option must be an object"
 
         # Override model config with command-line values
         if len(override_config):
@@ -51,33 +66,26 @@ class NmkLoader:
             for k, v in override_config.items():
                 self.model.add_config(k, None, v)
 
-        # Validate tasks after full loading process
-        self.validate_tasks()
+    def finish_parsing(self, args: Namespace, with_logs: bool):
+        # Handle root folder
+        if args.root is None:  # pragma: no cover
+            # By default, root dir is the parent folder of currently running venv
+            if sys.prefix == sys.base_prefix:
+                raise NmkNoLogsError("nmk must run from a virtual env; can't find root dir")
+            args.root = Path(sys.prefix).parent
+        else:
+            # Verify custom root
+            if not args.root.is_dir():
+                raise NmkNoLogsError(f"specified root directory not found: {args.root}")
 
-        # Print config is required
-        if args.print is not None and len(args.print):
-            for k in args.print:
-                assert k in self.model.config, f"Unknown config item key: {k}"
+        # Handle cache clear
+        args.nmk_dir = args.root / ".nmk"
+        if args.no_cache and args.nmk_dir.is_dir():
+            shutil.rmtree(args.nmk_dir)
 
-            def prepare_for_json(v):
-                if isinstance(v, list):
-                    return list(map(prepare_for_json, v))
-                if isinstance(v, dict):
-                    return {k: prepare_for_json(v) for k, v in v.items()}
-                return v if type(v) in [int, str, bool] else str(v)
-
-            dump_dict = json.dumps(
-                {k: prepare_for_json(c.value) for k, c in filter(lambda t: t[0] in args.print, self.model.config.items())}, indent=-1
-            ).replace("\n", " ")
-            if args.log_level >= logging.WARNING:
-                # Quiet mode
-                print(dump_dict)
-            else:
-                # Normal mode
-                NmkLogger.info("newspaper", f"Config dump: {dump_dict}")
-
-            # Stop here
-            raise NmkStopHereError()
+        # Setup logging
+        if with_logs:
+            logging_setup(args)
 
     def validate_tasks(self):
         # Iterate on tasks

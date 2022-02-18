@@ -1,6 +1,4 @@
 import logging
-import shutil
-import sys
 from argparse import ZERO_OR_MORE, ArgumentParser, Namespace
 from pathlib import Path
 from typing import List
@@ -8,8 +6,7 @@ from typing import List
 import argcomplete
 
 from nmk import __version__
-from nmk.errors import NmkNoLogsError
-from nmk.logs import logging_setup
+from nmk.completion import TasksCompleter
 
 
 class NmkParser:
@@ -21,7 +18,7 @@ class NmkParser:
         self.parser.add_argument("-V", "--version", action="version", version=f"nmk version {__version__}")
 
         # Tasks
-        self.parser.add_argument("tasks", metavar="task", default=[], nargs=ZERO_OR_MORE, help="build task to execute")
+        self.parser.add_argument("tasks", metavar="task", default=[], nargs=ZERO_OR_MORE, help="build task to execute").completer = TasksCompleter()
 
         # Logging
         lg = self.parser.add_argument_group("logging options")
@@ -77,25 +74,4 @@ class NmkParser:
 
     def parse(self, argv: List[str]) -> Namespace:
         # Parse arguments
-        args = self.parser.parse_args(argv)
-
-        # Handle root folder
-        if args.root is None:  # pragma: no cover
-            # By default, root dir is the parent folder of currently running venv
-            if sys.prefix == sys.base_prefix:
-                raise NmkNoLogsError("nmk must run from a virtual env; can't find root dir")
-            args.root = Path(sys.prefix).parent
-        else:
-            # Verify custom root
-            if not args.root.is_dir():
-                raise NmkNoLogsError(f"specified root directory not found: {args.root}")
-
-        # Handle cache clear
-        args.nmk_dir = args.root / ".nmk"
-        if args.no_cache and args.nmk_dir.is_dir():
-            shutil.rmtree(args.nmk_dir)
-
-        # Setup logging
-        logging_setup(args)
-
-        return args
+        return self.parser.parse_args(argv)
