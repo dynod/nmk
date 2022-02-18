@@ -25,3 +25,4 @@ pyyaml
 jsonschema
 rich
 requests
+Jinja2

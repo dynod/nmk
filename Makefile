@@ -4,7 +4,7 @@ SHELL := /bin/bash
 # Some defs
 REQS := requirements.txt
 VENV := venv
-IN_VENV := source $(VENV)/bin/activate &&
+IN_VENV := source loadme.sh &&
 SRC := src
 OUT := out
 FLAKE_REPORT := $(OUT)/flake-report/index.html
@@ -26,8 +26,6 @@ clean:
 
 # Venv build
 $(VENV): $(REQS)
-	python3 -m venv $(VENV)
-	$(IN_VENV) pip install pip --upgrade
 	$(IN_VENV) pip install -r $(REQS)
 	touch venv
 

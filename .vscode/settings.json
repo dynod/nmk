@@ -62,7 +62,8 @@
         "strftime",
         "sysdeps",
         "toxml",
-        "venv"
+        "venv",
+        "loadme"
     ],
     "cSpell.enableFiletypes": [
         "makefile",

@@ -23,3 +23,7 @@ class TestTasks(NmkTester):
 
     def test_cyclic_dep(self):
         self.nmk("task_cyclic_dep.yml", expected_error="Cyclic dependency: taskA referenced from tasks taskA -> taskB -> taskC")
+
+    def test_inputs_list(self):
+        self.nmk("task_inputs_list.yml")
+        self.check_logs("Inputs count: 1")

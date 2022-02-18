@@ -1,0 +1,10 @@
+tasks:
+    countInputs:
+        default: True
+        description: Just count inputs
+        emoji: hammer
+        input:
+            # Reference project files list twice, to make sure list of list are resolved, without duplicates
+            - ${PROJECTFILES}
+            - ${PROJECTFILES}
+        builder: tests.sample_tasks.CountInputsBuilder

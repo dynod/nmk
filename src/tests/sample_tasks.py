@@ -32,3 +32,9 @@ class ParamBuilder(NmkTaskBuilder):
     def build(self, foo: str, bar: int, ref: str):
         # Log param values
         self.logger.debug(f"foo:{foo} bar:{bar} ref:{ref}")
+
+
+class CountInputsBuilder(NmkTaskBuilder):
+    def build(self):
+        # Count inputs!
+        self.logger.warning(f"Inputs count: {len(self.task.inputs)}")

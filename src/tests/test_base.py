@@ -21,8 +21,23 @@ class TestBasePlugin(NmkTester):
 
     def test_build(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run"])
-        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "2 built tasks"])
+        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "3 built tasks"])
 
     def test_test(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run", "tests"])
-        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "3 built tasks"])
+        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "4 built tasks"])
+
+    def test_loadme(self):
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["loadme"])
+
+        # Check generated Linux loadme
+        loadme = self.test_folder / "loadme.sh"
+        assert loadme.is_file()
+        with loadme.open() as f:
+            assert "python3 -m venv venv" in f.read()
+
+        # Check generated Windows loadme
+        loadme = self.test_folder / "loadme.bat"
+        assert loadme.is_file()
+        with loadme.open() as f:
+            assert "python -m venv venv" in f.read()

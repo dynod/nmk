@@ -47,6 +47,11 @@ class NmkConfig(ABC):
         resolved_from = set(resolved_from) if resolved_from is not None else set()
         resolved_from.add(self.name)
 
+        # Map dicts and lists
+        if isinstance(candidate, list):
+            return list(map(lambda c: self._format(cache, c, resolved_from, path), candidate))
+        if isinstance(candidate, dict):
+            return {k: self._format(cache, v, resolved_from, path) for k, v in candidate.items()}
         if not isinstance(candidate, str):
             # Nothing to format
             return candidate
@@ -90,6 +95,9 @@ class NmkConfig(ABC):
 
                 # Replace with resolved value
                 begin, end = m.span(0)
+                if m.group(0) == to_format and not isinstance(ref_value, str):
+                    # Stop here, with raw non-string value
+                    return ref_value
                 to_format = to_format[0:begin] + str(ref_value) + to_format[end:]
         return to_format
 
