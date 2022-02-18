@@ -244,12 +244,12 @@ class NmkModelFile:
                     self.load_property(candidate, NmkModelK.SILENT, False),
                     self.load_property(candidate, NmkModelK.EMOJI, mapper=self.load_emoji),
                     self.load_property(candidate, NmkModelK.BUILDER, mapper=lambda cls: model.load_class(cls, NmkTaskBuilder)),
-                    self.load_property(candidate, NmkModelK.PARAMS, {}, mapper=lambda v: self.load_param_dict(v, name, model)),
+                    self.load_property(candidate, NmkModelK.PARAMS, mapper=lambda v: self.load_param_dict(v, name, model)),
                     self.load_property(candidate, NmkModelK.DEPS, [], mapper=lambda dp: [i for n, i in enumerate(dp) if i not in dp[:n]]),  # Remove duplicates
                     self.load_property(candidate, NmkModelK.APPEND_TO),
                     self.load_property(candidate, NmkModelK.PREPEND_TO),
-                    self.load_property(candidate, NmkModelK.INPUT, [], mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.INPUT, model)),
-                    self.load_property(candidate, NmkModelK.OUTPUT, [], mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.OUTPUT, model)),
+                    self.load_property(candidate, NmkModelK.INPUT, mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.INPUT, model)),
+                    self.load_property(candidate, NmkModelK.OUTPUT, mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.OUTPUT, model)),
                     model,
                 ),
             )

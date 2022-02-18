@@ -74,7 +74,10 @@ class NmkTask:
                         if new_p not in paths:
                             paths.append(new_p)
 
-            traverse_paths(getattr(self, field + "_cfg").value)
+            # Handle configs, if set...
+            path_config = getattr(self, field + "_cfg")
+            if path_config is not None:
+                traverse_paths(path_config.value)
             setattr(self, field, paths)
         return getattr(self, field)
 

@@ -112,8 +112,9 @@ class NmkBuild:
             # Prepare logger
             task.builder.update_logger(build_logger)
 
-            # Invoke builder with provided params
-            task.builder.build(**task.params.value)
+            # Invoke builder with provided params (if any)
+            params = task.params.value if task.params is not None else {}
+            task.builder.build(**params)
         except Exception as e:
             raise Exception(f"An error occurred during task {task.name} build: {e}").with_traceback(e.__traceback__)
 
