@@ -6,7 +6,7 @@ from nmk.model.builder import NmkTaskBuilder
 class SampleBuilder(NmkTaskBuilder):
     def build(self):
         assert len(self.task.outputs) > 0
-        my_output = self.task.outputs[0]
+        my_output = self.main_output
         if not my_output.is_file():
             self.logger.debug(f"Ready to write some input to {my_output}")
             with my_output.open("w") as f:
@@ -17,8 +17,8 @@ class SampleBuilder(NmkTaskBuilder):
 
 class CopyBuilder(NmkTaskBuilder):
     def build(self):
-        f_input = self.task.inputs[0]
-        f_output = self.task.outputs[0]
+        f_input = self.main_input
+        f_output = self.main_output
         self.logger.debug(f"Copying {f_input} to {f_output}")
         shutil.copyfile(f_input, f_output)
 
@@ -37,4 +37,4 @@ class ParamBuilder(NmkTaskBuilder):
 class CountInputsBuilder(NmkTaskBuilder):
     def build(self):
         # Count inputs!
-        self.logger.warning(f"Inputs count: {len(self.task.inputs)}")
+        self.logger.warning(f"Inputs count: {len(self.inputs)}")

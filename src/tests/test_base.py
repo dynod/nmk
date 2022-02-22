@@ -22,11 +22,11 @@ class TestBasePlugin(NmkTester):
 
     def test_build(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run"])
-        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "3 built tasks"])
+        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "4 built tasks"])
 
     def test_test(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run", "tests"])
-        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "4 built tasks"])
+        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "5 built tasks"])
 
     def test_loadme(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["loadme"])
@@ -54,3 +54,17 @@ class TestBasePlugin(NmkTester):
     def test_tasks(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["tasks"])
         self.check_logs(" 👉 tasks: List all available tasks")
+
+    def test_git_version_config(self):
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--print", "gitVersion"])
+        self.check_logs(f'Config dump: {{ "gitVersion": "{__version__[:5]}')
+
+    def test_git_version_stamp(self):
+        # Try 1: git version is persisted
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["gitVersion"])
+        self.check_logs("Refresh git version")
+        assert (self.test_folder / "out" / ".gitversion").is_file()
+
+        # Try 2: shouldn't be persisted
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["gitVersion"])
+        self.check_logs("Persisted git version already up to date")

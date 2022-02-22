@@ -5,6 +5,7 @@ REM
 
 REM Check system dependencies
 set MISSING_DEPS=0
+call :checkSysDeps git https://git-scm.com/downloads
 call :checkSysDeps python https://www.python.org/downloads/
 
 
