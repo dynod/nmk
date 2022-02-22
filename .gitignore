@@ -6,3 +6,4 @@ setup.cfg
 *.pyc
 __pycache__
 .nmk/
+.pytest_cache/

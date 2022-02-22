@@ -1,4 +1,6 @@
 # Tests for base plugin
+import subprocess
+
 from nmk import __version__
 from tests.utils import NmkTester
 
@@ -68,3 +70,9 @@ class TestBasePlugin(NmkTester):
         # Try 2: shouldn't be persisted
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["gitVersion"])
         self.check_logs("Persisted git version already up to date")
+
+    def test_deepclean(self, monkeypatch):
+        # Stub to avoid real git clean command executed
+        monkeypatch.setattr(subprocess, "run", lambda args, cwd, check: None)
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["deepclean"])
+        self.check_logs("Clean all git ignored files")

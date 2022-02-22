@@ -116,7 +116,7 @@ class NmkBuild:
             params = task.params.value if task.params is not None else {}
             task.builder.build(**params)
         except Exception as e:
-            raise Exception(f"An error occurred during task {task.name} build: {e}").with_traceback(e.__traceback__)
+            raise e if isinstance(e, NmkStopHereError) else Exception(f"An error occurred during task {task.name} build: {e}").with_traceback(e.__traceback__)
 
     def needs_build(self, task: NmkTask, build_logger: NmkLogWrapper):
         # Check if task needs to be built
