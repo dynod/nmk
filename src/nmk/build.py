@@ -145,7 +145,7 @@ class NmkBuild:
 
         # Check modification times
         in_updates = {p.stat().st_mtime: p for p in all_inputs}
-        out_updates = {p.stat().st_mtime if p.is_file() else 0: p for p in task.outputs}
+        out_updates = {p.stat().st_mtime if p.exists() else 0: p for p in task.outputs}
         input_max = max(in_updates.keys())
         output_max = min(out_updates.keys())
         if input_max > output_max:

@@ -61,7 +61,10 @@ if test ! -d venv; then
     source venv/bin/activate
     
     # Bootstrap it
-    pip install pip wheel argcomplete --upgrade
+    pip install pip wheel --upgrade 
+
+    # Install requirements
+    pip install -r requirements.txt 
 
     # Patch it for nmk completion
     echo ' ' >> venv/bin/activate

@@ -28,7 +28,10 @@ if exist venv\ (
     venv\Scripts\Activate.bat
     
     REM Bootstrap it
-    python -m pip install pip wheel --upgrade
+    python -m pip install pip wheel --upgrade 
+
+    REM Install requirements
+    python -m pip install -r requirements.txt 
 )
 
 REM End of main
