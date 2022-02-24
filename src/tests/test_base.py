@@ -61,6 +61,19 @@ class TestBasePlugin(NmkTester):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--print", "gitVersion"])
         self.check_logs(f'Config dump: {{ "gitVersion": "{__version__[:5]}')
 
+    def test_git_version_config_no_tag(self, monkeypatch):
+        # Fake git subprocess behavior, to make "git describe --tags" failing
+        real_run = subprocess.run
+        monkeypatch.setattr(
+            subprocess,
+            "run",
+            lambda all_args, check, capture_output, text, encoding, cwd: subprocess.CompletedProcess(all_args, 1, "", "")
+            if all_args[:3] == ["git", "describe", "--tags"]
+            else real_run(all_args, check=check, capture_output=capture_output, text=text, encoding=encoding, cwd=cwd),
+        )
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--print", "gitVersion"])
+        self.check_logs(f'Config dump: {{ "gitVersion": "{__version__[:5]}')
+
     def test_git_version_stamp(self):
         # Try 1: git version is persisted
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.version"])
@@ -103,7 +116,7 @@ class TestBasePlugin(NmkTester):
         monkeypatch.setattr(
             subprocess,
             "run",
-            lambda all_args, check, capture_output, text, encoding: subprocess.CompletedProcess(all_args, 0, "Fake packages list\nsomePackage  1.2.3", ""),
+            lambda all_args, check, capture_output, text, encoding, cwd: subprocess.CompletedProcess(all_args, 0, "Fake packages list\nsomePackage  1.2.3", ""),
         )
 
         # Test a simple venv update
