@@ -62,10 +62,15 @@ if test ! -d venv; then
     source venv/bin/activate
     
     # Bootstrap it
-    pip install pip wheel --upgrade 
+    pip install pip wheel --upgrade
 
-    # Install requirements
-    pip install -r requirements.txt 
+    # Install requirements (if present)
+    if test -f "requirements.txt"; then
+        pip install -r requirements.txt 
+    else
+        # Default: only install nmk
+        pip install nmk
+    fi
 
     # Patch it for nmk completion
     echo ' ' >> venv/bin/activate
