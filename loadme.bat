@@ -28,10 +28,15 @@ if exist venv\ (
     venv\Scripts\Activate.bat
     
     REM Bootstrap it
-    python -m pip install pip wheel --upgrade 
+    python -m pip install pip wheel --upgrade
 
-    REM Install requirements
-    python -m pip install -r requirements.txt 
+    REM Install requirements (if present)
+    if exist requirements.txt (
+        python -m pip install -r requirements.txt 
+    ) else (
+        REM Default: only install nmk
+        python -m pip install nmk
+    )
 )
 
 REM End of main
