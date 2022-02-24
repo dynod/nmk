@@ -6,3 +6,8 @@ config:
     # Nmk dependencies for venv
     venvFileDeps:
         - ${PROJECTDIR}/nmk-requirements.txt
+
+    # For now, use make on Linux for CI
+    loadMeSysDeps:
+        make:
+            apt: make

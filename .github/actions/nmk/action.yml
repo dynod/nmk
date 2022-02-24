@@ -1,0 +1,11 @@
+name: nmk action
+description: Invoke nmk in Docker container
+inputs:
+    task:
+        description: nmk task to be executed
+        default: build
+runs:
+    using: docker
+    image: Dockerfile
+    args:
+      - ${{ inputs.task }}

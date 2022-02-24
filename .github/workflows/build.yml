@@ -1,0 +1,47 @@
+# Build workflow
+name: Build
+on: push
+jobs:
+    build_job:
+        name: Build Job
+        runs-on: ubuntu-latest
+        steps:
+            # Checkout, with all submodules
+            - name: Checkout
+              uses: actions/checkout@v2.4.0
+              with:
+                  fetch-depth: 0
+                  submodules: recursive
+
+            # Trigger build and tests
+            - name: Build and tests
+              id: build_n_tests
+              uses: ./.github/actions/nmk
+              with:
+                  task: tests
+              continue-on-error: true
+
+            # Archive outputs (depending on build step)
+            - name: Archive the whole output (on failure)
+              if: steps.build_n_tests.outcome == 'failure'
+              uses: actions/upload-artifact@v2.3.0
+              with:
+                  name: Outputs
+                  path: out/
+            - name: Archive artifacts (on success)
+              if: steps.build_n_tests.outcome == 'success'
+              uses: actions/upload-artifact@v2.3.0
+              with:
+                  name: Outputs
+                  path: |
+                    out/
+                    !out/tests/
+
+            # Publish to Pypi (only on tags push)
+            - name: Publish package
+              if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && steps.build_n_tests.outcome == 'success'
+              uses: pypa/gh-action-pypi-publish@v1.5.0
+              with:
+                  user: __token__
+                  password: ${{ secrets.pypi_password }}
+                  packages_dir: out/artifacts
