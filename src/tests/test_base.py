@@ -72,7 +72,7 @@ class TestBasePlugin(NmkTester):
             else real_run(all_args, check=check, capture_output=capture_output, text=text, encoding=encoding, cwd=cwd),
         )
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--print", "gitVersion"])
-        self.check_logs(f'Config dump: {{ "gitVersion": "{__version__[:5]}')
+        self.check_logs('Config dump: { "gitVersion": "0.0.0-')
 
     def test_git_version_stamp(self):
         # Try 1: git version is persisted
