@@ -24,11 +24,11 @@ class TestBasePlugin(NmkTester):
 
     def test_build(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run"])
-        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "4 built tasks"])
+        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "7 built tasks"])
 
     def test_test(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run", "tests"])
-        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "5 built tasks"])
+        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "8 built tasks"])
 
     def test_loadme(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["loadme"])
@@ -63,16 +63,55 @@ class TestBasePlugin(NmkTester):
 
     def test_git_version_stamp(self):
         # Try 1: git version is persisted
-        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["gitVersion"])
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.version"])
         self.check_logs("Refresh git version")
         assert (self.test_folder / "out" / ".gitversion").is_file()
 
         # Try 2: shouldn't be persisted
-        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["gitVersion"])
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.version"])
         self.check_logs("Persisted git version already up to date")
 
-    def test_deepclean(self, monkeypatch):
+    def test_git_clean(self, monkeypatch):
         # Stub to avoid real git clean command executed
         monkeypatch.setattr(subprocess, "run", lambda args, cwd, check: None)
-        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["deepclean"])
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.clean"])
         self.check_logs("Clean all git ignored files")
+
+    def test_venv_merged_requirements(self):
+        # Prepare some fake files
+        fake_req = self.test_folder / "somereq.txt"
+        fake_arc = self.test_folder / "somearchive.tar.gz"
+        with fake_req.open("w") as f:
+            f.write("SomeFakePackage")
+        fake_arc.touch()
+
+        # Build a merged requirements file
+        self.nmk(
+            self.prepare_project("base/ref_base.yml"),
+            extra_args=["py.req", "--config", '{"venvFileDeps":["${PROJECTDIR}/somereq.txt"],"venvArchiveDeps":["${PROJECTDIR}/somearchive.tar.gz"]}'],
+        )
+
+        # Verify generated file
+        with (self.test_folder / "requirements.txt").open() as f:
+            content = f.read()
+            assert "Jinja2" in content
+            assert "SomeFakePackage" in content
+            assert "somearchive.tar.gz" in content
+
+    def test_venv_simple_update(self, monkeypatch):
+        # Fake pip subprocess behavior
+        monkeypatch.setattr(
+            subprocess,
+            "run",
+            lambda all_args, check, capture_output, text, encoding: subprocess.CompletedProcess(all_args, 0, "Fake packages list\nsomePackage  1.2.3", ""),
+        )
+
+        # Test a simple venv update
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["py.venv"])
+
+        # Verify output files
+        assert (self.test_folder / "venv").exists()
+        output_req = self.test_folder / "out" / "requirements.txt"
+        assert output_req.exists()
+        with output_req.open() as f:
+            assert "somePackage==1.2.3" in f.read()

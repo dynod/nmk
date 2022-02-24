@@ -1,3 +1,8 @@
 refs:
     # Base plugin
     - plugins/base/plugin.yml
+
+config:
+    # Nmk dependencies for venv
+    venvFileDeps:
+        - ${PROJECTDIR}/nmk-requirements.txt
