@@ -28,8 +28,13 @@ jobs:
               with:
                   name: Outputs
                   path: out/
+            - name: Build Failed!
+              if: steps.build_n_tests.outcome == 'failure'
+              uses: actions/github-script@v3
+              with:
+                script: |
+                    core.setFailed('Previous step failed')
             - name: Archive artifacts (on success)
-              if: steps.build_n_tests.outcome == 'success'
               uses: actions/upload-artifact@v2.3.0
               with:
                   name: Outputs
@@ -39,7 +44,7 @@ jobs:
 
             # Publish to Pypi (only on tags push)
             - name: Publish package
-              if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && steps.build_n_tests.outcome == 'success'
+              if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
               uses: pypa/gh-action-pypi-publish@v1.5.0
               with:
                   user: __token__
