@@ -121,16 +121,20 @@ class NmkModelFile:
                 project_ref, str(e) + (("\n" + "\n".join(map(lambda r: f" --> referenced from {r}", refs))) if len(refs) else "")
             ).with_traceback(e.__traceback__)
 
-    def resolve_project(self, project_ref: str) -> Path:
-        # Look at first segment
+    def is_url(self, project_ref: str) -> bool:
+        # Is this ref a known URL?
         project_path = Path(project_ref)
         scheme_candidate = project_path.parts[0]
-        if not project_path.is_absolute() and scheme_candidate in URL_SCHEMES:
+        return not project_path.is_absolute() and scheme_candidate in URL_SCHEMES
+
+    def resolve_project(self, project_ref: str) -> Path:
+        # URL?
+        if self.is_url(project_ref):
             # Cache-able reference
             return cache_remote(self.repo_cache, self.convert_url(project_ref))
 
         # Default case: assumed to be a local path
-        return project_path
+        return Path(project_ref)
 
     def convert_url(self, url: str) -> str:
         # Github-like URL
@@ -159,8 +163,8 @@ class NmkModelFile:
         # Repo-like reference?
         assert not ref.startswith("<"), f"Unresolved repo-like relative reference: {ref}"
 
-        # Relative local reference?
-        return self.make_absolute(Path(ref))
+        # Either URL or relative local reference?
+        return ref if self.is_url(ref) else self.make_absolute(Path(ref))
 
     def make_absolute(self, p: Path) -> str:
         # Make relative to current file, if needed

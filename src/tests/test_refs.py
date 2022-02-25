@@ -71,6 +71,10 @@ class TestRefs(NmkTester):
     def test_invalid_url(self):
         self.nmk("remote_repo_bad_url.yml", expected_error="While loading https://github.com/dynod/nmk/fake.zip!foo.yml: File is not a zip file")
 
+    def test_http_ref(self):
+        self.nmk("ref_http_without_repo.yml")
+        self.check_logs("Nothing to do")
+
     def test_direct_url_ref_raw(self):
         self.nmk("https://github.com/dynod/nmk/raw/main/src/tests/templates/simplest.yml")
         self.check_logs("Nothing to do")
