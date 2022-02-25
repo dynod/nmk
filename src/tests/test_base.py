@@ -74,6 +74,12 @@ class TestBasePlugin(NmkTester):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--print", "gitVersion"])
         self.check_logs('Config dump: { "gitVersion": "0.0.0-')
 
+    def test_git_version_config_no_git(self, monkeypatch):
+        # Fake git subprocess behavior, to make all "git" commands failing
+        monkeypatch.setattr(subprocess, "run", lambda all_args, check, capture_output, text, encoding, cwd: subprocess.CompletedProcess(all_args, 1, "", ""))
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--print", "gitVersion"])
+        self.check_logs('Config dump: { "gitVersion": "0.0.0" }')
+
     def test_git_version_stamp(self):
         # Try 1: git version is persisted
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.version"])
