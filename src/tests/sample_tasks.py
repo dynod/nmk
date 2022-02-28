@@ -3,6 +3,11 @@ import shutil
 from nmk.model.builder import NmkTaskBuilder
 
 
+class PrintBuilder(NmkTaskBuilder):
+    def build(self, label: str):
+        self.logger.warning(label)
+
+
 class SampleBuilder(NmkTaskBuilder):
     def build(self):
         assert len(self.task.outputs) > 0

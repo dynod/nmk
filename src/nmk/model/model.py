@@ -32,8 +32,11 @@ class NmkModel:
     config: Dict[str, NmkConfig] = field(default_factory=dict)
     tasks: Dict[str, NmkTask] = field(default_factory=dict)
     default_task: NmkTask = None
+    tasks_config: Dict[str, NmkConfig] = field(default_factory=dict)
 
-    def add_config(self, name: str, path: Path, init_value: Union[str, int, bool, list, dict] = None, resolver: object = None) -> NmkConfig:
+    def add_config(
+        self, name: str, path: Path, init_value: Union[str, int, bool, list, dict] = None, resolver: object = None, task_config: bool = False
+    ) -> NmkConfig:
         # Real value?
         is_list = is_dict = False
         if init_value is not None:
@@ -50,32 +53,35 @@ class NmkModel:
             cfg = NmkResolvedConfig(name, self, path, resolver)
             new_type = cfg.value_type
 
+        # Config object to work with
+        config_dict = self.tasks_config if task_config else self.config
+
         # Overriding?
-        old_config = self.config[name] if name in self.config else None
+        old_config = config_dict[name] if name in config_dict else None
         if old_config is not None:
             NmkLogger.debug(f"Overriding config {name}")
-            old_config = self.config[name]
+            old_config = config_dict[name]
 
             # Check for final
             assert not old_config.is_final, f"Can't override final config {name}"
 
             # Check for type change
-            old_type = self.config[name].value_type
+            old_type = config_dict[name].value_type
             assert new_type == old_type, f"Unexpected type change for config {name} ({old_type.__name__} --> {new_type.__name__})"
 
         # Add config to model
         if is_list or is_dict:
             if old_config is None or isinstance(old_config, NmkResolvedConfig):
                 # Add multiple config holder (or replace previously installed resolver)
-                self.config[name] = NmkListConfig(name, self, path) if is_list else NmkDictConfig(name, self, path)
+                config_dict[name] = NmkListConfig(name, self, path) if is_list else NmkDictConfig(name, self, path)
 
             # Add new value to be merged in fine
-            self.config[name].static_list.append(cfg)
+            config_dict[name].static_list.append(cfg)
         else:
             # Update value
-            self.config[name] = cfg
+            config_dict[name] = cfg
 
-        return self.config[name]
+        return config_dict[name]
 
     def load_class(self, qualified_class: str, expected_type: object) -> object:
         assert CLASS_SEP in qualified_class, f"Invalid class qualified name: {qualified_class} (missing separator: {CLASS_SEP})"

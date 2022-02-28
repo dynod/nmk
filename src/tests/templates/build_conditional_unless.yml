@@ -1,0 +1,53 @@
+config:
+    str_config: "FaLsE"
+    list_config: []
+    dict_config: {}
+    int_config: 0
+    bool_config: false
+
+tasks:
+    strBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "string condition"
+        default: true
+        unless: ${str_config}
+        deps:
+            - listBuild
+            - dictBuild
+            - intBuild
+            - boolBuild
+
+    listBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "list condition"
+        unless: ${list_config}
+
+    dictBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "dict condition"
+        unless: ${dict_config}
+
+    intBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "int condition"
+        unless: ${int_config}
+
+    boolBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "bool condition"
+        unless: ${bool_config}

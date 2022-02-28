@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkConfigResolver, NmkDictConfigResolver, NmkIntConfigResolver, NmkStrConfigResolver
 
@@ -39,3 +41,11 @@ class VolatileResolver(NonVolatileResolver):
 class GrabbingResolver(NmkDictConfigResolver):
     def get_value(self, name: str) -> dict:
         return {i: {k: self.model.config[k].value for k in ["someList", "someDict", "someVolatile", "someNonVolatile"]} for i in range(2)}
+
+
+class SamplePathResolver(NmkConfigResolver):
+    def get_type(self, name: str) -> object:
+        return Path
+
+    def get_value(self, name: str) -> Path:
+        return Path("/tmp")

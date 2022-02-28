@@ -5,7 +5,7 @@ from typing import List, Union
 from rich.emoji import Emoji
 from rich.text import Text
 
-from nmk.model.config import NmkDictConfig, NmkListConfig
+from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig
 
 
 @dataclass
@@ -21,6 +21,8 @@ class NmkTask:
     _prepend_to: str
     _inputs_cfg: NmkListConfig
     _outputs_cfg: NmkListConfig
+    run_if: NmkConfig
+    run_unless: NmkConfig
     model: object
     subtasks: List[object] = None
     _inputs: List[Path] = None

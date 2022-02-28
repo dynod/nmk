@@ -1,0 +1,63 @@
+config:
+    str_config: "FaLsE"
+    list_config: []
+    dict_config: {}
+    int_config: 0
+    bool_config: false
+    invalid_config:
+        __resolver__: tests.sample_resolvers.SamplePathResolver
+
+tasks:
+    strBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "string condition"
+        default: true
+        if: ${str_config}
+        deps:
+            - listBuild
+            - dictBuild
+            - intBuild
+            - boolBuild
+
+    listBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "list condition"
+        if: ${list_config}
+
+    dictBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "dict condition"
+        if: ${dict_config}
+
+    intBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "int condition"
+        if: ${int_config}
+
+    boolBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "bool condition"
+        if: ${bool_config}
+
+    errorBuild:
+        description: Try with sample builder
+        emoji: hammer_and_wrench
+        builder: tests.sample_tasks.PrintBuilder
+        params:
+            label: "error condition"
+        if: ${invalid_config}
