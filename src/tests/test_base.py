@@ -25,11 +25,11 @@ class TestBasePlugin(NmkTester):
 
     def test_build(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run"])
-        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "8 built tasks"])
+        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "9 built tasks"])
 
     def test_test(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run", "tests"])
-        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "9 built tasks"])
+        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "10 built tasks"])
 
     def test_loadme(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["loadme"])
@@ -168,17 +168,24 @@ class TestBasePlugin(NmkTester):
             f.write("foo\n")
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.ignore"])
         assert gitignore.is_file()
-        self.check_logs("Insert generated fragment at and of existing file")
+        self.check_logs("Insert generated fragment at and of existing .gitignore file")
 
         # Read content for compare
         with gitignore.open() as f:
             assert "foo\n" + content == f.read()
 
     def test_git_ignore_absolute_path(self):
-        # Try 1: generate a new .gitignore
         gitignore = self.test_folder / ".gitignore"
         assert not gitignore.exists()
         self.nmk(self.prepare_project("base/ref_base_absolute_git_ignore.yml"), extra_args=["git.ignore"])
         assert gitignore.is_file()
         assert (self.test_folder / "out" / ".gitignore").is_file()
         self.check_logs(["Create new .gitignore file", "Can't ignore non project-relative absolute path: /tmp/some/ignored/file"])
+
+    def test_git_attributes(self):
+        gitattributes = self.test_folder / ".gitattributes"
+        assert not gitattributes.exists()
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.attributes"])
+        assert gitattributes.is_file()
+        assert (self.test_folder / "out" / ".gitattributes").is_file()
+        self.check_logs("Create new .gitattributes file")
