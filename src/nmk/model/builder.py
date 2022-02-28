@@ -38,3 +38,12 @@ class NmkTaskBuilder(ABC):
     @property
     def main_output(self) -> Path:
         return self.outputs[0]
+
+    def allow_missing_input(self, missing_input: Path) -> bool:
+        """
+        This builder method will be called to check if the implementation allows for a given input to be missing
+        (sometimes, the task builder implementation may have conditional behavior WRT. if a given input exists or not).
+
+        Default implementation is that all inputs are mandatory (always return False)
+        """
+        return False

@@ -156,7 +156,7 @@ class NmkBuild:
             return True
 
         # All inputs must exist
-        missing_inputs = list(filter(lambda p: not p.is_file(), task.inputs))
+        missing_inputs = list(filter(lambda p: not p.is_file() and not task.builder.allow_missing_input(p), task.inputs))
         assert len(missing_inputs) == 0, f"Task {task.name} miss following inputs:\n" + "\n".join(map(lambda p: f" - {p}", missing_inputs))
 
         # Force build?
@@ -168,7 +168,7 @@ class NmkBuild:
         all_inputs = set(task.inputs + self.model.config[NmkRootConfig.PROJECT_FILES].value)
 
         # Check modification times
-        in_updates = {p.stat().st_mtime: p for p in all_inputs}
+        in_updates = {p.stat().st_mtime: p for p in filter(lambda p: p.exists(), all_inputs)}
         out_updates = {p.stat().st_mtime if p.exists() else 0: p for p in task.outputs}
         input_max = max(in_updates.keys())
         output_max = min(out_updates.keys())
