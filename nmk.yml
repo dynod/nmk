@@ -1,6 +1,7 @@
 refs:
-    # Base plugin
+    # Base+python plugins
     - plugins/base/plugin.yml
+    - plugins/python/plugin.yml
 
 config:
     # Nmk dependencies for venv
