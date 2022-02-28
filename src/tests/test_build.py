@@ -61,3 +61,63 @@ class TestBuild(NmkTester):
 
     def test_failling_build(self):
         self.nmk("build_error.yml", expected_error="An error occurred during task sampleBuild build: Some error happened!")
+
+    def test_conditional_if_build(self):
+        # Try 1: all tasks skipped because of if conditions
+        self.nmk("build_conditional_if.yml")
+        self.check_logs(
+            [
+                'Task "if" condition is not set: []',
+                'Task "if" condition is not set: ' + str({}),
+                'Task "if" condition is not set: 0',
+                'Task "if" condition is not set: False',
+                'Task "if" condition is not set: FaLsE',
+            ]
+        )
+
+        # Try 2: all tasks triggered because of if conditions
+        self.nmk(
+            "build_conditional_if.yml",
+            extra_args=["--config", '{"str_config":"ok","list_config":[0],"dict_config":{"foo":"bar"},"int_config":3,"bool_config":true}'],
+        )
+        self.check_logs(
+            [
+                " WARNING ❗ - list condition",
+                " WARNING ❗ - dict condition",
+                " WARNING ❗ - int condition",
+                " WARNING ❗ - bool condition",
+                " WARNING ❗ - string condition",
+            ]
+        )
+
+    def test_conditional_unless_build(self):
+        # Try 1: all tasks triggered because of unless conditions
+        self.nmk("build_conditional_unless.yml")
+        self.check_logs(
+            [
+                " WARNING ❗ - list condition",
+                " WARNING ❗ - dict condition",
+                " WARNING ❗ - int condition",
+                " WARNING ❗ - bool condition",
+                " WARNING ❗ - string condition",
+            ]
+        )
+
+        # Try 2: all tasks skipped because of unless conditions
+        self.nmk(
+            "build_conditional_unless.yml",
+            extra_args=["--config", '{"str_config":"ok","list_config":[0],"dict_config":{"foo":"bar"},"int_config":3,"bool_config":true}'],
+        )
+        self.check_logs(
+            [
+                'Task "unless" condition is set: [0]',
+                "Task \"unless\" condition is set: {'foo': 'bar'}",
+                'Task "unless" condition is set: 3',
+                'Task "unless" condition is set: True',
+                'Task "unless" condition is set: ok',
+            ]
+        )
+
+    def test_conditional_error(self):
+        # Try with unhandled config condition type
+        self.nmk("build_conditional_if.yml", extra_args=["errorBuild"], expected_error="Can't compute value type to evaluate conditional task: /tmp")

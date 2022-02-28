@@ -13,7 +13,7 @@ from nmk.errors import NmkFileLoadingError
 from nmk.logs import NmkLogger
 from nmk.model.builder import NmkTaskBuilder
 from nmk.model.cache import cache_remote
-from nmk.model.config import NmkDictConfig, NmkListConfig
+from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkConfigResolver
@@ -46,6 +46,8 @@ class NmkModelK:
     INPUT = "input"
     OUTPUT = "output"
     SILENT = "silent"
+    IF = "if"
+    UNLESS = "unless"
 
 
 # Data class for repository reference
@@ -254,6 +256,8 @@ class NmkModelFile:
                     self.load_property(candidate, NmkModelK.PREPEND_TO),
                     self.load_property(candidate, NmkModelK.INPUT, mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.INPUT, model)),
                     self.load_property(candidate, NmkModelK.OUTPUT, mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.OUTPUT, model)),
+                    self.load_property(candidate, NmkModelK.IF, mapper=lambda v: self.load_str_cfg(v, name, NmkModelK.IF, model)),
+                    self.load_property(candidate, NmkModelK.UNLESS, mapper=lambda v: self.load_str_cfg(v, name, NmkModelK.UNLESS, model)),
                     model,
                 ),
             )
@@ -274,8 +278,12 @@ class NmkModelFile:
 
     def load_str_list_cfg(self, v: list, task_name: str, in_out: str, model: NmkModel) -> NmkListConfig:
         # Add string list config
-        return model.add_config(f"task_{task_name}_{in_out}", self.file.parent, v if isinstance(v, list) else [v])
+        return model.add_config(f"{task_name}_{in_out}", self.file.parent, v if isinstance(v, list) else [v], task_config=True)
+
+    def load_str_cfg(self, v: list, task_name: str, condition: str, model: NmkModel) -> NmkConfig:
+        # Add string config
+        return model.add_config(f"{task_name}_{condition}", self.file.parent, v, task_config=True)
 
     def load_param_dict(self, v: dict, task_name: str, model: NmkModel) -> NmkDictConfig:
         # Map builder parameters
-        return model.add_config(f"task_{task_name}_params", self.file.parent, v)
+        return model.add_config(f"{task_name}_params", self.file.parent, v, task_config=True)

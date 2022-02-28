@@ -118,12 +118,36 @@ class NmkBuild:
         except Exception as e:
             raise e if isinstance(e, NmkStopHereError) else Exception(f"An error occurred during task {task.name} build: {e}").with_traceback(e.__traceback__)
 
+    def is_condition_set(self, value) -> bool:
+        # Condition depends on value type
+        if isinstance(value, list) or isinstance(value, dict):
+            # List/dict: should not be empty
+            return len(value)
+        if isinstance(value, str):
+            # String:
+            # "false" (case insensitive), 0, empty --> False
+            # anything else --> True
+            return len(value) and value != "0" and value.lower() != "false"
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, int):
+            return value != 0
+        raise AssertionError(f"Can't compute value type to evaluate conditional task: {value}")
+
     def needs_build(self, task: NmkTask, build_logger: NmkLogWrapper):
         # Check if task needs to be built
 
         # No builder = nothing to build
         if task.builder is None:
             build_logger.debug("Task doesn't have a builder defined")
+            return False
+
+        # Unless/if conditions
+        if task.run_unless is not None and self.is_condition_set(task.run_unless.value):
+            build_logger.debug(f'Task "unless" condition is set: {task.run_unless.value}')
+            return False
+        if task.run_if is not None and not self.is_condition_set(task.run_if.value):
+            build_logger.debug(f'Task "if" condition is not set: {task.run_if.value}')
             return False
 
         # Always build if task doesn't have inputs or outputs (no way to know if something has changed)
@@ -156,4 +180,5 @@ class NmkBuild:
             )
             return True
 
+        build_logger.debug("Output is already up to date: skip task")
         return False

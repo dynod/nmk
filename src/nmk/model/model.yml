@@ -76,6 +76,12 @@ properties:
                 # Parameters
                 params:
                     $ref: "#/$defs/configType"
+                # Skip condition: run only if config is evaluated to "true"
+                if:
+                    type: string
+                # Skip condition: run unless config is evaluated to "true"
+                unless:
+                    type: string
 
 $defs:
     # Reference string(s), i.e. either:
