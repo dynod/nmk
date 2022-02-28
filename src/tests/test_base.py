@@ -1,5 +1,6 @@
 # Tests for base plugin
 import subprocess
+import time
 
 from nmk import __version__
 from tests.utils import NmkTester
@@ -24,11 +25,11 @@ class TestBasePlugin(NmkTester):
 
     def test_build(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run"])
-        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "7 built tasks"])
+        self.check_logs_order(["setup]] INFO 🛫 - Setup project configuration", "build]] INFO 🛠  - Build project artifacts", "8 built tasks"])
 
     def test_test(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["--dry-run", "tests"])
-        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "8 built tasks"])
+        self.check_logs_order(["tests]] INFO 🤞 - Run automated tests", "9 built tasks"])
 
     def test_loadme(self):
         self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["loadme"])
@@ -134,3 +135,50 @@ class TestBasePlugin(NmkTester):
         assert output_req.exists()
         with output_req.open() as f:
             assert "somePackage==1.2.3" in f.read()
+
+    def test_git_ignore(self):
+        # Try 1: generate a new .gitignore
+        gitignore = self.test_folder / ".gitignore"
+        assert not gitignore.exists()
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.ignore"])
+        assert gitignore.is_file()
+        assert (self.test_folder / "out" / ".gitignore").is_file()
+        self.check_logs("Create new .gitignore file")
+
+        # Read content for compare
+        with gitignore.open() as f:
+            content = f.read()
+
+        # Try 2: regenerate after fake manual edit
+        time.sleep(1)
+        with gitignore.open("w") as f:
+            f.write("foo\n")
+            f.write(content)
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.ignore"])
+        assert gitignore.is_file()
+        self.check_logs("Merge .gitignore content by replacing fragment at lines 2-")
+
+        # Read content for compare
+        with gitignore.open() as f:
+            assert "foo\n" + content == f.read()
+
+        # Try 3: update an existing file without fragment
+        time.sleep(1)
+        with gitignore.open("w") as f:
+            f.write("foo\n")
+        self.nmk(self.prepare_project("base/ref_base.yml"), extra_args=["git.ignore"])
+        assert gitignore.is_file()
+        self.check_logs("Insert generated fragment at and of existing file")
+
+        # Read content for compare
+        with gitignore.open() as f:
+            assert "foo\n" + content == f.read()
+
+    def test_git_ignore_absolute_path(self):
+        # Try 1: generate a new .gitignore
+        gitignore = self.test_folder / ".gitignore"
+        assert not gitignore.exists()
+        self.nmk(self.prepare_project("base/ref_base_absolute_git_ignore.yml"), extra_args=["git.ignore"])
+        assert gitignore.is_file()
+        assert (self.test_folder / "out" / ".gitignore").is_file()
+        self.check_logs(["Create new .gitignore file", "Can't ignore non project-relative absolute path: /tmp/some/ignored/file"])

@@ -1,0 +1,6 @@
+refs:
+    - ../../../../../plugins/base/plugin.yml
+
+config:
+    gitIgnoredFiles:
+        - /tmp/some/ignored/file
