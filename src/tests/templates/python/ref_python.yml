@@ -1,0 +1,3 @@
+refs:
+    - ../../../../../plugins/base/plugin.yml
+    - ../../../../../plugins/python/plugin.yml

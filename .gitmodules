@@ -1,3 +1,6 @@
 [submodule "plugins/base"]
 	path = plugins/base
 	url = git@github.com:dynod/nmk-base.git
+[submodule "plugins/python"]
+	path = plugins/python
+	url = git@github.com:dynod/nmk-python.git
