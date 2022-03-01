@@ -1,0 +1,7 @@
+refs:
+    - ../../../../../plugins/base/plugin.yml
+    - ../../../../../plugins/python/plugin.yml
+
+config:
+    pythonSetupCfgFiles:
+        - ${BASEDIR}/missing_var.cfg
