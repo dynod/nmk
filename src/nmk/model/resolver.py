@@ -33,3 +33,8 @@ class NmkIntConfigResolver(NmkConfigResolver):
 class NmkDictConfigResolver(NmkConfigResolver):
     def get_type(self, name: str) -> object:
         return dict
+
+
+class NmkListConfigResolver(NmkConfigResolver):
+    def get_type(self, name: str) -> object:
+        return list
