@@ -85,3 +85,9 @@ class TestPythonPlugin(NmkTester):
         assert c.get("dummy", "foo") == "bar"
         assert c.get("dummy", "bar") == "venv"
         assert c.get("dummy", "other") == "1,2,3"
+
+    def test_python_format(self):
+        # Prepare fake source python files to enable python tasks
+        self.fake_python_src()
+        self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.format"])
+        assert (self.test_folder / "out" / ".black").is_file()
