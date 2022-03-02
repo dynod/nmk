@@ -42,19 +42,6 @@ class TestPythonPlugin(NmkTester):
         self.check_logs("Refresh python version")
         assert (self.test_folder / "out" / ".pythonversion").is_file()
 
-    def test_python_setup_no_inputs(self):
-        # Check python version is not generated (while no python files)
-        self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.setup"])
-        assert not (self.test_folder / "setup.py").is_file()
-
-        # Prepare fake source python files to enable python tasks
-        self.fake_python_src()
-
-        # Try without fragments
-        self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.setup"])
-        assert not (self.test_folder / "setup.py").is_file()
-        self.check_logs("Nothing to generate for python setup file")
-
     def test_python_setup_missing_config(self):
         # Prepare fake source python files to enable python tasks
         self.fake_python_src()
@@ -89,5 +76,6 @@ class TestPythonPlugin(NmkTester):
     def test_python_format(self):
         # Prepare fake source python files to enable python tasks
         self.fake_python_src()
-        self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.format"])
+        self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.sort"])
         assert (self.test_folder / "out" / ".black").is_file()
+        assert (self.test_folder / "out" / ".isort").is_file()
