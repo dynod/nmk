@@ -1,5 +1,10 @@
 # nmk - next-gen make-like build system
 
+[![License: MPL](https://img.shields.io/github/license/dynod/nmk)](https://github.com/dynod/nmk/blob/main/LICENSE)
+[![Checks](https://img.shields.io/github/checks-status/dynod/nmk/main)](https://github.com/dynod/nmk/actions?query=branch%3Amain)
+[![PyPI](https://img.shields.io/pypi/v/nmk)](https://pypi.org/project/nmk/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 **`nmk`** is an alternative build system, designed following these simple requirements:
 * both multi-platform and easy install - available as a python module
 * shareable/reusable/factorized build logic between projects
