@@ -4,3 +4,6 @@
 [submodule "plugins/python"]
 	path = plugins/python
 	url = git@github.com:dynod/nmk-python.git
+[submodule "samples/python"]
+	path = samples/python
+	url = git@github.com:dynod/nmk-python-sample.git
