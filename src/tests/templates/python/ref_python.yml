@@ -4,3 +4,4 @@ refs:
 
 config:
     pythonPackage: fake
+    pytestExtraArgs: ""

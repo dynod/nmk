@@ -22,11 +22,11 @@ class TestPythonPlugin(NmkTester):
         self.check_version(monkeypatch, "1.2.3-12-gb95312a", "1.2.3.post12+gb95312a")
         self.check_version(monkeypatch, "1.2.3-12-gb95312a-dirty", "1.2.3.post12+gb95312a.dirty")
 
-    def fake_python_src(self, content: str = ""):
+    def fake_python_src(self, content: str = "", package: str = "fake", name: str = "fake.py"):
         # Prepare fake source python files to enable python tasks
-        src = self.test_folder / "src" / "fake"
+        src = self.test_folder / "src" / package
         src.mkdir(parents=True, exist_ok=True)
-        fake = src / "fake.py"
+        fake = src / name
         with fake.open("w") as f:
             f.write(content)
         (src / "__init__.py")
@@ -99,3 +99,21 @@ class TestPythonPlugin(NmkTester):
         self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.build"])
         archives = list((self.test_folder / "out" / "artifacts").glob("fake-*"))
         assert len(archives) == 2
+
+    def test_python_test(self):
+        # Prepare test project for python build
+        self.fake_python_src(
+            """
+class TestSomething:
+    def test_something(self):
+        pass
+""",
+            package="tests",
+            name="test_foo.py",
+        )
+        p = self.prepare_project("python/ref_python.yml")
+        self.nmk(p, extra_args=["py.tests"])
+        assert self.test_folder / "out" / "tests" / "report.xml"
+
+        # Trigger again to cover clean code
+        self.nmk(p, extra_args=["py.tests"])
