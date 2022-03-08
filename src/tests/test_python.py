@@ -20,15 +20,16 @@ class TestPythonPlugin(NmkTester):
         self.check_version(monkeypatch, "1.2.3", "1.2.3")
         self.check_version(monkeypatch, "1.2.3-dirty", "1.2.3+dirty")
         self.check_version(monkeypatch, "1.2.3-12-gb95312a", "1.2.3.post12+gb95312a")
-        self.check_version(monkeypatch, "1.2.3-12-gb95312a-dirty", "1.2.3.post12+gb95312a-dirty")
+        self.check_version(monkeypatch, "1.2.3-12-gb95312a-dirty", "1.2.3.post12+gb95312a.dirty")
 
     def fake_python_src(self, content: str = ""):
         # Prepare fake source python files to enable python tasks
-        src = self.test_folder / "src"
+        src = self.test_folder / "src" / "fake"
         src.mkdir(parents=True, exist_ok=True)
         fake = src / "fake.py"
         with fake.open("w") as f:
             f.write(content)
+        (src / "__init__.py")
 
     def test_python_version_stamp(self):
         # Check python version is not generated (while no python files)
@@ -84,10 +85,17 @@ class TestPythonPlugin(NmkTester):
     def test_python_flake(self):
         # Prepare fake source with flake errors
         self.fake_python_src("foo=0")
-        self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.analyze"], expected_error=f"{self.test_folder}/src/fake.py has issues: ")
+        self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.analyze"], expected_error=f"{self.test_folder}/src/fake/fake.py has issues: ")
         assert (self.test_folder / "out" / "flake-report").is_dir()
 
         # Prepare fake source without errors
         self.fake_python_src("")
         self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.analyze"])
         assert (self.test_folder / "out" / "flake-report").is_dir()
+
+    def test_python_build(self):
+        # Prepare test project for python build
+        self.fake_python_src("")
+        self.nmk(self.prepare_project("python/ref_python.yml"), extra_args=["py.build"])
+        archives = list((self.test_folder / "out" / "artifacts").glob("fake-*"))
+        assert len(archives) == 2

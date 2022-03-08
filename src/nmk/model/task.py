@@ -64,22 +64,14 @@ class NmkTask:
 
     def _resolve_files(self, field: str) -> List[Path]:
         if getattr(self, field) is None:
-            # Convert strings to paths, and recurse lists
-            paths = []
-
-            def traverse_paths(new_paths):
-                for new_path in new_paths:
-                    if isinstance(new_path, list):
-                        traverse_paths(new_path)
-                    else:
-                        new_p = Path(new_path)
-                        if new_p not in paths:
-                            paths.append(new_p)
-
-            # Handle configs, if set...
+            # Convert strings to paths
             path_config = getattr(self, field + "_cfg")
+            paths = []
             if path_config is not None:
-                traverse_paths(path_config.value)
+                for new_path in path_config.value:
+                    new_p = Path(new_path)
+                    if new_p not in paths:
+                        paths.append(new_p)
             setattr(self, field, paths)
         return getattr(self, field)
 

@@ -161,8 +161,20 @@ class NmkMergedConfig(NmkConfig):
 @dataclass
 class NmkListConfig(NmkMergedConfig):
     def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> list:
-        # Merge lists
-        return [self._format(cache, v, resolved_from, path=holder.path) for holder in self.static_list for v in holder._get_value(cache)]
+        # Merge lists (recursively)
+        out = []
+
+        def traverse_list(items: list, holder):
+            for item in items:
+                formatted_item = self._format(cache, item, resolved_from, path=holder.path)
+                if isinstance(formatted_item, list):
+                    traverse_list(formatted_item, holder)
+                else:
+                    out.append(formatted_item)
+
+        for holder in self.static_list:
+            traverse_list(holder._get_value(cache), holder)
+        return out
 
     @property
     def value_type(self) -> object:
