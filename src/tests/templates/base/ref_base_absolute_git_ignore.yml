@@ -1,5 +1,5 @@
 refs:
-    - ../../../../../plugins/base/plugin.yml
+    - ../../../../../plugins/base/src/nmk_base/plugin.yml
 
 config:
     gitIgnoredFiles:

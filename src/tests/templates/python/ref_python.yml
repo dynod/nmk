@@ -1,6 +1,6 @@
 refs:
-    - ../../../../../plugins/base/plugin.yml
-    - ../../../../../plugins/python/plugin.yml
+    - ../../../../../plugins/base/src/nmk_base/plugin.yml
+    - ../../../../../plugins/python/src/nmk_python/plugin.yml
 
 config:
     pythonPackage: fake
