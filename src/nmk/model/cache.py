@@ -1,4 +1,6 @@
 import hashlib
+import re
+import sys
 import tarfile
 from functools import lru_cache
 from io import BytesIO
@@ -8,12 +10,58 @@ from zipfile import ZipFile
 import requests
 
 from nmk.logs import NmkLogger
+from nmk.utils import run_pip
 
 # If remote is not that fast...
 DOWNLOAD_TIMEOUT = 30
 
+# Pattern for pip-relative reference
+PIP_SCHEME = "pip:"
+PIP_PATTERN = re.compile(PIP_SCHEME + "//(([^<>=/ ]+)[^/ ]*)$")
+
 # Global first download flag (to log only once)
 first_download = True
+
+
+@lru_cache(maxsize=None)
+def venv_libs() -> Path:
+    # Find venv libs folder from sys
+    venv_root = Path(sys.executable).parent.parent
+    libs_candidates = list(
+        filter(
+            lambda x: x.name == "site-packages" and len(x.parts) > len(venv_root.parts) and list(venv_root.parts) == list(x.parts)[: len(venv_root.parts)],
+            map(Path, sys.path),
+        )
+    )
+    assert len(libs_candidates) == 1, "Unable to find venv libs root folder"
+    return libs_candidates[0]
+
+
+def log_install():
+    # First download?
+    global first_download
+    if first_download:  # pragma: no branch
+        first_download = False
+        NmkLogger.info("arrow_double_down", "Caching remote references...")
+
+
+@lru_cache(maxsize=None)
+def pip_install(url: str) -> Path:
+    # Check pip names
+    m = PIP_PATTERN.match(url)
+    assert m is not None, f"Malformed pip reference: {url}"
+    pip_ref = m.group(1)
+    package_name = m.group(2).replace("-", "_")
+
+    # Something to install?
+    repo_path = venv_libs() / package_name
+    if not repo_path.exists():
+        log_install()
+
+        # Trigger pip
+        run_pip(["install", pip_ref])
+
+    return repo_path
 
 
 @lru_cache(maxsize=None)
@@ -23,11 +71,7 @@ def download_file(root: Path, url: str) -> Path:
 
     # Something to cache?
     if not repo_path.exists():
-        # First download?
-        global first_download
-        if first_download:  # pragma: no branch
-            first_download = False
-            NmkLogger.info("arrow_double_down", "Caching remote references...")
+        log_install()
 
         # Supported archive format?
         url_path = Path(url)
@@ -62,4 +106,6 @@ def cache_remote(root: Path, remote: str) -> Path:
     sub_folder = Path(parts[1]) if len(parts) == 2 else Path()
 
     # Path will be relative to extracted folder (if suffix is specified)
-    return download_file(root, remote_url) / sub_folder
+    out = (pip_install(remote_url) if remote_url.startswith(PIP_SCHEME) else download_file(root, remote_url)) / sub_folder
+    NmkLogger.debug(f"Cached remote path: {remote} --> {out}")
+    return out

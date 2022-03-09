@@ -1,3 +1,6 @@
+import subprocess
+import sys
+
 from tests.utils import NmkTester
 
 
@@ -92,3 +95,24 @@ class TestRefs(NmkTester):
         # Check only one repo cached
         cache_folders = list(filter(lambda d: d.is_dir() and not d.name.startswith("."), (self.nmk_cache / "cache").glob("*")))
         assert len(cache_folders) == 1
+
+    def test_malformed_pip_url(self):
+        self.nmk("pip://foo/bar", expected_error="While loading pip://foo/bar: Malformed pip reference: pip://foo/bar")
+
+    def test_unknown_pip_reference(self):
+        self.nmk("pip://nmk!unknown.yml", expected_error="While loading pip://nmk!unknown.yml: Project file not found")
+
+    def test_pip_install(self, monkeypatch):
+        found_args = []
+
+        def record_process(all_args, check, capture_output, text, encoding, cwd):
+            nonlocal found_args
+            found_args = all_args
+            return subprocess.CompletedProcess(all_args, 0, "", "")
+
+        monkeypatch.setattr(subprocess, "run", record_process)
+        self.nmk(
+            "pip://definitely-unknown-package>=1.2!inside/unknown.yml",
+            expected_error="While loading pip://definitely-unknown-package>=1.2!inside/unknown.yml: Project file not found",
+        )
+        assert found_args == [sys.executable, "-m", "pip", "install", "definitely-unknown-package>=1.2"]

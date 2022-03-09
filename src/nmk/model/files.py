@@ -12,7 +12,7 @@ from rich.text import Text
 from nmk.errors import NmkFileLoadingError
 from nmk.logs import NmkLogger
 from nmk.model.builder import NmkTaskBuilder
-from nmk.model.cache import cache_remote
+from nmk.model.cache import PIP_SCHEME, cache_remote
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
@@ -21,10 +21,10 @@ from nmk.model.task import NmkTask
 
 # Known URL schemes
 GITHUB_SCHEME = "github:"
-URL_SCHEMES = ["http:", "https:", GITHUB_SCHEME]
+URL_SCHEMES = ["http:", "https:", GITHUB_SCHEME, PIP_SCHEME]
 
 # Github URL extraction pattern
-GITHUB_PATTERN = re.compile("github://([^ /]+)/([^ /]+)/([^ /]+)(/.+)?")
+GITHUB_PATTERN = re.compile(GITHUB_SCHEME + "//([^ /]+)/([^ /]+)/([^ /]+)(/.+)?")
 
 
 # Model keys

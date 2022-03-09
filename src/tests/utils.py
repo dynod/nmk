@@ -5,6 +5,7 @@ from typing import List, Union
 from pytest_multilog import TestHelper
 
 from nmk.__main__ import nmk
+from nmk.model.files import URL_SCHEMES
 
 
 class NmkTester(TestHelper):
@@ -28,7 +29,7 @@ class NmkTester(TestHelper):
 
     def nmk(self, project: Union[Path, str], with_logs: bool = False, extra_args: List[str] = None, expected_error: str = None, expected_rc: int = 0):
         # Prepare args and run nmk
-        if isinstance(project, str) and not project.startswith("http") and not project.startswith("github"):
+        if isinstance(project, str) and not any(project.startswith(scheme) for scheme in URL_SCHEMES):
             project = self.template(project)
         if isinstance(project, Path):
             project = project.as_posix()
