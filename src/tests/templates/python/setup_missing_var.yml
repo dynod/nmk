@@ -1,7 +1,0 @@
-refs:
-    - ../../../../../plugins/base/src/nmk_base/plugin.yml
-    - ../../../../../plugins/python/src/nmk_python/plugin.yml
-
-config:
-    pythonSetupCfgFiles:
-        - ${BASEDIR}/missing_var.cfg

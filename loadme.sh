@@ -43,7 +43,6 @@ __installSysDeps() {
 # Check system dependencies
 __checkSysDeps git "git"
 __checkSysDeps python3 "python3 python3-venv"
-__checkSysDeps make "make"
 
 # Perform installs if needed
 __installSysDeps || return $?

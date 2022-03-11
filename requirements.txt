@@ -3,14 +3,13 @@
 #
 
 #
-# Merged requirements files
+# Package dependencies from nmk project files
 #
 
-## Tools
+Jinja2
+nmk
 black
 isort
-
-## Flake8 & plugins
 flake8
 flake8-html
 pep8-naming
@@ -20,26 +19,16 @@ flake8-comprehensions
 flake8-string-format
 flake8-pep3101
 flake8-bugbear
-
-# Tests
-pytest-xdist
-pytest-cov
-pytest-multilog
-
-# Dependencies
+setuptools
+wheel
 argcomplete
 coloredlogs
 pyyaml
 jsonschema
 rich
 requests
-
-
-#
-# Package dependencies from nmk project files
-#
-
-Jinja2
-nmk
+pytest-xdist
+pytest-cov
+pytest-multilog
 
 

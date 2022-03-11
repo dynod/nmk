@@ -1,6 +1,0 @@
-refs:
-    - ../../../../../plugins/base/src/nmk_base/plugin.yml
-
-config:
-    gitIgnoredFiles:
-        - /tmp/some/ignored/file

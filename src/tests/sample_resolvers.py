@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from nmk.model.model import NmkModel
-from nmk.model.resolver import NmkConfigResolver, NmkDictConfigResolver, NmkIntConfigResolver, NmkStrConfigResolver
+from nmk.model.resolver import NmkConfigResolver, NmkDictConfigResolver, NmkIntConfigResolver, NmkListConfigResolver, NmkStrConfigResolver
 
 
 class StrResolver(NmkStrConfigResolver):
@@ -49,3 +49,8 @@ class SamplePathResolver(NmkConfigResolver):
 
     def get_value(self, name: str) -> Path:
         return Path("/tmp")
+
+
+class SampleListResolver(NmkListConfigResolver):
+    def get_value(self, name: str) -> list:
+        return [1, 2]

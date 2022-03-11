@@ -1,8 +1,0 @@
-refs:
-    - ../../../../../plugins/base/src/nmk_base/plugin.yml
-    - ../../../../../plugins/python/src/nmk_python/plugin.yml
-
-config:
-    pythonSetupCfgFiles:
-        - ${BASEDIR}/setup1.cfg
-        - ${BASEDIR}/setup2.cfg
