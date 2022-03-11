@@ -66,6 +66,10 @@ class TestRefs(NmkTester):
         self.nmk("remote_repo_ref_valid.yml")
         self.check_logs("Nothing to do")
 
+    def test_ref_repo_github(self):
+        self.nmk("remote_repo_ref_github.yml")
+        self.check_logs("Nothing to do")
+
     def test_clear_cache(self):
         (self.nmk_cache / "cache").mkdir(parents=True)
         self.nmk("remote_repo_ref_valid.yml", extra_args=["--no-cache"])

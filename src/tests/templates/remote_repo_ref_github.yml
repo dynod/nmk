@@ -1,0 +1,5 @@
+refs:
+    # Valid reference
+    - <someRepo>/src/tests/templates/simplest.yml
+    - someRepo:
+        remote: github://dynod/nmk/main
