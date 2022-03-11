@@ -7,7 +7,7 @@
             "request": "test",
             "justMyCode": false,
             "env": {
-                "PYTEST_ADDOPTS": "--no-cov -n 0"
+                "PYTEST_ADDOPTS": "--no-cov -n 1"
             }
         }
     ]

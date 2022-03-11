@@ -187,7 +187,7 @@ class NmkModelFile:
                 return str(local_repo_dir / rel_ref)
 
         # Nothing found locally: go with remote reference
-        return f"{repo.remote}{'!' if '!' not in repo.remote else '/'}{rel_ref}"
+        return f"{repo.remote}{'!' if '!' not in repo.remote and not repo.remote.startswith(GITHUB_SCHEME) else '/'}{rel_ref}"
 
     @property
     def all_refs(self) -> List[str]:
