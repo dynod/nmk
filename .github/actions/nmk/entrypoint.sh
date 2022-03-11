@@ -4,4 +4,4 @@
 source loadme.sh
 
 # Go with real build
-make build $1
+nmk $1

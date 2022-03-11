@@ -4,11 +4,18 @@ refs:
     - plugins/python/src/nmk_python/plugin.yml
 
 config:
-    # Nmk dependencies for venv
-    venvFileDeps:
-        - ${PROJECTDIR}/nmk-requirements.txt
+    # Python package
+    pythonPackage: nmk
+    
+    # Nmk dependencies
+    pythonPackageRequirements:
+        - argcomplete
+        - coloredlogs
+        - pyyaml
+        - jsonschema
+        - rich
+        - requests
 
-    # For now, use make on Linux for CI
-    loadMeSysDeps:
-        make:
-            apt: make
+    # Extra setup data
+    pythonSetupCfgFiles:
+        - nmk.cfg

@@ -1,0 +1,3 @@
+config:
+    someResolved:
+        __resolver__: tests.sample_resolvers.SampleListResolver

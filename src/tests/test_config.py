@@ -94,6 +94,10 @@ class TestConfig(NmkTester):
         self.nmk("config_str_resolver.yml", extra_args=["--print", "someResolved"])
         self.check_logs('Config dump: { "someResolved": "my dynamic value" }')
 
+    def test_config_list_resolver(self):
+        self.nmk("config_list_resolver.yml", extra_args=["--print", "someResolved"])
+        self.check_logs('Config dump: { "someResolved": [ 1, 2 ] }')
+
     def test_config_lying_resolver(self):
         self.nmk(
             "config_lying_resolver.yml",
