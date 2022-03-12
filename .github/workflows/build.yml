@@ -16,7 +16,7 @@ jobs:
             # Trigger build and tests
             - name: Build and tests
               id: build_n_tests
-              uses: ./.github/actions/nmk
+              uses: dynod/nmk-action@v1
               with:
                   task: tests
               continue-on-error: true
