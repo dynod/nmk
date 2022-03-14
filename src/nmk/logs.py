@@ -51,7 +51,7 @@ def logging_setup(args: Namespace):
             logging.basicConfig(force=True, level=logging.DEBUG)
             log_file = Path(args.log_file.format(ROOTDIR=args.root))
             log_file.parent.mkdir(parents=True, exist_ok=True)
-            handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5)
+            handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5, encoding="utf-8")
             handler.setFormatter(logging.Formatter(LOG_FORMAT_DEBUG, datefmt=coloredlogs.DEFAULT_DATE_FORMAT))
             logging.getLogger().addHandler(handler)
 
