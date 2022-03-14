@@ -2,9 +2,28 @@
 name: Build
 on: push
 jobs:
-    build_job:
-        name: Build Job
-        runs-on: ubuntu-latest
+    # Only on branch push
+    tests:
+        name: Build and Test - Python ${{ matrix.version }} - ${{ matrix.os }}
+        if: github.event_name == 'push' && !startsWith(github.event.ref, 'refs/tags')
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-latest
+                    # FIXME: wait for check_logs support with emojis on Windows
+                    # - windows-latest
+                version:
+                    - "3.8"
+                    - "3.9"
+                    - "3.10"
+                include:
+                    - os: ubuntu-latest
+                      command: source loadme.sh nmk tests
+                    # FIXME: wait for check_logs support with emojis on Windows
+                    #- os: windows-latest
+                    #  command: ./loadme.bat nmk tests
+        runs-on: ${{ matrix.os }}
         steps:
             # Checkout, with all submodules
             - name: Checkout
@@ -13,12 +32,17 @@ jobs:
                   fetch-depth: 0
                   submodules: recursive
 
+            # Setup python
+            - name: Set up Python ${{ matrix.version }}
+              uses: actions/setup-python@v3.0.0
+              with:
+                  python-version: ${{ matrix.version }}
+
             # Trigger build and tests
             - name: Build and tests
               id: build_n_tests
-              uses: dynod/nmk-action@v1
-              with:
-                  task: tests
+              shell: bash
+              run: ${{ matrix.command }}
               continue-on-error: true
 
             # Archive outputs (depending on build step)
@@ -26,7 +50,7 @@ jobs:
               if: steps.build_n_tests.outcome == 'failure'
               uses: actions/upload-artifact@v2.3.0
               with:
-                  name: Outputs
+                  name: Outputs-${{ matrix.os }}-${{ matrix.version }}
                   path: out/
             - name: Build Failed!
               if: steps.build_n_tests.outcome == 'failure'
@@ -37,14 +61,33 @@ jobs:
             - name: Archive artifacts (on success)
               uses: actions/upload-artifact@v2.3.0
               with:
-                  name: Outputs
+                  name: Outputs-${{ matrix.os }}-${{ matrix.version }}
                   path: |
                     out/
                     !out/tests/
 
-            # Publish to Pypi (only on tags push)
+    # Only on tags push
+    publish:
+        name: Publish
+        runs-on: ubuntu-latest
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+        steps:
+            # Official build
+            - name: Checkout
+              uses: actions/checkout@v2.4.0
+              with:
+                  fetch-depth: 0
+                  submodules: recursive
+            - name: Set up Python
+              uses: actions/setup-python@v3.0.0
+              with:
+                  python-version: "3.8"
+            - name: Build
+              run: |
+                source loadme.sh && nmk build
+
+            # Publish to Pypi
             - name: Publish package
-              if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
               uses: pypa/gh-action-pypi-publish@v1.5.0
               with:
                   user: __token__
