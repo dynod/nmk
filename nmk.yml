@@ -3,6 +3,10 @@ refs:
     - plugins/base/src/nmk_base/plugin.yml
     - plugins/python/src/nmk_python/plugin.yml
     - plugins/github/src/nmk_github/plugin.yml
+    - <workspace>/shared.yml
+    - workspace:
+        local: ../../shared
+        remote: github://dynod/workspace/main/shared
 
 config:
     # Python package
@@ -20,9 +24,3 @@ config:
     # Extra setup data
     pythonSetupCfgFiles:
         - nmk.cfg
-
-    # Python versions to be tested on Github
-    githubPythonVersions:
-        - "3.8"
-        - "3.9"
-        - "3.10"
