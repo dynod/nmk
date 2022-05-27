@@ -37,7 +37,7 @@ class NmkBuild:
 
     def _traverse_task(self, task: NmkTask, refering_tasks: List[NmkTask]):
         # Cyclic dependency?
-        assert task not in refering_tasks, f"Cyclic dependency: {task.name} referenced from tasks {' -> '.join(map(lambda t:t.name, refering_tasks))}"
+        assert task not in refering_tasks, f"Cyclic dependency: {task.name} referenced from tasks {' -> '.join(t.name for t in refering_tasks)}"
 
         # Traverse dependencies
         for dep in task.subtasks:
@@ -82,7 +82,7 @@ class NmkBuild:
         if len(self.ordered_tasks):
             # Do the build
             NmkLogger.debug("Starting the build!")
-            max_task_len = max(map(lambda t: len(t.name), self.ordered_tasks))
+            max_task_len = max(len(t.name) for t in self.ordered_tasks)
             for task in self.ordered_tasks:
                 build_logger = NmkLogWrapper(logging.getLogger((" " * (max_task_len - len(task.name))) + f"[{task.name}]"))
                 if self.model.args.dry_run:
@@ -157,7 +157,7 @@ class NmkBuild:
 
         # All inputs must exist
         missing_inputs = list(filter(lambda p: not p.is_file() and not task.builder.allow_missing_input(p), task.inputs))
-        assert len(missing_inputs) == 0, f"Task {task.name} miss following inputs:\n" + "\n".join(map(lambda p: f" - {p}", missing_inputs))
+        assert len(missing_inputs) == 0, f"Task {task.name} miss following inputs:\n" + "\n".join(f" - {p}" for p in missing_inputs)
 
         # Force build?
         if self.model.args.force:

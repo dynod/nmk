@@ -3,6 +3,7 @@ refs:
     - plugins/base/src/nmk_base/plugin.yml
     - plugins/python/src/nmk_python/plugin.yml
     - plugins/github/src/nmk_github/plugin.yml
+    - plugins/vscode/src/nmk_vscode/plugin.yml
     - <workspace>/shared.yml
     - workspace:
         local: ../../shared

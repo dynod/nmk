@@ -120,7 +120,7 @@ class NmkModelFile:
             if isinstance(e, NmkFileLoadingError):
                 raise e
             raise NmkFileLoadingError(
-                project_ref, str(e) + (("\n" + "\n".join(map(lambda r: f" --> referenced from {r}", refs))) if len(refs) else "")
+                project_ref, str(e) + (("\n" + "\n".join(f" --> referenced from {r}" for r in refs)) if len(refs) else "")
             ).with_traceback(e.__traceback__)
 
     def is_url(self, project_ref: str) -> bool:

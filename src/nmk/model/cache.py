@@ -75,7 +75,7 @@ def download_file(root: Path, url: str) -> Path:
 
         # Supported archive format?
         url_path = Path(url)
-        remote_exts = list(map(lambda e: e.lower(), url_path.suffixes))
+        remote_exts = [e.lower() for e in url_path.suffixes]
         if len(remote_exts) and remote_exts[-1] == ".zip":
             # Extract zip without writing file to disk
             with requests.get(url, timeout=DOWNLOAD_TIMEOUT, stream=True) as r, ZipFile(BytesIO(r.content)) as z:
