@@ -49,7 +49,7 @@ class NmkConfig(ABC):
 
         # Map dicts and lists
         if isinstance(candidate, list):
-            return list(map(lambda c: self._format(cache, c, resolved_from, path), candidate))
+            return [self._format(cache, c, resolved_from, path) for c in candidate]
         if isinstance(candidate, dict):
             return {k: self._format(cache, v, resolved_from, path) for k, v in candidate.items()}
         if not isinstance(candidate, str):
