@@ -250,14 +250,14 @@ class NmkModelFile:
                     self.load_property(candidate, NmkModelK.SILENT, False),
                     self.load_property(candidate, NmkModelK.EMOJI, mapper=self.load_emoji),
                     self.load_property(candidate, NmkModelK.BUILDER, mapper=lambda cls: model.load_class(cls, NmkTaskBuilder)),
-                    self.load_property(candidate, NmkModelK.PARAMS, mapper=lambda v: self.load_param_dict(v, name, model)),
+                    self.load_property(candidate, NmkModelK.PARAMS, mapper=lambda v, n: self.load_param_dict(v, n, model), task_name=name),
                     self.load_property(candidate, NmkModelK.DEPS, [], mapper=lambda dp: [i for n, i in enumerate(dp) if i not in dp[:n]]),  # Remove duplicates
                     self.load_property(candidate, NmkModelK.APPEND_TO),
                     self.load_property(candidate, NmkModelK.PREPEND_TO),
-                    self.load_property(candidate, NmkModelK.INPUT, mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.INPUT, model)),
-                    self.load_property(candidate, NmkModelK.OUTPUT, mapper=lambda v: self.load_str_list_cfg(v, name, NmkModelK.OUTPUT, model)),
-                    self.load_property(candidate, NmkModelK.IF, mapper=lambda v: self.load_str_cfg(v, name, NmkModelK.IF, model)),
-                    self.load_property(candidate, NmkModelK.UNLESS, mapper=lambda v: self.load_str_cfg(v, name, NmkModelK.UNLESS, model)),
+                    self.load_property(candidate, NmkModelK.INPUT, mapper=lambda v, n: self.load_str_list_cfg(v, n, NmkModelK.INPUT, model), task_name=name),
+                    self.load_property(candidate, NmkModelK.OUTPUT, mapper=lambda v, n: self.load_str_list_cfg(v, n, NmkModelK.OUTPUT, model), task_name=name),
+                    self.load_property(candidate, NmkModelK.IF, mapper=lambda v, n: self.load_str_cfg(v, n, NmkModelK.IF, model), task_name=name),
+                    self.load_property(candidate, NmkModelK.UNLESS, mapper=lambda v, n: self.load_str_cfg(v, n, NmkModelK.UNLESS, model), task_name=name),
                     model,
                 ),
             )
@@ -270,11 +270,14 @@ class NmkModelFile:
         # May be a renderable text
         return Text.from_markup(candidate) if ":" in candidate else Emoji(candidate)
 
-    def load_property(self, candidate: dict, key: str, default=None, mapper: Callable = None):
+    def load_property(self, candidate: dict, key: str, default=None, mapper: Callable = None, task_name: str = None):
         # Load value from yml model (if any, otherwise handle default value), and potentially map it
-        mapper = mapper if mapper is not None else lambda x: x
+        mapper = mapper if mapper is not None else (lambda x: x if task_name is None else lambda x, v: x)
         value = candidate[key] if key in candidate else default
-        return mapper(value) if value is not None else None
+        if task_name is None:
+            return mapper(value) if value is not None else None
+        else:
+            return mapper(value, task_name) if value is not None else None
 
     def load_str_list_cfg(self, v: list, task_name: str, in_out: str, model: NmkModel) -> NmkListConfig:
         # Add string list config
