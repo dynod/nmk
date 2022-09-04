@@ -4,15 +4,15 @@ refs:
     - base:
         local: plugins/base/src
         remote: github://dynod/nmk-base/main/src
-    - <python>/nmk_python/plugin.yml
+    - <python>/nmk_python/plugin-defs.yml
     - python:
         local: plugins/python/src
         remote: github://dynod/nmk-python/main/src
-    - <github>/nmk_github/plugin.yml
+    - <github>/nmk_github/plugin-defs.yml
     - github:
         local: plugins/github/src
         remote: github://dynod/nmk-github/main/src
-    - <vscode>/nmk_vscode/plugin.yml
+    - <vscode>/nmk_vscode/plugin-defs.yml
     - vscode:
         local: plugins/vscode/src
         remote: github://dynod/nmk-vscode/main/src
