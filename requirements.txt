@@ -11,7 +11,6 @@ nmk
 black
 isort
 flake8
-flake8-html
 pep8-naming
 flake8-builtins
 flake8-blind-except
@@ -30,5 +29,6 @@ requests
 pytest-xdist
 pytest-cov
 pytest-multilog
+Jinja2
 
 

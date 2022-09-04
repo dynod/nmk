@@ -1,9 +1,21 @@
 refs:
     # Base+python plugins
-    - plugins/base/src/nmk_base/plugin.yml
-    - plugins/python/src/nmk_python/plugin.yml
-    - plugins/github/src/nmk_github/plugin.yml
-    - plugins/vscode/src/nmk_vscode/plugin.yml
+    - <base>/nmk_base/plugin.yml
+    - base:
+        local: plugins/base/src
+        remote: github://dynod/nmk-base/main/src
+    - <python>/nmk_python/plugin.yml
+    - python:
+        local: plugins/python/src
+        remote: github://dynod/nmk-python/main/src
+    - <github>/nmk_github/plugin.yml
+    - github:
+        local: plugins/github/src
+        remote: github://dynod/nmk-github/main/src
+    - <vscode>/nmk_vscode/plugin.yml
+    - vscode:
+        local: plugins/vscode/src
+        remote: github://dynod/nmk-vscode/main/src
     - <workspace>/shared.yml
     - workspace:
         local: ../../shared
@@ -25,3 +37,7 @@ config:
     # Extra setup data
     pythonSetupCfgFiles:
         - nmk.cfg
+
+    # Add direct Jinja2 dep as it may not be installed at first through plug-ins deps
+    venvPkgDeps:
+        - Jinja2
