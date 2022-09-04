@@ -7,7 +7,6 @@
 #
 
 nmk
-nmk
 black
 isort
 flake8

@@ -4,9 +4,6 @@
 .nmk/
 out
 venv
-.nmk/
-out
-venv
 setup.py
 setup.cfg
 .eggs/
