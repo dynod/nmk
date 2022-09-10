@@ -35,8 +35,13 @@ config:
         - requests
 
     # Extra setup data
-    pythonSetupCfgFiles:
-        - nmk.cfg
+    pythonSetupItems:
+        metadata:
+            description: Next-gen make-like build system
+        options.entry_points:
+            console_scripts: "\nnmk = nmk.__main__:main"
+        options.package_data:
+                nmk.model: "*.yml"
 
     # Add direct Jinja2 dep as it may not be installed at first through plug-ins deps
     venvPkgDeps:
