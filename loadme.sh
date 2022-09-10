@@ -5,12 +5,20 @@
 __checkSysDeps() {
     local cmd="${1}"
     local packages="${2}"
+    local url="${3}"
     
     # Command found?
     echo -n "Check ${cmd} "
     if test -z "$(which "${cmd}" 2>/dev/null || true)"; then
         echo "[missing]"
-        NMK_APT_DEPS="${NMK_APT_DEPS} ${packages}"
+        if test -n "${packages}"; then
+            # APT mode
+            NMK_APT_DEPS="${NMK_APT_DEPS} ${packages}"
+        else
+            # URL mode
+            echo "Please install from ${url}"
+            MISSING_DEPS=1
+        fi
     else
         echo "[OK]"
     fi
@@ -40,28 +48,49 @@ __installSysDeps() {
     fi
 }
 
+# Test for git-bash mode
+if test -f /git-bash.exe; then
+    # Windows-style venv
+    IS_GIT_BASH=1
+    VENV_DIR=venv/Scripts
+    PYTHON_EXE=python
+else
+    # Linux-style venv
+    VENV_DIR=venv/bin
+    PYTHON_EXE=python3
+fi
+
 # Check system dependencies
-__checkSysDeps git "git"
-__checkSysDeps python3 "python3 python3-venv"
-
-# Perform installs if needed
-__installSysDeps || return $?
-
-# Clean useless stuff from terminal context
-unset __checkSysDeps
-unset __installSysDeps
+if test -n "${IS_GIT_BASH}"; then
+    # git-bash mode
+    MISSING_DEPS=0
+    __checkSysDeps git "" "https://git-scm.com/downloads"
+    __checkSysDeps python "" "https://www.python.org/downloads/"
+    
+    # Stop if something is missing
+    if test ${MISSING_DEPS} -ne 0; then
+        return 1
+    fi
+else
+    # Linux mode
+    __checkSysDeps git "git"
+    __checkSysDeps python3 "python3 python3-venv"
+    
+    # Perform installs if needed
+    __installSysDeps || return $?
+fi
 
 # Create venv if not done yet
 if test ! -d venv; then
     # Create it
     echo Create venv...
-    python3 -m venv venv
+    ${PYTHON_EXE} -m venv venv
 
     # Load it
-    source venv/bin/activate
+    source ${VENV_DIR}/activate
     
     # Bootstrap it
-    pip install pip wheel --upgrade
+    python -m pip install pip wheel --upgrade
 
     # Install requirements (if present)
     if test -f "requirements.txt"; then
@@ -72,13 +101,26 @@ if test ! -d venv; then
     fi
 
     # Patch it for nmk completion
-    echo ' ' >> venv/bin/activate
-    echo 'eval "$(register-python-argcomplete nmk)"' >> venv/bin/activate
+    echo ' ' >> ${VENV_DIR}/activate
+    if test -n "${IS_GIT_BASH}"; then
+        # On git bash, handle completion through temporary files rather than descriptors
+        # see https://github.com/kislyuk/argcomplete#git-bash-support
+        echo 'export ARGCOMPLETE_USE_TEMPFILES=1' >> ${VENV_DIR}/activate
+    fi
+    echo 'eval "$(register-python-argcomplete nmk)"' >> ${VENV_DIR}/activate
 fi
 
 # Finally load venv
 echo Load venv
-source venv/bin/activate
+source ${VENV_DIR}/activate
+
+# Clean useless stuff from terminal context
+unset __checkSysDeps
+unset __installSysDeps
+unset VENV_DIR
+unset PYTHON_EXE
+unset IS_GIT_BASH
+unset MISSING_DEPS
 
 # Run command specified as parameter, if any
 "$@"
