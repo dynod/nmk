@@ -1,2 +1,4 @@
 config:
-    tryDotRef: _${ENV.HOME}_
+    tryDotRef: _${someMap.foo}_
+    someMap:
+        foo: bar
