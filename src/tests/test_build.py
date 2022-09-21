@@ -1,3 +1,5 @@
+import os
+
 from tests.utils import NmkTester
 
 
@@ -7,15 +9,17 @@ class TestBuild(NmkTester):
 
     def test_dry_run_default(self):
         self.nmk("build_default.yml", extra_args=["--dry-run"])
-        self.check_logs_order(["subA]] DEBUG 🛠  - My A task", "subB]] INFO 🛠  - My B task", "parentTask]] INFO 🛠  - The parent task", "3 built tasks"])
+        self.check_logs(
+            ["subA]] DEBUG 🛠  - My A task", "subB]] INFO 🛠  - My B task", "parentTask]] INFO 🛠  - The parent task", "3 built tasks"], check_order=True
+        )
 
     def test_dry_run_specified(self):
         self.nmk("build_default.yml", extra_args=["--dry-run", "subA"])
-        self.check_logs_order(["subA]] DEBUG 🛠  - My A task", "1 built tasks"])
+        self.check_logs(["subA]] DEBUG 🛠  - My A task", "1 built tasks"], check_order=True)
 
     def test_no_builder(self):
         self.nmk("build_default.yml", extra_args=["subB"])
-        self.check_logs_order(["subB]] DEBUG 🐛 - Task skipped, nothing to do", "1 built tasks"])
+        self.check_logs(["subB]] DEBUG 🐛 - Task skipped, nothing to do", "1 built tasks"], check_order=True)
 
     def test_build_params(self):
         self.nmk("build_default.yml", extra_args=["subA"])
@@ -120,4 +124,6 @@ class TestBuild(NmkTester):
 
     def test_conditional_error(self):
         # Try with unhandled config condition type
-        self.nmk("build_conditional_if.yml", extra_args=["errorBuild"], expected_error="Can't compute value type to evaluate conditional task: /tmp")
+        self.nmk(
+            "build_conditional_if.yml", extra_args=["errorBuild"], expected_error=f"Can't compute value type to evaluate conditional task: {os.path.sep}tmp"
+        )

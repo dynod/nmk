@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from nmk.completion import ConfigCompleter
 from nmk.parser import NmkParser
@@ -150,8 +150,19 @@ class TestConfig(NmkTester):
         self.nmk(
             "simplest.yml", extra_args=["--print", "ROOTDIR", "--print", "CACHEDIR", "--print", "PROJECTDIR", "--print", "PROJECTFILES", "--print", "BASEDIR"]
         )
+
+        # Check for patterns
+        # On Windows, json serialization escapes the \ in paths
+        def json_serialized_path(in_path: Path) -> str:
+            return str(in_path).replace("\\", "\\\\")
+
         self.check_logs(
-            f'Config dump: {{ "BASEDIR": "", "ROOTDIR": "{self.test_folder}", "CACHEDIR": "{self.test_folder}/.nmk", "PROJECTDIR": "{self.templates_root}", "PROJECTFILES": [ "{self.template("simplest.yml")}" ] }}'
+            "Config dump: { "
+            + '"BASEDIR": "", '
+            + f'"ROOTDIR": "{json_serialized_path(self.test_folder)}", '
+            + f'"CACHEDIR": "{json_serialized_path(self.test_folder/".nmk")}", '
+            + f'"PROJECTDIR": "{json_serialized_path(self.templates_root)}", '
+            + f'"PROJECTFILES": [ "{json_serialized_path(self.template("simplest.yml"))}"'
         )
 
     def test_config_dot_no_dict(self):
@@ -177,7 +188,7 @@ class TestConfig(NmkTester):
 
     def test_config_dot_ok(self):
         self.nmk("config_dot_ok.yml", extra_args=["--print", "tryDotRef"])
-        self.check_logs(f'Config dump: {{ "tryDotRef": "_{os.environ["HOME"]}_" }}')
+        self.check_logs('Config dump: { "tryDotRef": "_bar_" }')
 
     def test_config_completion(self):
         # With final ones

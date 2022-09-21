@@ -13,6 +13,7 @@ jobs:
             matrix:
                 os:
                     - ubuntu-latest
+                    - windows-latest
                 version:
                     - "3.8"
                     - "3.9"
@@ -20,6 +21,8 @@ jobs:
                 include:
                     - os: ubuntu-latest
                       command: source loadme.sh nmk tests
+                    - os: windows-latest
+                      command: ./loadme.bat nmk tests
         runs-on: ${{ matrix.os }}
         steps:
             # Checkout, with all submodules
@@ -45,10 +48,12 @@ jobs:
             # Archive outputs (depending on build step)
             - name: Archive the whole output (on failure)
               if: steps.build_n_tests.outcome == 'failure'
-              uses: actions/upload-artifact@v2.3.0
+              uses: actions/upload-artifact@v2.3.1
               with:
                   name: Outputs-${{ matrix.os }}-${{ matrix.version }}
-                  path: out/
+                  path: |
+                    .nmk/nmk.log*
+                    out/
             - name: Build Failed!
               if: steps.build_n_tests.outcome == 'failure'
               uses: actions/github-script@v3
@@ -56,10 +61,11 @@ jobs:
                 script: |
                     core.setFailed('Previous step failed')
             - name: Archive artifacts (on success)
-              uses: actions/upload-artifact@v2.3.0
+              uses: actions/upload-artifact@v2.3.1
               with:
                   name: Outputs-${{ matrix.os }}-${{ matrix.version }}
                   path: |
+                    .nmk/nmk.log*
                     out/
                     !out/tests/
 

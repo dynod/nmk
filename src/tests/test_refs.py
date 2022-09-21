@@ -1,3 +1,5 @@
+import os
+import re
 import subprocess
 import sys
 
@@ -9,8 +11,9 @@ class TestRefs(NmkTester):
         self.nmk("relative_ref_not_found.yml", expected_error=f"While loading {self.template('unknownRef.yml')}: Project file not found")
 
     def test_absolute_ref_not_found(self):
-        self.nmk("absolute_ref_not_found.yml", expected_error="While loading /unknownRef.yml: Project file not found")
-        self.check_logs("nmk] WARNING ❗ - Absolute path (not portable) used in project: /unknownRef.yml")
+        project_name = "absolute_ref_not_found_win.yml" if os.name == "nt" else "absolute_ref_not_found.yml"
+        self.nmk(project_name, expected_error=re.compile("While loading [^ ]+unknownRef.yml: Project file not found"))
+        self.check_logs(re.compile(r"Absolute path \(not portable\) used in project: [^ ]+unknownRef.yml"))
 
     def test_repo_ref_not_found(self):
         self.nmk("repo_ref_not_found.yml", expected_error="While loading {project}: Unresolved repo-like relative reference: <unknownRepo>/unknownRef.yml")
