@@ -60,30 +60,31 @@ else
     PYTHON_EXE=python3
 fi
 
-# Check system dependencies
-if test -n "${IS_GIT_BASH}"; then
-    # git-bash mode
-    MISSING_DEPS=0
-    __checkSysDeps git "" "https://git-scm.com/downloads"
-    __checkSysDeps python "" "https://www.python.org/downloads/"
-    
-    # Stop if something is missing
-    if test ${MISSING_DEPS} -ne 0; then
-        return 1
-    fi
-else
-    # Linux mode
-    __checkSysDeps git "git"
-    __checkSysDeps python3 "python3 python3-venv"
-    
-    # Perform installs if needed
-    __installSysDeps || return $?
-fi
-
 # Create venv if not done yet
-if test ! -d venv; then
-    # Create it
+if test ! -f venv/venvOK; then
+    # Check system dependencies
+    if test -n "${IS_GIT_BASH}"; then
+        # git-bash mode
+        MISSING_DEPS=0
+        __checkSysDeps git "" "https://git-scm.com/downloads"
+        __checkSysDeps python "" "https://www.python.org/downloads/"
+        
+        # Stop if something is missing
+        if test ${MISSING_DEPS} -ne 0; then
+            return 1
+        fi
+    else
+        # Linux mode
+        __checkSysDeps git "git"
+        __checkSysDeps python3 "python3 python3-venv"
+        
+        # Perform installs if needed
+        __installSysDeps || return $?
+    fi
+
+    # Create venv
     echo Create venv...
+    rm -Rf venv
     ${PYTHON_EXE} -m venv venv
 
     # Load it
@@ -108,10 +109,12 @@ if test ! -d venv; then
         echo 'export ARGCOMPLETE_USE_TEMPFILES=1' >> ${VENV_DIR}/activate
     fi
     echo 'eval "$(register-python-argcomplete nmk)"' >> ${VENV_DIR}/activate
+
+    # Done, mark venv as "ready"
+    touch venv/venvOK
 fi
 
 # Finally load venv
-echo Load venv
 source ${VENV_DIR}/activate
 
 # Clean useless stuff from terminal context

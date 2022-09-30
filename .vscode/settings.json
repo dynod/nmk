@@ -39,5 +39,6 @@
         "**/venv/**": true
     },
     "editor.formatOnSave": true,
-    "task.allowAutomaticTasks": "on"
+    "task.allowAutomaticTasks": "on",
+    "terminal.integrated.defaultProfile.windows": "Git Bash"
 }

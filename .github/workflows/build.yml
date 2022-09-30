@@ -18,11 +18,8 @@ jobs:
                     - "3.8"
                     - "3.9"
                     - "3.10"
-                include:
-                    - os: ubuntu-latest
-                      command: source loadme.sh nmk tests
-                    - os: windows-latest
-                      command: ./loadme.bat nmk tests
+                command:
+                    - source loadme.sh nmk tests
         runs-on: ${{ matrix.os }}
         steps:
             # Checkout, with all submodules

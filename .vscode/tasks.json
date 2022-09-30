@@ -6,9 +6,6 @@
             "label": "nmk build",
             "type": "shell",
             "command": "source loadme.sh nmk build",
-            "windows": {
-                "command": "loadme.bat nmk build"
-            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -29,9 +26,6 @@
             "label": "nmk clean",
             "type": "shell",
             "command": "source loadme.sh nmk clean",
-            "windows": {
-                "command": "loadme.bat nmk clean"
-            },
             "group": "build",
             "runOptions": {
                 "runOn": "default"
@@ -49,9 +43,6 @@
             "label": "nmk tests",
             "type": "shell",
             "command": "source loadme.sh nmk tests",
-            "windows": {
-                "command": "loadme.bat nmk tests"
-            },
             "group": "test",
             "runOptions": {
                 "runOn": "default"
@@ -69,9 +60,6 @@
             "label": "nmk setup",
             "type": "shell",
             "command": "source loadme.sh nmk setup",
-            "windows": {
-                "command": "loadme.bat nmk setup"
-            },
             "group": "build",
             "runOptions": {
                 "runOn": "folderOpen"
