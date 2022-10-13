@@ -47,21 +47,38 @@ __installSysDeps() {
         ${cmd} || return $?
     fi
 }
+__findVenv() {
+    # Current git root folder
+    local git_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    if test "${git_root}" == ""; then
+        # No more git root found --> no venv found
+        echo ""
+    elif test -f "${git_root}/venv/venvOK"; then
+        # Venv found!
+        echo "${git_root}/venv"
+    else
+        # Look for venv in potential parent git repo
+        (cd ${git_root}/.. && __findVenv)
+    fi
+}
 
 # Test for git-bash mode
 if test -f /git-bash.exe; then
     # Windows-style venv
     IS_GIT_BASH=1
-    VENV_DIR=venv/Scripts
+    VENV_SUFFIX=Scripts
     PYTHON_EXE=python
 else
     # Linux-style venv
-    VENV_DIR=venv/bin
+    VENV_SUFFIX=bin
     PYTHON_EXE=python3
 fi
 
+# Look for venv
+VENV_ROOT="$(__findVenv)"
+
 # Create venv if not done yet
-if test ! -f venv/venvOK; then
+if test -z "${VENV_ROOT}"; then
     # Check system dependencies
     if test -n "${IS_GIT_BASH}"; then
         # git-bash mode
@@ -88,7 +105,7 @@ if test ! -f venv/venvOK; then
     ${PYTHON_EXE} -m venv venv
 
     # Load it
-    source ${VENV_DIR}/activate
+    source venv/${VENV_SUFFIX}/activate
     
     # Bootstrap it
     python -m pip install pip wheel --upgrade
@@ -102,25 +119,28 @@ if test ! -f venv/venvOK; then
     fi
 
     # Patch it for nmk completion
-    echo ' ' >> ${VENV_DIR}/activate
+    echo ' ' >> venv/${VENV_SUFFIX}/activate
     if test -n "${IS_GIT_BASH}"; then
         # On git bash, handle completion through temporary files rather than descriptors
         # see https://github.com/kislyuk/argcomplete#git-bash-support
-        echo 'export ARGCOMPLETE_USE_TEMPFILES=1' >> ${VENV_DIR}/activate
+        echo 'export ARGCOMPLETE_USE_TEMPFILES=1' >> venv/${VENV_SUFFIX}/activate
     fi
-    echo 'eval "$(register-python-argcomplete nmk)"' >> ${VENV_DIR}/activate
+    echo 'eval "$(register-python-argcomplete nmk)"' >> venv/${VENV_SUFFIX}/activate
 
     # Done, mark venv as "ready"
     touch venv/venvOK
+    VENV_ROOT=venv
 fi
 
 # Finally load venv
-source ${VENV_DIR}/activate
+source "${VENV_ROOT}/${VENV_SUFFIX}/activate"
 
 # Clean useless stuff from terminal context
 unset __checkSysDeps
 unset __installSysDeps
-unset VENV_DIR
+unset __findVenv
+unset VENV_SUFFIX
+unset VENV_ROOT
 unset PYTHON_EXE
 unset IS_GIT_BASH
 unset MISSING_DEPS
