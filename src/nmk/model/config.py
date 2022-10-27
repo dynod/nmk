@@ -106,6 +106,7 @@ class NmkConfig(ABC):
         pass
 
     @property
+    @abstractmethod
     def value_type(self) -> object:  # pragma: no cover
         pass
 
@@ -157,23 +158,43 @@ class NmkResolvedConfig(NmkConfig):
 class NmkMergedConfig(NmkConfig):
     static_list: List[NmkStaticConfig] = field(default_factory=list)
 
+    # Recursive list resolution
+    def traverse_list(self, items: list, out_list: list, cache: bool, resolved_from: Set[str], holder):
+        for item in items:
+            formatted_item = self._format(cache, item, resolved_from, path=holder.path)
+            if isinstance(formatted_item, list):
+                # Go deeper in this sub-list
+                self.traverse_list(formatted_item, out_list, cache, resolved_from, holder)
+            else:
+                # Simple list append
+                out_list.append(formatted_item)
+
+    # Recursive dict resolution
+    def traverse_dict(self, items: dict, out_dict: dict, cache: bool, resolved_from: Set[str], holder):
+        for k, v in items.items():
+            formatted_item = self._format(cache, v, resolved_from, path=holder.path)
+            if isinstance(formatted_item, dict):
+                # Recursively merge this dict
+                if k not in out_dict:
+                    out_dict[k] = {}
+                self.traverse_dict(formatted_item, out_dict[k], cache, resolved_from, holder)
+            elif isinstance(formatted_item, list):
+                # Recursively merge this list
+                if k not in out_dict:
+                    out_dict[k] = []
+                self.traverse_list(formatted_item, out_dict[k], cache, resolved_from, holder)
+            else:
+                # Simple item: override
+                out_dict[k] = formatted_item
+
 
 @dataclass
 class NmkListConfig(NmkMergedConfig):
     def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> list:
         # Merge lists (recursively)
         out = []
-
-        def traverse_list(items: list, holder):
-            for item in items:
-                formatted_item = self._format(cache, item, resolved_from, path=holder.path)
-                if isinstance(formatted_item, list):
-                    traverse_list(formatted_item, holder)
-                else:
-                    out.append(formatted_item)
-
         for holder in self.static_list:
-            traverse_list(holder._get_value(cache), holder)
+            self.traverse_list(holder._get_value(cache), out, cache, resolved_from, holder)
         return out
 
     @property
@@ -184,10 +205,10 @@ class NmkListConfig(NmkMergedConfig):
 @dataclass
 class NmkDictConfig(NmkMergedConfig):
     def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> dict:
-        # Merge dicts
+        # Merge dicts and lists (recursively)
         out = {}
         for holder in self.static_list:
-            out.update({k: self._format(cache, v, resolved_from, path=holder.path) for k, v in holder._get_value(cache).items()})
+            self.traverse_dict(holder._get_value(cache), out, cache, resolved_from, holder)
         return out
 
     @property

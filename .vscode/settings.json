@@ -29,7 +29,8 @@
         "pyvenv",
         "sdist",
         "venv",
-        "loadme"
+        "loadme",
+        "dynod"
     ],
     "python.analysis.extraPaths": [
         "src"
