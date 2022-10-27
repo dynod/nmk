@@ -8,3 +8,10 @@ config:
     someDict:
         adc: def
         ghi: jkl
+    otherDict:
+        subList:
+            - a
+            - b
+        subDict:
+            a: 1
+            b: 2

@@ -25,10 +25,28 @@ class TestConfig(NmkTester):
         # Dump config loaded from file (with override)
         self.nmk(
             "config_override.yml",
-            extra_args=["--print", "someString", "--print", "someInt", "--print", "someBool", "--print", "someList", "--print", "someDict"],
+            extra_args=[
+                "--print",
+                "someString",
+                "--print",
+                "someInt",
+                "--print",
+                "someBool",
+                "--print",
+                "someList",
+                "--print",
+                "someDict",
+                "--print",
+                "otherDict",
+            ],
         )
         self.check_logs(
-            'Config dump: { "someString": "def", "someInt": 567, "someBool": true, "someList": [ "abc", "def", "ghi" ], "someDict": { "adc": "foo", "ghi": "jkl", "bar": "zzz" } }'
+            'Config dump: { "someString": "def", '
+            + '"someInt": 567, '
+            + '"someBool": true, '
+            + '"someList": [ "abc", "def", "ghi" ], '
+            + '"someDict": { "adc": "foo", "ghi": "jkl", "bar": "zzz" }, '
+            + '"otherDict": { "subList": [ "a", "b", "c" ], "subDict": { "a": 1, "b": 3, "c": 5 } } }'
         )
 
     def test_config_invalid_fragment(self):
@@ -195,12 +213,12 @@ class TestConfig(NmkTester):
         configs = ConfigCompleter()(
             "", None, None, NmkParser().parse(["--root", self.test_folder.as_posix(), "-p", self.template("config_sample.yml").as_posix()])
         )
-        assert len(configs) == 5 + 7  # 5 provided one + 7 built-ins
-        assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict"])
+        assert len(configs) == 6 + 7  # 6 provided one + 7 built-ins
+        assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict", "otherDict"])
 
         # Without final ones
         configs = ConfigCompleter(False)(
             "", None, None, NmkParser().parse(["--root", self.test_folder.as_posix(), "-p", self.template("config_sample.yml").as_posix()])
         )
-        assert len(configs) == 5 + 1  # 5 provided one + 1 non-final built-in
-        assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict"])
+        assert len(configs) == 6 + 1  # 5 provided one + 1 non-final built-in
+        assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict", "otherDict"])

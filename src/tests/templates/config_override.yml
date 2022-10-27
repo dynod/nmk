@@ -10,3 +10,9 @@ config:
     someDict:
         adc: foo
         bar: zzz
+    otherDict:
+        subList:
+            - c
+        subDict:
+            b: 3
+            c: 5
