@@ -17,8 +17,8 @@ class NmkTask:
     builder: object
     params: NmkDictConfig
     _deps: List[str]
-    _append_to: str
-    _prepend_to: str
+    _append_to: Union[str, List[str]]
+    _prepend_to: Union[str, List[str]]
     _inputs_cfg: NmkListConfig
     _outputs_cfg: NmkListConfig
     run_if: NmkConfig
@@ -28,14 +28,18 @@ class NmkTask:
     _inputs: List[Path] = None
     _outputs: List[Path] = None
 
-    def __resolve_task(self, name: str) -> object:
+    def __resolve_task(self, name: Union[str, List[str]]) -> object:
         if name is not None:
-            # If reference is set, get matching task object
-            assert name in self.model.tasks, f"Unknown {name} task referenced by {self.name} task"
-            return self.model.tasks[name]
+            # Iterate on candidate names until we find a known one
+            name_list = name if isinstance(name, list) else [name]
+            for name_candidate in name_list:
+                if name_candidate in self.model.tasks:
+                    return self.model.tasks[name_candidate]
+            else:
+                raise AssertionError(f"Can't find any of candidates ({name_list}) referenced by {self.name} task")
         return None
 
-    def __contribute_dep(self, name: str, append: bool):
+    def __contribute_dep(self, name: Union[str, List[str]], append: bool):
         t = self.__resolve_task(name)
         if t is not None and self.name not in t._deps:
             # Ascendant dependency which is not yet contributed:
