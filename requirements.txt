@@ -28,6 +28,7 @@ requests
 pytest-xdist
 pytest-cov
 pytest-multilog
+grpcio-tools
 Jinja2
 
 

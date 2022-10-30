@@ -30,6 +30,10 @@
         "sdist",
         "venv",
         "loadme",
+        "proto",
+        "protos",
+        "protoc",
+        "grpcio",
         "dynod"
     ],
     "python.analysis.extraPaths": [

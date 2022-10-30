@@ -16,6 +16,10 @@ refs:
     - vscode:
         local: plugins/vscode/src
         remote: github://dynod/nmk-vscode/main/src
+    - <proto>/nmk_proto/plugin-defs.yml
+    - proto:
+        local: plugins/proto/src
+        remote: github://dynod/nmk-proto/main/src
     - <workspace>/shared.yml
     - workspace:
         local: ../../shared
