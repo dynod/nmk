@@ -14,6 +14,10 @@
 	path = plugins/vscode
 	url = git@github.com:dynod/nmk-vscode.git
 	branch = main
+[submodule "plugins/proto"]
+	path = plugins/proto
+	url = git@github.com:dynod/nmk-proto.git
+	branch = main
 [submodule "samples/python"]
 	path = samples/python
 	url = git@github.com:dynod/nmk-python-sample.git
