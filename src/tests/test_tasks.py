@@ -17,7 +17,7 @@ class TestTasks(NmkTester):
         )
 
     def test_unknown_dep(self):
-        self.nmk("task_unknown_dep.yml", expected_error="Unknown someUnknownOtherTask task referenced by someTask task")
+        self.nmk("task_unknown_dep.yml", expected_error="Can't find any of candidates (['someUnknownOtherTask']) referenced by someTask task")
 
     def test_contributing_dep(self):
         self.nmk("task_contributing_dep.yml", extra_args=["--dry-run"])
