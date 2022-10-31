@@ -12,4 +12,6 @@ tasks:
     contribA:
         description: prepended task
         emoji: hammer_and_wrench
-        prependToDeps: someTask
+        prependToDeps:
+            - someUnknownTask
+            - someTask

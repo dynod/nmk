@@ -66,10 +66,18 @@ properties:
                         type: string
                 # - parent dep (append after the existing ones)
                 appendToDeps:
-                    type: string
+                    oneOf:
+                        - type: string
+                        - type: array
+                          items:
+                              type: string
                 # - parent dep (prepend before the existing ones)
                 prependToDeps:
-                    type: string
+                    oneOf:
+                        - type: string
+                        - type: array
+                          items:
+                              type: string
                 # Default task
                 default:
                     type: boolean
