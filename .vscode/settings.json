@@ -33,6 +33,7 @@
         "proto",
         "protos",
         "protoc",
+        "protobuf",
         "grpcio",
         "dynod"
     ],
@@ -45,5 +46,14 @@
     },
     "editor.formatOnSave": true,
     "task.allowAutomaticTasks": "on",
-    "terminal.integrated.defaultProfile.windows": "Git Bash"
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "protoc": {
+        "options": [
+            "--proto_path",
+            "protos"
+        ]
+    },
+    "cSpell.enabledLanguageIds": [
+        "proto3"
+    ]
 }
