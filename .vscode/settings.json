@@ -50,7 +50,9 @@
     "protoc": {
         "options": [
             "--proto_path",
-            "protos"
+            "protos",
+            "--proto_path",
+            ".nmk/protos"
         ]
     },
     "cSpell.enabledLanguageIds": [
