@@ -83,6 +83,7 @@ class NmkModelFile:
                 p_dir = self.file.parent.resolve()
                 NmkLogger.debug(f"{NmkRootConfig.PROJECT_DIR} updated to {p_dir}")
                 model.config[NmkRootConfig.PROJECT_DIR].static_value = p_dir
+                model.config[NmkRootConfig.PROJECT_NMK_DIR].static_value = p_dir / ".nmk"
 
             # Remember file in model (if not already done)
             if self.file in model.files:
