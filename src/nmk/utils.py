@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -29,3 +30,29 @@ def run_pip(args: List[str], logger=NmkLogger) -> str:
     """
     all_args = [sys.executable, "-m", "pip"] + args
     return run_with_logs(all_args, logger).stdout
+
+
+def is_windows() -> bool:
+    """
+    Returns true if running on Windows, false otherwise
+    """
+    return os.name == "nt"
+
+
+def create_dir_symlink(target: Path, link: Path):
+    """
+    Create a directory symbolic link (or something close, according to the OS)
+
+    Parameters:
+        target(Path): path that will be pointed by the created link
+        link(Path): created link location
+    """
+    # Ready to create symlink (platform dependent --> disable coverage)
+    if is_windows():  # pragma: no branch
+        # Windows specific: create a directory junction (similar to a Linux symlink)
+        import _winapi  # pragma: no cover
+
+        _winapi.CreateJunction(str(target), str(link))  # pragma: no cover
+    else:  # pragma: no cover
+        # Standard symlink
+        os.symlink(target, link)  # pragma: no cover
