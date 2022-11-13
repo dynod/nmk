@@ -166,7 +166,23 @@ class TestConfig(NmkTester):
 
     def test_config_builtin(self):
         self.nmk(
-            "simplest.yml", extra_args=["--print", "ROOTDIR", "--print", "CACHEDIR", "--print", "PROJECTDIR", "--print", "PROJECTFILES", "--print", "BASEDIR"]
+            "simplest.yml",
+            extra_args=[
+                "--print",
+                "ROOTDIR",
+                "--print",
+                "ROOTNMKDIR",
+                "--print",
+                "CACHEDIR",
+                "--print",
+                "PROJECTDIR",
+                "--print",
+                "PROJECTNMKDIR",
+                "--print",
+                "PROJECTFILES",
+                "--print",
+                "BASEDIR",
+            ],
         )
 
         # Check for patterns
@@ -178,8 +194,10 @@ class TestConfig(NmkTester):
             "Config dump: { "
             + '"BASEDIR": "", '
             + f'"ROOTDIR": "{json_serialized_path(self.test_folder)}", '
-            + f'"CACHEDIR": "{json_serialized_path(self.test_folder/".nmk")}", '
+            + f'"ROOTNMKDIR": "{json_serialized_path(self.test_folder/".nmk")}", '
+            + f'"CACHEDIR": "{json_serialized_path(self.test_folder/".nmk"/"cache")}", '
             + f'"PROJECTDIR": "{json_serialized_path(self.templates_root)}", '
+            + f'"PROJECTNMKDIR": "{json_serialized_path(self.templates_root/".nmk")}", '
             + f'"PROJECTFILES": [ "{json_serialized_path(self.template("simplest.yml"))}"'
         )
 
@@ -213,7 +231,7 @@ class TestConfig(NmkTester):
         configs = ConfigCompleter()(
             "", None, None, NmkParser().parse(["--root", self.test_folder.as_posix(), "-p", self.template("config_sample.yml").as_posix()])
         )
-        assert len(configs) == 6 + 7  # 6 provided one + 7 built-ins
+        assert len(configs) == 6 + 9  # 6 provided one + 9 built-ins
         assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict", "otherDict"])
 
         # Without final ones

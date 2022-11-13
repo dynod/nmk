@@ -24,7 +24,8 @@ class NmkLoader:
         self.finish_parsing(args, with_logs)
 
         # Prepare repo cache and empty model
-        self.repo_cache: Path = args.nmk_dir / "cache"
+        self.root_nmk_dir = args.nmk_dir
+        self.repo_cache: Path = self.root_nmk_dir / "cache"
         self.model = NmkModel(args)
 
         # Load model
@@ -45,8 +46,10 @@ class NmkLoader:
             NmkRootConfig.PYTHON_PATH: [],
             NmkRootConfig.BASE_DIR: "",  # Useless while directly referenced (must identify current project file parent dir)
             NmkRootConfig.ROOT_DIR: root,
-            NmkRootConfig.CACHE_DIR: root / ".nmk",
+            NmkRootConfig.ROOT_NMK_DIR: self.root_nmk_dir,
+            NmkRootConfig.CACHE_DIR: self.repo_cache,
             NmkRootConfig.PROJECT_DIR: "",  # Will be updated as soon as initial project is loaded
+            NmkRootConfig.PROJECT_NMK_DIR: "",  # Will be updated as soon as initial project is loaded
             NmkRootConfig.PROJECT_FILES: [],  # Will be updated as soon as files are loaded
             NmkRootConfig.ENV: {k: v for k, v in os.environ.items()},
         }.items():
