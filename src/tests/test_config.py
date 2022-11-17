@@ -171,13 +171,13 @@ class TestConfig(NmkTester):
                 "--print",
                 "ROOTDIR",
                 "--print",
-                "ROOTNMKDIR",
+                "ROOTDIR_NMK",
                 "--print",
                 "CACHEDIR",
                 "--print",
                 "PROJECTDIR",
                 "--print",
-                "PROJECTNMKDIR",
+                "PROJECTDIR_NMK",
                 "--print",
                 "PROJECTFILES",
                 "--print",
@@ -194,10 +194,10 @@ class TestConfig(NmkTester):
             "Config dump: { "
             + '"BASEDIR": "", '
             + f'"ROOTDIR": "{json_serialized_path(self.test_folder)}", '
-            + f'"ROOTNMKDIR": "{json_serialized_path(self.test_folder/".nmk")}", '
+            + f'"ROOTDIR_NMK": "{json_serialized_path(self.test_folder/".nmk")}", '
             + f'"CACHEDIR": "{json_serialized_path(self.test_folder/".nmk"/"cache")}", '
             + f'"PROJECTDIR": "{json_serialized_path(self.templates_root)}", '
-            + f'"PROJECTNMKDIR": "{json_serialized_path(self.templates_root/".nmk")}", '
+            + f'"PROJECTDIR_NMK": "{json_serialized_path(self.templates_root/".nmk")}", '
             + f'"PROJECTFILES": [ "{json_serialized_path(self.template("simplest.yml"))}"'
         )
 
