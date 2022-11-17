@@ -35,7 +35,8 @@
         "protoc",
         "protobuf",
         "grpcio",
-        "dynod"
+        "dynod",
+        "nmk"
     ],
     "python.analysis.extraPaths": [
         "src"
@@ -55,7 +56,10 @@
             ".nmk/protos"
         ]
     },
-    "cSpell.enabledLanguageIds": [
-        "proto3"
-    ]
+    "cSpell.enableFiletypes": [
+        "proto3",
+        "yaml",
+        "python"
+    ],
+    "cSpell.allowCompoundWords": true
 }
