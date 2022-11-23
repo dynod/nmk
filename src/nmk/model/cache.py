@@ -83,7 +83,29 @@ def download_file(root: Path, url: str) -> Path:
         elif len(remote_exts) and (".tar" in remote_exts or remote_exts[-1] == ".tgz"):
             # Extract tar without writing file to disk
             with requests.get(url, timeout=DOWNLOAD_TIMEOUT, stream=True) as r, tarfile.open(fileobj=BytesIO(r.content), mode="r|*") as z:
-                z.extractall(repo_path)
+                
+                import os
+                
+                def is_within_directory(directory, target):
+                    
+                    abs_directory = os.path.abspath(directory)
+                    abs_target = os.path.abspath(target)
+                
+                    prefix = os.path.commonprefix([abs_directory, abs_target])
+                    
+                    return prefix == abs_directory
+                
+                def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                
+                    for member in tar.getmembers():
+                        member_path = os.path.join(path, member.name)
+                        if not is_within_directory(path, member_path):
+                            raise Exception("Attempted Path Traversal in Tar File")
+                
+                    tar.extractall(path, members, numeric_owner=numeric_owner) 
+                    
+                
+                safe_extract(z, repo_path)
         elif len(remote_exts) and remote_exts[-1] == ".yml":
             # Download repo yml
             repo_path.mkdir(parents=True, exist_ok=True)
