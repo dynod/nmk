@@ -86,7 +86,7 @@ def download_archive(repo_path: Path, url: str) -> Path:
     dest_file = repo_path.parent / (repo_path.name + "".join(Path(url).suffixes))
     dest_file.parent.mkdir(parents=True, exist_ok=True)
     NmkLogger.debug(f"Downloading {url} to {dest_file}...")
-    with requests.get(url, timeout=DOWNLOAD_TIMEOUT, verify=False, stream=True) as r, dest_file.open("wb") as f:
+    with requests.get(url, timeout=DOWNLOAD_TIMEOUT, stream=True) as r, dest_file.open("wb") as f:
         shutil.copyfileobj(r.raw, f)
     return dest_file
 
