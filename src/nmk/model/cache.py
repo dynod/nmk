@@ -1,9 +1,9 @@
 import hashlib
 import re
+import shutil
 import sys
 import tarfile
 from functools import lru_cache
-from io import BytesIO
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -64,6 +64,33 @@ def pip_install(url: str) -> Path:
     return repo_path
 
 
+def safe_tar_extract(tar_path: Path, target_path: Path):
+    # Protect against ".." folders in tar -- see https://github.com/advisories/GHSA-gw9q-c7gh-j9vm (CVE-2007-4559)
+    with tarfile.open(name=tar_path, mode="r|*") as tar:
+        for member in tar.getmembers():
+            dest_path = target_path / member.name
+            try:
+                # Destination path *must* be a sub-folder/file of target path
+                dest_path.relative_to(target_path)
+            except ValueError:  # pragma: no cover
+                # Invalid entry
+                raise AssertionError(f"Invalid path in tar archive: {member.name}")
+
+    # Extract all
+    with tarfile.open(name=tar_path, mode="r|*") as tar:
+        tar.extractall(target_path)
+
+
+def download_archive(repo_path: Path, url: str) -> Path:
+    # Download binary file
+    dest_file = repo_path.parent / (repo_path.name + "".join(Path(url).suffixes))
+    dest_file.parent.mkdir(parents=True, exist_ok=True)
+    NmkLogger.debug(f"Downloading {url} to {dest_file}...")
+    with requests.get(url, timeout=DOWNLOAD_TIMEOUT, verify=False, stream=True) as r, dest_file.open("wb") as f:
+        shutil.copyfileobj(r.raw, f)
+    return dest_file
+
+
 @lru_cache(maxsize=None)
 def download_file(root: Path, url: str) -> Path:
     # Cache path
@@ -77,13 +104,12 @@ def download_file(root: Path, url: str) -> Path:
         url_path = Path(url)
         remote_exts = [e.lower() for e in url_path.suffixes]
         if len(remote_exts) and remote_exts[-1] == ".zip":
-            # Extract zip without writing file to disk
-            with requests.get(url, timeout=DOWNLOAD_TIMEOUT, stream=True) as r, ZipFile(BytesIO(r.content)) as z:
+            # Download and extract zip
+            with ZipFile(download_archive(repo_path, url)) as z:
                 z.extractall(repo_path)
         elif len(remote_exts) and (".tar" in remote_exts or remote_exts[-1] == ".tgz"):
-            # Extract tar without writing file to disk
-            with requests.get(url, timeout=DOWNLOAD_TIMEOUT, stream=True) as r, tarfile.open(fileobj=BytesIO(r.content), mode="r|*") as z:
-                z.extractall(repo_path)
+            # Download and extract tar
+            safe_tar_extract(download_archive(repo_path, url), repo_path)
         elif len(remote_exts) and remote_exts[-1] == ".yml":
             # Download repo yml
             repo_path.mkdir(parents=True, exist_ok=True)
