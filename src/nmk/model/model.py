@@ -41,7 +41,7 @@ class NmkModel:
         is_list = is_dict = False
         if init_value is not None:
             # Yes: with real value read from file
-            NmkLogger.debug(f"New static config {name} with value '{init_value}'")
+            NmkLogger.debug(f"New static config {name} with value: {init_value}")
             cfg = NmkStaticConfig(name, self, path, init_value)
             is_list = isinstance(init_value, list)
             is_dict = isinstance(init_value, dict)

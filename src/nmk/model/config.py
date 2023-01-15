@@ -76,8 +76,10 @@ class NmkConfig(ABC):
                         segments = None
 
                     # Resolve from config
-                    assert ref_name not in resolved_from, f"Cyclic string substitution: resolving (again!) '{ref_name}' config from '{self.name}' config"
-                    assert ref_name in self.model.config, f"Unknown '{ref_name}' config referenced from '{self.name}' config"
+                    assert (
+                        ref_name not in resolved_from
+                    ), f"Cyclic string substitution: resolving (again!) '{ref_name}' config from '{self.name}' config"  # NOQA:B028
+                    assert ref_name in self.model.config, f"Unknown '{ref_name}' config referenced from '{self.name}' config"  # NOQA:B028
 
                     # Resolve reference
                     ref_value = self.model.config[ref_name].resolve(cache, resolved_from)

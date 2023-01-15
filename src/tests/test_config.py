@@ -193,12 +193,12 @@ class TestConfig(NmkTester):
         self.check_logs(
             "Config dump: { "
             + '"BASEDIR": "", '
-            + f'"ROOTDIR": "{json_serialized_path(self.test_folder)}", '
-            + f'"ROOTDIR_NMK": "{json_serialized_path(self.test_folder/".nmk")}", '
-            + f'"CACHEDIR": "{json_serialized_path(self.test_folder/".nmk"/"cache")}", '
-            + f'"PROJECTDIR": "{json_serialized_path(self.templates_root)}", '
-            + f'"PROJECTDIR_NMK": "{json_serialized_path(self.templates_root/".nmk")}", '
-            + f'"PROJECTFILES": [ "{json_serialized_path(self.template("simplest.yml"))}"'
+            + f'"ROOTDIR": "{json_serialized_path(self.test_folder)}", '  # NOQA:B028
+            + f'"ROOTDIR_NMK": "{json_serialized_path(self.test_folder/".nmk")}", '  # NOQA:B028
+            + f'"CACHEDIR": "{json_serialized_path(self.test_folder/".nmk"/"cache")}", '  # NOQA:B028
+            + f'"PROJECTDIR": "{json_serialized_path(self.templates_root)}", '  # NOQA:B028
+            + f'"PROJECTDIR_NMK": "{json_serialized_path(self.templates_root/".nmk")}", '  # NOQA:B028
+            + f'"PROJECTFILES": [ "{json_serialized_path(self.template("simplest.yml"))}"'  # NOQA:B028
         )
 
     def test_config_dot_no_dict(self):
