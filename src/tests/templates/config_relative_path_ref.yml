@@ -1,0 +1,4 @@
+config:
+    someConfig:
+        - ${r!PROJECTDIR_NMK}
+        - ${PROJECTDIR_NMK}
