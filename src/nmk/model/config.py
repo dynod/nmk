@@ -101,9 +101,20 @@ class NmkConfig(ABC):
                             v = v[segment]
                         ref_value = v
 
-                # Relative path, if applicable
-                if relative_path and isinstance(ref_value, Path):
-                    ref_value = ref_value.relative_to(self.model.config[NmkRootConfig.PROJECT_DIR].value)
+                # Relative path required?
+                if relative_path:
+                    try:
+                        # Update path(s) relatively to project root
+                        p_dir = self.model.config[NmkRootConfig.PROJECT_DIR].value
+                        if isinstance(ref_value, list):
+                            ref_value = [Path(v).relative_to(p_dir).as_posix() for v in ref_value]
+                        elif isinstance(ref_value, dict):
+                            ref_value = {k: Path(v).relative_to(p_dir).as_posix() for k, v in ref_value.items()}
+                        else:
+                            ref_value = Path(ref_value).relative_to(p_dir).as_posix()
+                    except ValueError:
+                        # Invalid relative reference
+                        raise AssertionError(f"Invalid relative path reference: {m.group(0)}")
 
                 # Replace with resolved value
                 begin, end = m.span(0)

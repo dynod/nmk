@@ -2,3 +2,9 @@ config:
     someConfig:
         - ${r!PROJECTDIR_NMK}
         - ${PROJECTDIR_NMK}
+    someList:
+        - ${PROJECTDIR_NMK}
+    someListRef: ${r!someList}
+    someDict:
+        foo: ${PROJECTDIR_NMK}
+    someDictRef: ${r!someDict}
