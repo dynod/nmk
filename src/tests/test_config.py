@@ -5,6 +5,11 @@ from nmk.parser import NmkParser
 from tests.utils import NmkTester
 
 
+# On Windows, json serialization escapes the \ in paths
+def json_serialized_path(in_path: Path) -> str:
+    return str(in_path).replace("\\", "\\\\")
+
+
 class TestConfig(NmkTester):
     def test_config_sample(self):
         # Dump config loaded from file
@@ -161,6 +166,10 @@ class TestConfig(NmkTester):
             expected_error="Cyclic string substitution: resolving (again!) 'someConfig' config from 'someOtherVar' config",
         )
 
+    def test_config_relative_path_reference(self):
+        self.nmk("config_relative_path_ref.yml", extra_args=["--print", "someConfig"])
+        self.check_logs(f'Config dump: {{ "someConfig": [ ".nmk", "{json_serialized_path(self.templates_root/".nmk")}" ] }}')  # NOQA:B028
+
     def test_config_override_final(self):
         self.nmk("config_override_final.yml", expected_error="While loading {project}: Can't override final config BASEDIR")
 
@@ -186,10 +195,6 @@ class TestConfig(NmkTester):
         )
 
         # Check for patterns
-        # On Windows, json serialization escapes the \ in paths
-        def json_serialized_path(in_path: Path) -> str:
-            return str(in_path).replace("\\", "\\\\")
-
         self.check_logs(
             "Config dump: { "
             + '"BASEDIR": "", '

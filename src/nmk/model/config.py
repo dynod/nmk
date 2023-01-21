@@ -64,6 +64,12 @@ class NmkConfig(ABC):
             if m is not None:
                 # Look for referenced config item name
                 ref_name = m.group(1)
+
+                # Relative path reference
+                relative_path = ref_name.startswith("r!")
+                if relative_path:
+                    ref_name = ref_name[2:]
+
                 if ref_name == NmkRootConfig.BASE_DIR:
                     # Resolve current path
                     ref_value = str(path if path is not None else self.path)
@@ -94,6 +100,10 @@ class NmkConfig(ABC):
                             assert segment in v, f"Unknown dict key {segment} in doted reference from {self.name} for {ref_name} value"
                             v = v[segment]
                         ref_value = v
+
+                # Relative path, if applicable
+                if relative_path and isinstance(ref_value, Path):
+                    ref_value = ref_value.relative_to(self.model.config[NmkRootConfig.PROJECT_DIR].value)
 
                 # Replace with resolved value
                 begin, end = m.span(0)
