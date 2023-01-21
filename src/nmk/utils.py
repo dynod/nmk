@@ -56,3 +56,26 @@ def create_dir_symlink(target: Path, link: Path):
     else:  # pragma: no cover
         # Standard symlink
         os.symlink(target, link)  # pragma: no cover
+
+
+def is_condition_set(value) -> bool:
+    """
+    Verify if condition is considered to be "true", depending on provided value
+
+    Parameters:
+        value(Any): value to be evaluated
+    """
+    # Condition depends on value type
+    if isinstance(value, list) or isinstance(value, dict):
+        # List/dict: should not be empty
+        return len(value) > 0
+    if isinstance(value, str):
+        # String:
+        # "false" (case insensitive), 0, empty --> False
+        # anything else --> True
+        return len(value) > 0 and value != "0" and value.lower() != "false"
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return value != 0
+    raise AssertionError(f"Can't compute value type to evaluate conditional behavior: {value}")

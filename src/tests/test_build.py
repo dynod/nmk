@@ -125,5 +125,5 @@ class TestBuild(NmkTester):
     def test_conditional_error(self):
         # Try with unhandled config condition type
         self.nmk(
-            "build_conditional_if.yml", extra_args=["errorBuild"], expected_error=f"Can't compute value type to evaluate conditional task: {os.path.sep}tmp"
+            "build_conditional_if.yml", extra_args=["errorBuild"], expected_error=f"Can't compute value type to evaluate conditional behavior: {os.path.sep}tmp"
         )
