@@ -167,8 +167,19 @@ class TestConfig(NmkTester):
         )
 
     def test_config_relative_path_reference(self):
-        self.nmk("config_relative_path_ref.yml", extra_args=["--print", "someConfig"])
-        self.check_logs(f'Config dump: {{ "someConfig": [ ".nmk", "{json_serialized_path(self.templates_root/".nmk")}" ] }}')  # NOQA:B028
+        self.nmk("config_relative_path_ref.yml", extra_args=["--print", "someConfig", "--print", "someListRef", "--print", "someDictRef"])
+        self.check_logs(
+            f'Config dump: {{ "someConfig": [ ".nmk", "{json_serialized_path(self.templates_root/".nmk")}" ], '  # NOQA:B028
+            + '"someListRef": [ ".nmk" ], '
+            + '"someDictRef": { "foo": ".nmk" } }'
+        )
+
+    def test_config_relative_path_invalid_reference(self):
+        self.nmk(
+            "config_relative_path_invalid_ref.yml",
+            extra_args=["--print", "someConfig"],
+            expected_error="Invalid relative path reference: ${{r!someFakePath}}",
+        )
 
     def test_config_override_final(self):
         self.nmk("config_override_final.yml", expected_error="While loading {project}: Can't override final config BASEDIR")
