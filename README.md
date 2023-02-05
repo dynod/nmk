@@ -1,7 +1,7 @@
 # nmk - next-gen make-like build system
 
 <!-- NMK-BADGES-BEGIN -->
-[![License: MPL](https://img.shields.io/github/license/dynod/nmk)](https://github.com/dynod/nmk/blob/main/LICENSE)
+[![License: MPL](https://img.shields.io/github/license/dynod/nmk?color=green)](https://github.com/dynod/nmk/blob/main/LICENSE)
 [![Checks](https://img.shields.io/github/actions/workflow/status/dynod/nmk/build.yml?branch=main&label=build%20%26%20u.t.)](https://github.com/dynod/nmk/actions?query=branch%3Amain)
 [![Issues](https://img.shields.io/github/issues-search/dynod/nmk?label=issues&query=is%3Aopen+is%3Aissue)](https://github.com/dynod/nmk/issues?q=is%3Aopen+is%3Aissue)
 [![Supported python versions](https://img.shields.io/badge/python-3.8%20--%203.11-blue)](https://www.python.org/)
