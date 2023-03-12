@@ -26,3 +26,6 @@
 	path = plugins/badges
 	url = git@github.com:dynod/nmk-badges.git
 	branch = main
+[submodule "plugins/doc"]
+	path = plugins/doc
+	url = git@github.com:dynod/nmk-doc.git
