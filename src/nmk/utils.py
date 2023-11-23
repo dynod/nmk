@@ -12,7 +12,7 @@ def run_with_logs(args: List[str], logger=NmkLogger, check: bool = True, cwd: Pa
     Execute subprocess, and logs output/error streams + error code
     """
     logger.debug(f"Running command: {args}")
-    cp = subprocess.run(args, check=False, capture_output=True, text=True, encoding="utf-8", cwd=cwd)
+    cp = subprocess.run(args, check=False, capture_output=True, text=True, encoding="utf-8", errors="ignore", cwd=cwd)
     logger.debug(f">> rc: {cp.returncode}")
     logger.debug(">> stderr:")
     list(map(logger.debug, cp.stderr.splitlines(keepends=False)))

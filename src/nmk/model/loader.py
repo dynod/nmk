@@ -51,7 +51,7 @@ class NmkLoader:
             NmkRootConfig.PROJECT_DIR: "",  # Will be updated as soon as initial project is loaded
             NmkRootConfig.PROJECT_NMK_DIR: "",  # Will be updated as soon as initial project is loaded
             NmkRootConfig.PROJECT_FILES: [],  # Will be updated as soon as files are loaded
-            NmkRootConfig.ENV: {k: v for k, v in os.environ.items()},
+            NmkRootConfig.ENV: dict(os.environ),
         }.items():
             self.model.add_config(name, None, value)
 

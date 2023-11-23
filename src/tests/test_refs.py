@@ -112,7 +112,7 @@ class TestRefs(NmkTester):
     def test_pip_install(self, monkeypatch):
         found_args = []
 
-        def record_process(all_args, check, capture_output, text, encoding, cwd):
+        def record_process(all_args, check, capture_output, text, encoding, cwd, errors):
             nonlocal found_args
             found_args = all_args
             return subprocess.CompletedProcess(all_args, 0, "", "")

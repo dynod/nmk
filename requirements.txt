@@ -28,7 +28,6 @@ requests
 pytest-xdist
 pytest-cov
 pytest-multilog
-sphinx-autoapi
 Jinja2
 
 
