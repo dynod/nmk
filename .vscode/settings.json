@@ -3,18 +3,16 @@
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": true
-        }
+        },
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
     },
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": true,
-    "python.linting.flake8Args": [
-        "--ignore=E203,E501,B902,W503"
-    ],
-    "python.formatting.provider": "black",
-    "python.formatting.blackArgs": [
+    "black-formatter.args": [
         "-l",
         "160"
+    ],
+    "flake8.args": [
+        "--ignore=E203,E501,B902,W503"
     ],
     "python.defaultInterpreterPath": "venv/bin/python",
     "python.autoComplete.extraPaths": [
