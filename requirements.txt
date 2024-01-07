@@ -25,6 +25,7 @@ pyyaml
 jsonschema
 rich
 requests
+buildenv
 pytest-xdist
 pytest-cov
 pytest-multilog

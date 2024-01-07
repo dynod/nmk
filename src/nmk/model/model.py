@@ -33,6 +33,7 @@ class NmkModel:
     tasks: Dict[str, NmkTask] = field(default_factory=dict)
     default_task: NmkTask = None
     tasks_config: Dict[str, NmkConfig] = field(default_factory=dict)
+    pip_args: str = ""
 
     def add_config(
         self, name: str, path: Path, init_value: Union[str, int, bool, list, dict] = None, resolver: object = None, task_config: bool = False
