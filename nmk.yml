@@ -37,6 +37,7 @@ config:
         - jsonschema
         - rich
         - requests
+        - buildenv
 
     # Extra setup data
     pythonSetupItems:

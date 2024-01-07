@@ -46,7 +46,7 @@ def log_install():
 
 
 @lru_cache(maxsize=None)
-def pip_install(url: str) -> Path:
+def pip_install(url: str, extra_pip_args: str) -> Path:
     # Check pip names
     m = PIP_PATTERN.match(url)
     assert m is not None, f"Malformed pip reference: {url}"
@@ -59,7 +59,7 @@ def pip_install(url: str) -> Path:
         log_install()
 
         # Trigger pip
-        run_pip(["install", pip_ref])
+        run_pip(["install", pip_ref], extra_args=extra_pip_args)
 
     return repo_path
 
@@ -124,7 +124,7 @@ def download_file(root: Path, url: str) -> Path:
 
 
 @lru_cache(maxsize=None)
-def cache_remote(root: Path, remote: str) -> Path:
+def cache_remote(root: Path, remote: str, extra_pip_args: str) -> Path:
     # Make sure remote format is valid
     parts = remote.split("!")
     assert len(parts) in [1, 2] and all(len(p) > 0 for p in parts), f"Unsupported repo remote syntax: {remote}"
@@ -132,6 +132,6 @@ def cache_remote(root: Path, remote: str) -> Path:
     sub_folder = Path(parts[1]) if len(parts) == 2 else Path()
 
     # Path will be relative to extracted folder (if suffix is specified)
-    out = (pip_install(remote_url) if remote_url.startswith(PIP_SCHEME) else download_file(root, remote_url)) / sub_folder
+    out = (pip_install(remote_url, extra_pip_args) if remote_url.startswith(PIP_SCHEME) else download_file(root, remote_url)) / sub_folder
     NmkLogger.debug(f"Cached remote path: {remote} --> {out}")
     return out

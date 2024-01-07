@@ -123,3 +123,20 @@ class TestRefs(NmkTester):
             expected_error="While loading pip://definitely-unknown-package>=1.2!inside/unknown.yml: Project file not found",
         )
         assert found_args == [sys.executable, "-m", "pip", "install", "definitely-unknown-package>=1.2"]
+
+    def test_pip_extra_args(self, monkeypatch):
+        found_args = []
+
+        def record_process(all_args, check, capture_output, text, encoding, cwd, errors):
+            nonlocal found_args
+            found_args = all_args
+            return subprocess.CompletedProcess(all_args, 0, "", "")
+
+        monkeypatch.setattr(subprocess, "run", record_process)
+        prj = self.prepare_project("pip_ref.yml")
+        self.prepare_project("buildenv.cfg")
+        self.nmk(
+            prj,
+            expected_error="While loading pip://some-unknown-package!foo.yml: Project file not found",
+        )
+        assert found_args == [sys.executable, "-m", "pip", "install", "some-unknown-package", "--some", "--fancy", "--args"]

@@ -24,11 +24,11 @@ def run_with_logs(args: List[str], logger=NmkLogger, check: bool = True, cwd: Pa
     return cp
 
 
-def run_pip(args: List[str], logger=NmkLogger) -> str:
+def run_pip(args: List[str], logger=NmkLogger, extra_args: str = "") -> str:
     """
     Execute pip command, with logging
     """
-    all_args = [sys.executable, "-m", "pip"] + args
+    all_args = [sys.executable, "-m", "pip"] + args + list(filter(lambda x: len(x) > 0, extra_args.strip(" ").split(" ")))
     return run_with_logs(all_args, logger).stdout
 
 

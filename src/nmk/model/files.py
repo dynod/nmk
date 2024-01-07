@@ -6,6 +6,7 @@ from typing import Callable, Dict, List, Union
 
 import jsonschema
 import yaml
+from buildenv import BuildEnvLoader
 from rich.emoji import Emoji
 from rich.text import Text
 
@@ -73,6 +74,7 @@ class NmkModelFile:
         # Init properties
         self._repos = None
         self.repo_cache = repo_cache
+        self.global_model = model
 
         try:
             # Resolve local file from project reference
@@ -84,6 +86,9 @@ class NmkModelFile:
                 NmkLogger.debug(f"{NmkRootConfig.PROJECT_DIR} updated to {p_dir}")
                 model.config[NmkRootConfig.PROJECT_DIR].static_value = p_dir
                 model.config[NmkRootConfig.PROJECT_NMK_DIR].static_value = p_dir / ".nmk"
+
+                # Also remember pip args from buildenv
+                model.pip_args = BuildEnvLoader(p_dir).pip_args
 
             # Remember file in model (if not already done)
             if self.file in model.files:
@@ -134,7 +139,7 @@ class NmkModelFile:
         # URL?
         if self.is_url(project_ref):
             # Cache-able reference
-            return cache_remote(self.repo_cache, self.convert_url(project_ref))
+            return cache_remote(self.repo_cache, self.convert_url(project_ref), self.global_model.pip_args)
 
         # Default case: assumed to be a local path
         return Path(project_ref)
