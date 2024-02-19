@@ -139,4 +139,4 @@ class TestRefs(NmkTester):
             prj,
             expected_error="While loading pip://some-unknown-package!foo.yml: Project file not found",
         )
-        assert found_args == [sys.executable, "-m", "pip", "install", "some-unknown-package", "--some", "--fancy", "--args"]
+        assert found_args == [sys.executable, "-m", "pip", "install", "some-unknown-package", "--require-virtualenv", "--some", "--fancy", "--args"]
