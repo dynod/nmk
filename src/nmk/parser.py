@@ -42,23 +42,23 @@ class NmkParser:
             dest="log_level",
             help="verbose mode (all messages, including debug ones)",
         )
-        lg.add_argument(
-            "--log-file", metavar="L", default="{ROOTDIR}/.nmk/nmk.log", help="write logs to L (default: {ROOTDIR}/.nmk/nmk.log)"
-        ).completer = argcomplete.completers.FilesCompleter(directories=True)
+        lg.add_argument("--log-file", metavar="L", default="{ROOTDIR}/.nmk/nmk.log", help="write logs to L (default: {ROOTDIR}/.nmk/nmk.log)").completer = (
+            argcomplete.completers.FilesCompleter(directories=True)
+        )
         lg.add_argument("--no-logs", action="store_true", default=False, help="disable logging")
 
         # Root folder
         rg = self.parser.add_argument_group("root folder options")
-        rg.add_argument(
-            "-r", "--root", metavar="R", type=Path, default=None, help="root folder (default: virtual env parent)"
-        ).completer = argcomplete.completers.DirectoriesCompleter()
+        rg.add_argument("-r", "--root", metavar="R", type=Path, default=None, help="root folder (default: virtual env parent)").completer = (
+            argcomplete.completers.DirectoriesCompleter()
+        )
         rg.add_argument("--no-cache", action="store_true", default=False, help="clear cache before resolving references")
 
         # Project
         pg = self.parser.add_argument_group("project options")
-        pg.add_argument(
-            "-p", "--project", metavar="P", default="nmk.yml", help="project file (default: nmk.yml)"
-        ).completer = argcomplete.completers.FilesCompleter(allowednames=["*.yml", "*.yaml"], directories=True)
+        pg.add_argument("-p", "--project", metavar="P", default="nmk.yml", help="project file (default: nmk.yml)").completer = (
+            argcomplete.completers.FilesCompleter(allowednames=["*.yml", "*.yaml"], directories=True)
+        )
 
         # Config
         cg = self.parser.add_argument_group("config options")

@@ -6,7 +6,7 @@
 # Package dependencies from nmk project files
 #
 
-nmk
+nmk-base
 black
 isort
 flake8

@@ -20,7 +20,7 @@ jobs:
                     - "3.10"
                     - "3.11"
                 command:
-                    - source loadme.sh nmk tests
+                    - ./buildenv.sh run nmk tests
         runs-on: ${{ matrix.os }}
         steps:
             # Checkout, with all submodules
@@ -90,7 +90,7 @@ jobs:
               with:
                   python-version: "3.8"
             - name: Build
-              run: source loadme.sh nmk build
+              run: ./buildenv.sh run nmk build git.dirty
 
             - name: Publish package on pypi.org
               uses: pypa/gh-action-pypi-publish@v1.5.0
