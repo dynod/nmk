@@ -22,7 +22,7 @@ def contribute_python_path(paths: List[str]):
         for added_path in added_paths:
             # Path must be a directory
             assert Path(added_path).is_dir(), f"Contributed python path is not found: {added_path}"
-            sys.path.append(added_path)
+            sys.path.insert(0, added_path)
 
 
 @dataclass
