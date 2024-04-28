@@ -1,25 +1,8 @@
 refs:
-    # Base+python plugins
-    - <base>/nmk_base/plugin.yml
-    - base:
-        local: plugins/base/src
-        remote: github://dynod/nmk-base/main/src
-    - <badges>/nmk_badges/plugin-defs.yml
-    - badges:
-        local: plugins/badges/src
-        remote: github://dynod/nmk-badges/main/src
-    - <github>/nmk_github/plugin-defs.yml
-    - github:
-        local: plugins/github/src
-        remote: github://dynod/nmk-github/main/src
-    - <python>/nmk_python/plugin-defs.yml
-    - python:
-        local: plugins/python/src
-        remote: github://dynod/nmk-python/main/src
-    - <vscode>/nmk_vscode/plugin-defs.yml
-    - vscode:
-        local: plugins/vscode/src
-        remote: github://dynod/nmk-vscode/main/src
+    # Plugins reference
+    - pip://nmk-github!plugin.yml
+    - pip://nmk-python!plugin.yml
+    - pip://nmk-vscode!plugin.yml
     - <workspace>/shared.yml
     - workspace:
         local: ../../shared
@@ -47,7 +30,3 @@ config:
             console_scripts: "\nnmk = nmk.__main__:main"
         options.package_data:
                 nmk.model: "*.yml"
-
-    # Add direct Jinja2 dep as it may not be installed at first through plug-ins deps
-    venvPkgDeps:
-        - Jinja2

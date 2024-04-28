@@ -43,6 +43,28 @@
     "editor.formatOnSave": true,
     "task.allowAutomaticTasks": "on",
     "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "args": [
+                "--init-file",
+                ".buildenv/shell.sh"
+            ]
+        }
+    },
+    "terminal.integrated.profiles.windows": {
+        "Git Bash": {
+            "args": [
+                "--init-file",
+                ".buildenv/shell.sh"
+            ]
+        },
+        "Command Prompt": {
+            "args": [
+                "/k",
+                ".buildenv\\shell.cmd"
+            ]
+        }
+    },
     "cSpell.allowCompoundWords": true,
     "cSpell.enableFiletypes": [
         "yaml",
