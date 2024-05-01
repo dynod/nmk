@@ -145,6 +145,10 @@ class TestConfig(NmkTester):
         self.nmk("config_python_path_resolver.yml", extra_args=["--print", "someResolved"])
         self.check_logs('Config dump: { "someResolved": "my dynamic value from python path" }')
 
+    def test_config_resolver_with_python_path_deprecated(self):
+        self.nmk("config_python_path_resolver_deprecated.yml", extra_args=["--print", "someResolved"])
+        self.check_logs('Config dump: { "someResolved": "my dynamic value from python path" }')
+
     def test_config_resolver_with_unknown_python_path(self):
         self.nmk("config_unknown_python_path_resolver.yml", expected_error="While loading {project}: Contributed python path is not found:")
 

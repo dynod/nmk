@@ -55,12 +55,23 @@ class NmkLoader:
         }.items():
             self.model.add_config(name, None, value)
 
-        # Init recursive files loading loop
+        # Init recursive files loading
         NmkModelFile(self.model.args.project, self.repo_cache, self.model, [])
+
+        # Loop 1: load python paths
+        for m in self.model.file_models.values():
+            file_model: NmkModelFile = m
+            file_model.load_paths()
+
+        # Loop 2: load config items + tasks
+        for m in self.model.file_models.values():
+            file_model: NmkModelFile = m
+            file_model.load_config()
+            file_model.load_tasks()
 
         # Refresh project files list
         NmkLogger.debug(f"Updating {NmkRootConfig.PROJECT_FILES} now that all files are loaded")
-        self.model.config[NmkRootConfig.PROJECT_FILES] = NmkStaticConfig(NmkRootConfig.PROJECT_FILES, self.model, None, list(self.model.files.keys()))
+        self.model.config[NmkRootConfig.PROJECT_FILES] = NmkStaticConfig(NmkRootConfig.PROJECT_FILES, self.model, None, list(self.model.file_paths))
 
     def override_config(self, config_list: List[str]):
         # Iterate on config

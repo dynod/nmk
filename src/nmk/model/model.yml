@@ -29,6 +29,12 @@ properties:
                             local:
                                 type: string
 
+    # python path
+    path:
+        type: array
+        items:
+            type: string
+
     # configuration
     config:
         $ref: "#/$defs/configType"
