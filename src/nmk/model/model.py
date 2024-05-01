@@ -7,28 +7,28 @@ from typing import Dict, List, Union
 
 from nmk.logs import NmkLogger
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkStaticConfig
-from nmk.model.keys import NmkRootConfig
 from nmk.model.task import NmkTask
 
 # Class separator
 CLASS_SEP = "."
 
 
-def contribute_python_path(paths: List[str]):
+def contribute_python_path(paths: List[Path]):
     # Extra paths?
-    added_paths = [p for p in paths if p not in sys.path]
-    if len(added_paths):
+    added_paths = [p for p in [x.resolve() for x in paths] if str(p) not in sys.path]
+    if len(added_paths):  # pragma: no branch
         NmkLogger.debug(f"Contributed python paths: {added_paths}")
         for added_path in added_paths:
             # Path must be a directory
-            assert Path(added_path).is_dir(), f"Contributed python path is not found: {added_path}"
-            sys.path.insert(0, added_path)
+            assert added_path.is_dir(), f"Contributed python path is not found: {added_path}"
+            sys.path.insert(0, str(added_path))
 
 
 @dataclass
 class NmkModel:
     args: Namespace
-    files: Dict[Path, object] = field(default_factory=dict)
+    file_paths: List[Path] = field(default_factory=list)
+    file_models: Dict[Path, object] = field(default_factory=dict)
     config: Dict[str, NmkConfig] = field(default_factory=dict)
     tasks: Dict[str, NmkTask] = field(default_factory=dict)
     default_task: NmkTask = None
@@ -87,9 +87,6 @@ class NmkModel:
     def load_class(self, qualified_class: str, expected_type: object) -> object:
         assert CLASS_SEP in qualified_class, f"Invalid class qualified name: {qualified_class} (missing separator: {CLASS_SEP})"
         class_parts = qualified_class.split(CLASS_SEP)
-
-        # Contribute to python path
-        contribute_python_path(self.config[NmkRootConfig.PYTHON_PATH].resolve(False))
 
         try:
             # Load specified class

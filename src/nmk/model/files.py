@@ -16,7 +16,7 @@ from nmk.model.builder import NmkTaskBuilder
 from nmk.model.cache import PIP_SCHEME, cache_remote
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig
 from nmk.model.keys import NmkRootConfig
-from nmk.model.model import NmkModel
+from nmk.model.model import NmkModel, contribute_python_path
 from nmk.model.resolver import NmkConfigResolver
 from nmk.model.task import NmkTask
 
@@ -49,6 +49,7 @@ class NmkModelK:
     SILENT = "silent"
     IF = "if"
     UNLESS = "unless"
+    PATH = "path"
 
 
 # Data class for repository reference
@@ -75,6 +76,8 @@ class NmkModelFile:
         self._repos = None
         self.repo_cache = repo_cache
         self.global_model = model
+        self.project_ref = project_ref
+        self.parent_refs = refs
 
         try:
             # Resolve local file from project reference
@@ -90,12 +93,12 @@ class NmkModelFile:
                 # Also remember pip args from buildenv
                 model.pip_args = BuildEnvLoader(p_dir).pip_args
 
-            # Remember file in model (if not already done)
-            if self.file in model.files:
+            # Remember file path in model (to avoid recursive loading)
+            if self.file in model.file_paths:
                 # Already known file
                 NmkLogger.debug(f"{self.file} file already loaded, ignore...")
                 return
-            model.files[self.file] = self
+            model.file_paths.append(self.file)
 
             # Load YAML model
             assert self.file.is_file(), "Project file not found"
@@ -116,18 +119,19 @@ class NmkModelFile:
             for ref_file_path in self.refs:
                 NmkModelFile(ref_file_path, self.repo_cache, model, refs + [project_ref])
 
-            # Load config
-            self.load_config(model)
-
-            # Load tasks
-            self.load_tasks(model)
+            # Remember file model (in loading order)
+            model.file_models[self.file] = self
 
         except Exception as e:
             if isinstance(e, NmkFileLoadingError):
                 raise e
-            raise NmkFileLoadingError(
-                project_ref, str(e) + (("\n" + "\n".join(f" --> referenced from {r}" for r in refs)) if len(refs) else "")
-            ).with_traceback(e.__traceback__)
+            self.__raise_with_refs(e)
+
+    def __raise_with_refs(self, e: Exception):
+        # Raise an exception with parent files
+        raise NmkFileLoadingError(
+            self.project_ref, str(e) + (("\n" + "\n".join(f" --> referenced from {r}" for r in self.parent_refs)) if len(self.parent_refs) else "")
+        ).with_traceback(e.__traceback__)
 
     def is_url(self, project_ref: str) -> bool:
         # Is this ref a known URL?
@@ -227,51 +231,93 @@ class NmkModelFile:
 
         return self._repos
 
-    def load_config(self, model: NmkModel):
-        # Is this file providing config items?
-        if NmkModelK.CONFIG not in self.model:
-            return
+    def load_config(self):
+        try:
+            # Is this file providing config items?
+            if NmkModelK.CONFIG not in self.model:
+                return
 
-        # Iterate on config items
-        for name, candidate in self.model[NmkModelK.CONFIG].items():
-            # Complex item?
-            if isinstance(candidate, dict) and NmkModelK.RESOLVER in candidate:
-                # With a resolver
-                model.add_config(name, self.file.parent, resolver=model.load_class(candidate[NmkModelK.RESOLVER], NmkConfigResolver))
-            else:
-                # Simple config item, direct add
-                model.add_config(name, self.file.parent, candidate)
+            # Iterate on config items
+            for name, candidate in self.model[NmkModelK.CONFIG].items():
+                # Complex item?
+                if isinstance(candidate, dict) and NmkModelK.RESOLVER in candidate:
+                    # With a resolver
+                    self.global_model.add_config(
+                        name, self.file.parent, resolver=self.global_model.load_class(candidate[NmkModelK.RESOLVER], NmkConfigResolver)
+                    )
+                else:
+                    # Simple config item, direct add
+                    self.global_model.add_config(name, self.file.parent, candidate)
 
-    def load_tasks(self, model: NmkModel):
-        # Is this file providing config items?
-        if NmkModelK.TASKS not in self.model:
-            return
+                # Deprecated python path contribution
+                if name == NmkRootConfig.PYTHON_PATH:
+                    # Python path to be contributed from config item? (deprecated)
+                    config_paths = self.global_model.config[name].resolve(False)
 
-        # Iterate on task items
-        for name, candidate in self.model[NmkModelK.TASKS].items():
-            # Contribute to model
-            model.add_task(
-                NmkTask(
-                    name,
-                    self.load_property(candidate, NmkModelK.DESCRIPTION),
-                    self.load_property(candidate, NmkModelK.SILENT, False),
-                    self.load_property(candidate, NmkModelK.EMOJI, mapper=self.load_emoji),
-                    self.load_property(candidate, NmkModelK.BUILDER, mapper=lambda cls: model.load_class(cls, NmkTaskBuilder)),
-                    self.load_property(candidate, NmkModelK.PARAMS, mapper=lambda v, n: self.load_param_dict(v, n, model), task_name=name),
-                    self.load_property(candidate, NmkModelK.DEPS, [], mapper=lambda dp: [i for n, i in enumerate(dp) if i not in dp[:n]]),  # Remove duplicates
-                    self.load_property(candidate, NmkModelK.APPEND_TO),
-                    self.load_property(candidate, NmkModelK.PREPEND_TO),
-                    self.load_property(candidate, NmkModelK.INPUT, mapper=lambda v, n: self.load_str_list_cfg(v, n, NmkModelK.INPUT, model), task_name=name),
-                    self.load_property(candidate, NmkModelK.OUTPUT, mapper=lambda v, n: self.load_str_list_cfg(v, n, NmkModelK.OUTPUT, model), task_name=name),
-                    self.load_property(candidate, NmkModelK.IF, mapper=lambda v, n: self.load_str_cfg(v, n, NmkModelK.IF, model), task_name=name),
-                    self.load_property(candidate, NmkModelK.UNLESS, mapper=lambda v, n: self.load_str_cfg(v, n, NmkModelK.UNLESS, model), task_name=name),
-                    model,
-                ),
-            )
+                    # Warn about deprecated way to contribute to python path
+                    NmkLogger.warning(f'Python path contribution through "pythonPath" config item is deprecated (from {self.file})')
 
-            # If declared as default task, remember it in model
-            if self.load_property(candidate, NmkModelK.DEFAULT, False):
-                model.set_default_task(name)
+                    # Contribute to python path
+                    contribute_python_path([Path(p) for p in config_paths])
+        except Exception as e:
+            self.__raise_with_refs(e)
+
+    def load_tasks(self):
+        try:
+            # Is this file providing config items?
+            if NmkModelK.TASKS not in self.model:
+                return
+
+            # Iterate on task items
+            for name, candidate in self.model[NmkModelK.TASKS].items():
+                # Contribute to model
+                self.global_model.add_task(
+                    NmkTask(
+                        name,
+                        self.load_property(candidate, NmkModelK.DESCRIPTION),
+                        self.load_property(candidate, NmkModelK.SILENT, False),
+                        self.load_property(candidate, NmkModelK.EMOJI, mapper=self.load_emoji),
+                        self.load_property(candidate, NmkModelK.BUILDER, mapper=lambda cls: self.global_model.load_class(cls, NmkTaskBuilder)),
+                        self.load_property(candidate, NmkModelK.PARAMS, mapper=lambda v, n: self.load_param_dict(v, n), task_name=name),
+                        self.load_property(
+                            candidate, NmkModelK.DEPS, [], mapper=lambda dp: [i for n, i in enumerate(dp) if i not in dp[:n]]
+                        ),  # Remove duplicates
+                        self.load_property(candidate, NmkModelK.APPEND_TO),
+                        self.load_property(candidate, NmkModelK.PREPEND_TO),
+                        self.load_property(candidate, NmkModelK.INPUT, mapper=lambda v, n: self.load_str_list_cfg(v, n, NmkModelK.INPUT), task_name=name),
+                        self.load_property(candidate, NmkModelK.OUTPUT, mapper=lambda v, n: self.load_str_list_cfg(v, n, NmkModelK.OUTPUT), task_name=name),
+                        self.load_property(candidate, NmkModelK.IF, mapper=lambda v, n: self.load_str_cfg(v, n, NmkModelK.IF), task_name=name),
+                        self.load_property(candidate, NmkModelK.UNLESS, mapper=lambda v, n: self.load_str_cfg(v, n, NmkModelK.UNLESS), task_name=name),
+                        self.global_model,
+                    ),
+                )
+
+                # If declared as default task, remember it in model
+                if self.load_property(candidate, NmkModelK.DEFAULT, False):
+                    self.global_model.set_default_task(name)
+
+        except Exception as e:
+            self.__raise_with_refs(e)
+
+    def load_paths(self):
+        try:
+            # Is this file providing python path contribution?
+            if NmkModelK.PATH not in self.model:
+                return
+
+            # Prepare paths list
+            contributed_paths = []
+            for p in self.model[NmkModelK.PATH]:
+                candidate = Path(p)
+                if not candidate.is_absolute():  # pragma: no branch
+                    candidate = self.file.parent / candidate
+                contributed_paths.append(candidate)
+
+            # Extend python path
+            contribute_python_path(contributed_paths)
+
+        except Exception as e:
+            self.__raise_with_refs(e)
 
     def load_emoji(self, candidate: str) -> Union[Emoji, Text]:
         # May be a renderable text
@@ -286,14 +332,14 @@ class NmkModelFile:
         else:
             return mapper(value, task_name) if value is not None else None
 
-    def load_str_list_cfg(self, v: list, task_name: str, in_out: str, model: NmkModel) -> NmkListConfig:
+    def load_str_list_cfg(self, v: list, task_name: str, in_out: str) -> NmkListConfig:
         # Add string list config
-        return model.add_config(f"{task_name}_{in_out}", self.file.parent, v if isinstance(v, list) else [v], task_config=True)
+        return self.global_model.add_config(f"{task_name}_{in_out}", self.file.parent, v if isinstance(v, list) else [v], task_config=True)
 
-    def load_str_cfg(self, v: list, task_name: str, condition: str, model: NmkModel) -> NmkConfig:
+    def load_str_cfg(self, v: list, task_name: str, condition: str) -> NmkConfig:
         # Add string config
-        return model.add_config(f"{task_name}_{condition}", self.file.parent, v, task_config=True)
+        return self.global_model.add_config(f"{task_name}_{condition}", self.file.parent, v, task_config=True)
 
-    def load_param_dict(self, v: dict, task_name: str, model: NmkModel) -> NmkDictConfig:
+    def load_param_dict(self, v: dict, task_name: str) -> NmkDictConfig:
         # Map builder parameters
-        return model.add_config(f"{task_name}_params", self.file.parent, v, task_config=True)
+        return self.global_model.add_config(f"{task_name}_params", self.file.parent, v, task_config=True)
