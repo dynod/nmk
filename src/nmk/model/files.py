@@ -33,6 +33,7 @@ class NmkModelK:
     REFS = "refs"
     REMOTE = "remote"
     LOCAL = "local"
+    OVERRIDE = "override"
     CONFIG = "config"
     RESOLVER = "__resolver__"
     TASKS = "tasks"
@@ -58,6 +59,7 @@ class NmkRepo:
     name: str
     remote: str
     local: Path = None
+    override: bool = False
 
 
 @lru_cache(maxsize=None)
@@ -175,13 +177,21 @@ class NmkModelFile:
         # Repo-like reference?
         assert not ref.startswith("<"), f"Unresolved repo-like relative reference: {ref}"
 
-        # Either URL or relative local reference?
-        return ref if self.is_url(ref) else self.make_absolute(Path(ref))
+        # Remote ref may be overridden by a local path
+        checked_ref = self.global_model.check_remote_ref(ref) if self.is_url(ref) else ref
+        if self.is_url(checked_ref):
+            # Still a remote ref (not overridden)
+            return checked_ref
+        if checked_ref == ref:
+            # Local ref (not overridden)
+            return self.make_absolute(Path(checked_ref))
+        return checked_ref
 
     def make_absolute(self, p: Path) -> str:
         # Make relative to current file, if needed
+        current_file_path = (self.file if self.file.is_absolute() else Path.cwd() / self.file).parent
         if not p.is_absolute():
-            p = self.file.parent / p
+            p = current_file_path / p
         else:
             NmkLogger.warning(f"Absolute path (not portable) used in project: {p}")
         return str(p)
@@ -192,9 +202,9 @@ class NmkModelFile:
 
         # Local path exists?
         if repo.local is not None:
-            local_repo_dir = Path(self.make_absolute(repo.local))
-            if local_repo_dir.is_dir():
-                return str(local_repo_dir / rel_ref)
+            assert not repo.override or repo.local.is_dir(), f'Local path "{repo.local}" not found for repository "{repo.name}" using override option'
+            if repo.local.is_dir():
+                return str(repo.local / rel_ref)
 
         # Nothing found locally: go with remote reference
         # Use "as_posix" to keep "/" slashes in URL even on Windows
@@ -219,7 +229,17 @@ class NmkModelFile:
                 for k, r in repo_dict.items():
                     if isinstance(r, dict):
                         # Full repo item, with all details
-                        new_repos[k] = NmkRepo(k, r[NmkModelK.REMOTE], Path(r[NmkModelK.LOCAL]) if NmkModelK.LOCAL in r else None)
+                        r = NmkRepo(
+                            k,
+                            r[NmkModelK.REMOTE],
+                            Path(self.make_absolute(Path(r[NmkModelK.LOCAL]))) if NmkModelK.LOCAL in r else None,
+                            r[NmkModelK.OVERRIDE] if NmkModelK.OVERRIDE in r else False,
+                        )
+                        new_repos[k] = r
+
+                        # If override option is set, remember remote ref to be replaced
+                        if r.override:
+                            self.global_model.replace_remote(r.remote, r.local)
                     else:
                         # Simple repo item, with only remote reference
                         new_repos[k] = NmkRepo(k, r)

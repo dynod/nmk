@@ -1,0 +1,9 @@
+refs:
+    # Valid reference
+    - <someRepo>/src/tests/templates/simplest.yml
+    - someRepo:
+        local: ../../..
+        remote: https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main
+        override: true
+    - remote_repo_override_dep.yml
+    - github://dynod/nmk/main/src/tests/templates/simplest.yml

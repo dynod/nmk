@@ -28,6 +28,9 @@ properties:
                             # Repository local reference
                             local:
                                 type: string
+                            # Remote references override
+                            override:
+                                type: boolean
 
     # python path
     path:

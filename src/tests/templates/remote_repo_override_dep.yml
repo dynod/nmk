@@ -1,0 +1,3 @@
+refs:
+    # Remote reference expected to be replaced
+    - https://github.com/dynod/nmk/archive/refs/heads/main.zip!nmk-main/src/tests/templates/simplest.yml
