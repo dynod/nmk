@@ -34,6 +34,7 @@ class NmkModel:
     default_task: NmkTask = None
     tasks_config: Dict[str, NmkConfig] = field(default_factory=dict)
     pip_args: str = ""
+    overridden_refs: Dict[str, Path] = field(default_factory=dict)
 
     def add_config(
         self, name: str, path: Path, init_value: Union[str, int, bool, list, dict] = None, resolver: object = None, task_config: bool = False
@@ -118,3 +119,18 @@ class NmkModel:
         # Just point to default task
         NmkLogger.debug(f"New default task: {name}")
         self.default_task = self.tasks[name]
+
+    def replace_remote(self, remote: str, local: Path):
+        # Remember remote ref to be replaced by a local one
+        NmkLogger.debug(f"Override all remote refs to {remote} by {local}")
+        self.overridden_refs[remote] = local
+
+    def check_remote_ref(self, remote: str) -> Path:
+        # Replace potentially overridden remote ref by its local equivalent
+        for prefix in self.overridden_refs.keys():
+            if remote.startswith(prefix):
+                prefix_len = len(prefix)
+                local = self.overridden_refs[prefix] / remote[prefix_len + (1 if remote[prefix_len] == "/" else 0) :]
+                NmkLogger.debug(f'Replacing remote ref "{remote}" by overridden local equivalent: "{local}"')
+                return local
+        return remote

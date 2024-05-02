@@ -54,6 +54,10 @@ class TestRefs(NmkTester):
             expected_error="While loading https://github.com/dynod/nmk/archive/refs/heads/main.foo!nmk-main/src/tests/templates/invalid.yml: Unsupported remote file format: .foo",
         )
 
+    def test_repo_override(self):
+        self.nmk("remote_repo_override.yml")
+        self.check_logs(["Nothing to do", 'Replacing remote ref "'])
+
     def test_unknown_tar_ref(self):
         self.nmk(
             "remote_repo_ref_tar.yml",
