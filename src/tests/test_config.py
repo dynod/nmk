@@ -173,7 +173,7 @@ class TestConfig(NmkTester):
     def test_config_relative_path_reference(self):
         self.nmk("config_relative_path_ref.yml", extra_args=["--print", "someConfig", "--print", "someListRef", "--print", "someDictRef"])
         self.check_logs(
-            f'Config dump: {{ "someConfig": [ ".nmk", "{json_serialized_path(self.templates_root/".nmk")}" ], '  # NOQA:B028
+            f'Config dump: {{ "someConfig": [ ".nmk", "{json_serialized_path(self.templates_root / ".nmk")}" ], '  # NOQA:B028
             + '"someListRef": [ ".nmk" ], '
             + '"someDictRef": { "foo": ".nmk" } }'
         )
@@ -214,10 +214,10 @@ class TestConfig(NmkTester):
             "Config dump: { "
             + '"BASEDIR": "", '
             + f'"ROOTDIR": "{json_serialized_path(self.test_folder)}", '  # NOQA:B028
-            + f'"ROOTDIR_NMK": "{json_serialized_path(self.test_folder/".nmk")}", '  # NOQA:B028
-            + f'"CACHEDIR": "{json_serialized_path(self.test_folder/".nmk"/"cache")}", '  # NOQA:B028
+            + f'"ROOTDIR_NMK": "{json_serialized_path(self.test_folder / ".nmk")}", '  # NOQA:B028
+            + f'"CACHEDIR": "{json_serialized_path(self.test_folder / ".nmk" / "cache")}", '  # NOQA:B028
             + f'"PROJECTDIR": "{json_serialized_path(self.templates_root)}", '  # NOQA:B028
-            + f'"PROJECTDIR_NMK": "{json_serialized_path(self.templates_root/".nmk")}", '  # NOQA:B028
+            + f'"PROJECTDIR_NMK": "{json_serialized_path(self.templates_root / ".nmk")}", '  # NOQA:B028
             + f'"PROJECTFILES": [ "{json_serialized_path(self.template("simplest.yml"))}"'  # NOQA:B028
         )
 
