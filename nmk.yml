@@ -1,5 +1,6 @@
 refs:
     # Plugins reference
+    - pip://nmk-badges!plugin.yml
     - pip://nmk-github!plugin.yml
     - pip://nmk-python!plugin.yml
     - pip://nmk-vscode!plugin.yml
