@@ -5,8 +5,8 @@ from nmk.model.resolver import NmkConfigResolver, NmkDictConfigResolver, NmkIntC
 
 
 class StrResolver(NmkStrConfigResolver):
-    def get_value(self, name: str) -> str:
-        return "my dynamic value"
+    def get_value(self, name: str, qualifier: str) -> str:
+        return f"my {qualifier} value"
 
 
 class LyingResolver(NmkIntConfigResolver):

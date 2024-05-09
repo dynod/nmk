@@ -114,6 +114,7 @@ class TestConfig(NmkTester):
         )
 
     def test_config_str_resolver(self):
+        # Test string resolver, with some parameters
         self.nmk("config_str_resolver.yml", extra_args=["--print", "someResolved"])
         self.check_logs('Config dump: { "someResolved": "my dynamic value" }')
 
