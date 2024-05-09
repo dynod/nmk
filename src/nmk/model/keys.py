@@ -1,5 +1,4 @@
 class NmkRootConfig:
-    PYTHON_PATH = "pythonPath"
     BASE_DIR = "BASEDIR"
     ROOT_DIR = "ROOTDIR"
     ROOT_NMK_DIR = "ROOTDIR_NMK"

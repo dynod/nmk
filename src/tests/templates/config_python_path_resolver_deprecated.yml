@@ -1,5 +1,0 @@
-config:
-    pythonPath:
-        - ${BASEDIR}/code
-    someResolved:
-        __resolver__: contributed_resolvers.StrResolver

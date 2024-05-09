@@ -268,17 +268,6 @@ class NmkModelFile:
                 else:
                     # Simple config item, direct add
                     self.global_model.add_config(name, self.file.parent, candidate)
-
-                # Deprecated python path contribution
-                if name == NmkRootConfig.PYTHON_PATH:
-                    # Python path to be contributed from config item? (deprecated)
-                    config_paths = self.global_model.config[name].resolve(False)
-
-                    # Warn about deprecated way to contribute to python path
-                    NmkLogger.warning(f'Python path contribution through "pythonPath" config item is deprecated (from {self.file})')
-
-                    # Contribute to python path
-                    contribute_python_path([Path(p) for p in config_paths])
         except Exception as e:
             self.__raise_with_refs(e)
 
