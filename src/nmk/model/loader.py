@@ -43,7 +43,6 @@ class NmkLoader:
         # Add built-in config items
         root = self.model.args.root.resolve()
         for name, value in {
-            NmkRootConfig.PYTHON_PATH: [],
             NmkRootConfig.BASE_DIR: "",  # Useless while directly referenced (must identify current project file parent dir)
             NmkRootConfig.ROOT_DIR: root,
             NmkRootConfig.ROOT_NMK_DIR: self.root_nmk_dir,

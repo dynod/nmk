@@ -145,10 +145,6 @@ class TestConfig(NmkTester):
         self.nmk("config_python_path_resolver.yml", extra_args=["--print", "someResolved"])
         self.check_logs('Config dump: { "someResolved": "my dynamic value from python path" }')
 
-    def test_config_resolver_with_python_path_deprecated(self):
-        self.nmk("config_python_path_resolver_deprecated.yml", extra_args=["--print", "someResolved"])
-        self.check_logs('Config dump: { "someResolved": "my dynamic value from python path" }')
-
     def test_config_resolver_with_unknown_python_path(self):
         self.nmk("config_unknown_python_path_resolver.yml", expected_error="While loading {project}: Contributed python path is not found:")
 
@@ -190,7 +186,7 @@ class TestConfig(NmkTester):
 
     def test_config_builtin(self):
         self.nmk(
-            "simplest.yml",
+            "config_basedir_ref.yml",
             extra_args=[
                 "--print",
                 "ROOTDIR",
@@ -206,6 +202,8 @@ class TestConfig(NmkTester):
                 "PROJECTFILES",
                 "--print",
                 "BASEDIR",
+                "--print",
+                "foo",
             ],
         )
 
@@ -213,12 +211,13 @@ class TestConfig(NmkTester):
         self.check_logs(
             "Config dump: { "
             + '"BASEDIR": "", '
-            + f'"ROOTDIR": "{json_serialized_path(self.test_folder)}", '  # NOQA:B028
-            + f'"ROOTDIR_NMK": "{json_serialized_path(self.test_folder / ".nmk")}", '  # NOQA:B028
-            + f'"CACHEDIR": "{json_serialized_path(self.test_folder / ".nmk" / "cache")}", '  # NOQA:B028
-            + f'"PROJECTDIR": "{json_serialized_path(self.templates_root)}", '  # NOQA:B028
-            + f'"PROJECTDIR_NMK": "{json_serialized_path(self.templates_root / ".nmk")}", '  # NOQA:B028
-            + f'"PROJECTFILES": [ "{json_serialized_path(self.template("simplest.yml"))}"'  # NOQA:B028
+            + f'"ROOTDIR": "{json_serialized_path(self.test_folder)}", '
+            + f'"ROOTDIR_NMK": "{json_serialized_path(self.test_folder / ".nmk")}", '
+            + f'"CACHEDIR": "{json_serialized_path(self.test_folder / ".nmk" / "cache")}", '
+            + f'"PROJECTDIR": "{json_serialized_path(self.templates_root)}", '
+            + f'"PROJECTDIR_NMK": "{json_serialized_path(self.templates_root / ".nmk")}", '
+            + f'"PROJECTFILES": [ "{json_serialized_path(self.template("config_basedir_ref.yml"))}" ], '
+            + f'"foo": "{json_serialized_path(self.templates_root)}/foo"'
         )
 
     def test_config_dot_no_dict(self):
@@ -251,12 +250,12 @@ class TestConfig(NmkTester):
         configs = ConfigCompleter()(
             "", None, None, NmkParser().parse(["--root", self.test_folder.as_posix(), "-p", self.template("config_sample.yml").as_posix()])
         )
-        assert len(configs) == 6 + 9  # 6 provided one + 9 built-ins
+        assert len(configs) == 6 + 8  # 6 provided one + 8 built-ins
         assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict", "otherDict"])
 
         # Without final ones
         configs = ConfigCompleter(False)(
             "", None, None, NmkParser().parse(["--root", self.test_folder.as_posix(), "-p", self.template("config_sample.yml").as_posix()])
         )
-        assert len(configs) == 6 + 1  # 5 provided one + 1 non-final built-in
+        assert len(configs) == 6  # 6 provided one only (all built-ins are final)
         assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict", "otherDict"])

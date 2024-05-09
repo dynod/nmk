@@ -1,0 +1,2 @@
+config:
+    foo: ${BASEDIR}/foo
