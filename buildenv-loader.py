@@ -257,7 +257,11 @@ class BuildEnvLoader:
             # Prepare pip install extra args, if any
             pip_args = self.pip_args.split(" ")
 
-            # Setup venv
+            # Setup venv (unless path contains spaces)
+            assert " " not in str(self.venv_path), (
+                "Current path contains spaces, which definitely doesn't work with some of venv generated scripts.\n"
+                + "Please consider moving your project in a path without spaces."
+            )
             logger.info("Creating venv...")
             env_builder.clear = False
             env_builder.create(self.venv_path)
@@ -293,7 +297,10 @@ class BuildEnvLoader:
 if __name__ == "__main__":  # pragma: no cover
     try:
         logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
-        sys.exit(BuildEnvLoader(Path(__file__).parent).setup(sys.argv[1:]))
+        project_path = Path(__file__).parent
+        if not project_path.is_absolute():
+            project_path = Path.cwd() / project_path
+        sys.exit(BuildEnvLoader(project_path).setup(sys.argv[1:]))
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
