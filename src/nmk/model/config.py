@@ -148,36 +148,6 @@ class NmkStaticConfig(NmkConfig):
 
 
 @dataclass
-class NmkResolvedConfig(NmkConfig):
-    resolver: Callable
-
-    def resolve(self, cache: bool = True, resolved_from: Set[str] = None) -> Union[str, int, bool, list, dict]:
-        # Always disable cache if resolver is volatile
-        return super().resolve(cache and not self.resolver.is_volatile(self.name), resolved_from)
-
-    def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> Union[str, int, bool, list, dict]:
-        try:
-            # Cache value from resolver if not done yet, or redo if value is declared to be volatile
-            out = self.resolver.get_value(self.name)
-
-            # Make sure the resolver has returned expected type
-            got_type = type(out)
-            declared_type = self.value_type
-            assert isinstance(out, declared_type), f"Invalid type returned by resolver: got {got_type.__name__}, expecting {declared_type.__name__}"
-            return self._format(cache, out, resolved_from)
-        except Exception as e:
-            raise Exception(f"Error occurred while resolving config {self.name}: {e}").with_traceback(e.__traceback__)
-
-    @property
-    def value_type(self) -> object:
-        try:
-            # Ask resolver for value type
-            return self.resolver.get_type(self.name)
-        except Exception as e:
-            raise Exception(f"Error occurred while getting type for config {self.name}: {e}").with_traceback(e.__traceback__)
-
-
-@dataclass
 class NmkMergedConfig(NmkConfig):
     static_list: List[NmkStaticConfig] = field(default_factory=list)
 
@@ -237,3 +207,35 @@ class NmkDictConfig(NmkMergedConfig):
     @property
     def value_type(self) -> object:
         return dict
+
+
+@dataclass
+class NmkResolvedConfig(NmkConfig):
+    resolver: Callable
+    params: NmkDictConfig
+
+    def resolve(self, cache: bool = True, resolved_from: Set[str] = None) -> Union[str, int, bool, list, dict]:
+        # Always disable cache if resolver is volatile
+        return super().resolve(cache and not self.resolver.is_volatile(self.name), resolved_from)
+
+    def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> Union[str, int, bool, list, dict]:
+        try:
+            # Cache value from resolver if not done yet, or redo if value is declared to be volatile
+            params = self.params.value if self.params is not None else {}
+            out = self.resolver.get_value(self.name, **params)
+
+            # Make sure the resolver has returned expected type
+            got_type = type(out)
+            declared_type = self.value_type
+            assert isinstance(out, declared_type), f"Invalid type returned by resolver: got {got_type.__name__}, expecting {declared_type.__name__}"
+            return self._format(cache, out, resolved_from)
+        except Exception as e:
+            raise Exception(f"Error occurred while resolving config {self.name}: {e}").with_traceback(e.__traceback__)
+
+    @property
+    def value_type(self) -> object:
+        try:
+            # Ask resolver for value type
+            return self.resolver.get_type(self.name)
+        except Exception as e:
+            raise Exception(f"Error occurred while getting type for config {self.name}: {e}").with_traceback(e.__traceback__)

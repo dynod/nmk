@@ -261,9 +261,12 @@ class NmkModelFile:
             for name, candidate in self.model[NmkModelK.CONFIG].items():
                 # Complex item?
                 if isinstance(candidate, dict) and NmkModelK.RESOLVER in candidate:
-                    # With a resolver
+                    # With a resolver, and eventually params
                     self.global_model.add_config(
-                        name, self.file.parent, resolver=self.global_model.load_class(candidate[NmkModelK.RESOLVER], NmkConfigResolver)
+                        name,
+                        self.file.parent,
+                        resolver=self.global_model.load_class(candidate[NmkModelK.RESOLVER], NmkConfigResolver),
+                        resolver_params=self.load_property(candidate, NmkModelK.PARAMS, mapper=lambda v, n: self.load_param_dict(v, n), task_name=name),
                     )
                 else:
                     # Simple config item, direct add
@@ -350,5 +353,5 @@ class NmkModelFile:
         return self.global_model.add_config(f"{task_name}_{condition}", self.file.parent, v, task_config=True)
 
     def load_param_dict(self, v: dict, task_name: str) -> NmkDictConfig:
-        # Map builder parameters
+        # Map builder/resolver parameters
         return self.global_model.add_config(f"{task_name}_params", self.file.parent, v, task_config=True)

@@ -37,7 +37,13 @@ class NmkModel:
     overridden_refs: Dict[str, Path] = field(default_factory=dict)
 
     def add_config(
-        self, name: str, path: Path, init_value: Union[str, int, bool, list, dict] = None, resolver: object = None, task_config: bool = False
+        self,
+        name: str,
+        path: Path,
+        init_value: Union[str, int, bool, list, dict] = None,
+        resolver: object = None,
+        task_config: bool = False,
+        resolver_params: NmkDictConfig = None,
     ) -> NmkConfig:
         # Real value?
         is_list = is_dict = False
@@ -52,7 +58,7 @@ class NmkModel:
             # No: with resolver
             assert resolver is not None, f"Internal error: resolver is not set for config {name}"
             NmkLogger.debug(f"New dynamic config {name} with resolver class {type(resolver).__name__}")
-            cfg = NmkResolvedConfig(name, self, path, resolver)
+            cfg = NmkResolvedConfig(name, self, path, resolver, resolver_params)
             new_type = cfg.value_type
 
         # Config object to work with
