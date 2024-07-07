@@ -26,9 +26,10 @@ jobs:
         steps:
             # Checkout and fetch tags
             - name: Checkout
-              uses: actions/checkout@v4.1.4
-            - name: Fetch tags
-              run: git fetch --depth=1 --tags
+              uses: actions/checkout@v4.1.6
+              with:
+                  fetch-depth: 0
+                  fetch-tags: true
 
             # Setup python
             - name: Set up Python ${{ matrix.version }}
@@ -82,9 +83,10 @@ jobs:
         steps:
             # Official build
             - name: Checkout
-              uses: actions/checkout@v4.1.4
-            - name: Fetch tags
-              run: git fetch --depth=1 --tags
+              uses: actions/checkout@v4.1.6
+              with:
+                  fetch-depth: 0
+                  fetch-tags: true
             - name: Set up Python
               uses: actions/setup-python@v5.1.0
               with:
