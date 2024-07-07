@@ -27,6 +27,7 @@ class NmkTask:
     subtasks: List[object] = None
     _inputs: List[Path] = None
     _outputs: List[Path] = None
+    skipped: bool = False
 
     def __resolve_task(self, name: Union[str, List[str]]) -> object:
         if name is not None:

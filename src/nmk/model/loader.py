@@ -124,3 +124,11 @@ class NmkLoader:
             # Resolve references
             task._resolve_subtasks()
             task._resolve_contribs()
+
+            # Is it a skipped one?
+            while task.name in self.model.args.skipped_tasks:
+                task.skipped = True
+                self.model.args.skipped_tasks.remove(task.name)
+
+        # Unknown skipped task?
+        assert len(self.model.args.skipped_tasks) == 0, f"unknown skipped task(s): {', '.join(self.model.args.skipped_tasks)}"

@@ -122,6 +122,11 @@ class NmkBuild:
     def needs_build(self, task: NmkTask, build_logger: NmkLogWrapper):
         # Check if task needs to be built
 
+        # Task explicitly skipped
+        if task.skipped:
+            build_logger.debug("Task skipped from command line")
+            return False
+
         # No builder = nothing to build
         if task.builder is None:
             build_logger.debug("Task doesn't have a builder defined")

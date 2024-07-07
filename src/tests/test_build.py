@@ -17,6 +17,13 @@ class TestBuild(NmkTester):
         self.nmk("build_default.yml", extra_args=["--dry-run", "subA"])
         self.check_logs(["subA]] DEBUG 🛠  - My A task", "1 built tasks"], check_order=True)
 
+    def test_skip_unknown(self):
+        self.nmk("build_default.yml", extra_args=["--skip", "unknown.task"], expected_error="unknown skipped task(s): unknown.task")
+
+    def test_skip(self):
+        self.nmk("build_default.yml", extra_args=["--skip", "subA"])
+        self.check_logs(["subA]] DEBUG 🐛 - Task skipped, nothing to do", "0 built tasks"], check_order=True)
+
     def test_no_builder(self):
         self.nmk("build_default.yml", extra_args=["subB"])
         self.check_logs(["subB]] DEBUG 🐛 - Task skipped, nothing to do", "1 built tasks"], check_order=True)
