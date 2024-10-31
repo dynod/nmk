@@ -65,7 +65,7 @@ class NmkModel:
         config_dict = self.tasks_config if task_config else self.config
 
         # Overriding?
-        old_config = config_dict[name] if name in config_dict else None
+        old_config = config_dict.get(name, None)
         if old_config is not None:
             NmkLogger.debug(f"Overriding config {name}")
             old_config = config_dict[name]
@@ -103,7 +103,7 @@ class NmkModel:
             assert hasattr(mod, cls_name), f"Can't find class {cls_name} in module {mod_name}"
             out = getattr(mod, cls_name)(self)
         except Exception as e:
-            raise Exception(f"Can't instantiate class {qualified_class}: {e}")
+            raise Exception(f"Can't instantiate class {qualified_class}: {e}") from e
 
         # Verify type is as expected
         assert isinstance(
@@ -133,7 +133,7 @@ class NmkModel:
 
     def check_remote_ref(self, remote: str) -> Path:
         # Replace potentially overridden remote ref by its local equivalent
-        for prefix in self.overridden_refs.keys():
+        for prefix in self.overridden_refs:
             if remote.startswith(prefix):
                 prefix_len = len(prefix)
                 local = self.overridden_refs[prefix] / remote[prefix_len + (1 if remote[prefix_len] == "/" else 0) :]

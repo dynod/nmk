@@ -82,9 +82,7 @@ class NmkConfig(ABC):
                         segments = None
 
                     # Resolve from config
-                    assert (
-                        ref_name not in resolved_from
-                    ), f"Cyclic string substitution: resolving (again!) '{ref_name}' config from '{self.name}' config"  # NOQA:B028
+                    assert ref_name not in resolved_from, f"Cyclic string substitution: resolving (again!) '{ref_name}' config from '{self.name}' config"  # NOQA:B028
                     assert ref_name in self.model.config, f"Unknown '{ref_name}' config referenced from '{self.name}' config"  # NOQA:B028
 
                     # Resolve reference
@@ -112,9 +110,9 @@ class NmkConfig(ABC):
                             ref_value = {k: Path(v).relative_to(p_dir).as_posix() for k, v in ref_value.items()}
                         else:
                             ref_value = Path(ref_value).relative_to(p_dir).as_posix()
-                    except ValueError:
+                    except ValueError as e:
                         # Invalid relative reference
-                        raise AssertionError(f"Invalid relative path reference: {m.group(0)}")
+                        raise AssertionError(f"Invalid relative path reference: {m.group(0)}") from e
 
                 # Replace with resolved value
                 begin, end = m.span(0)
@@ -230,7 +228,7 @@ class NmkResolvedConfig(NmkConfig):
             assert isinstance(out, declared_type), f"Invalid type returned by resolver: got {got_type.__name__}, expecting {declared_type.__name__}"
             return self._format(cache, out, resolved_from)
         except Exception as e:
-            raise Exception(f"Error occurred while resolving config {self.name}: {e}").with_traceback(e.__traceback__)
+            raise Exception(f"Error occurred while resolving config {self.name}: {e}") from e
 
     @property
     def value_type(self) -> object:
@@ -238,4 +236,4 @@ class NmkResolvedConfig(NmkConfig):
             # Ask resolver for value type
             return self.resolver.get_type(self.name)
         except Exception as e:
-            raise Exception(f"Error occurred while getting type for config {self.name}: {e}").with_traceback(e.__traceback__)
+            raise Exception(f"Error occurred while getting type for config {self.name}: {e}") from e

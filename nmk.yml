@@ -23,11 +23,9 @@ config:
         - requests
         - buildenv
 
-    # Extra setup data
-    pythonSetupItems:
-        metadata:
+    # Extra project data
+    pythonProjectFileItems:
+        project:
             description: Next-gen make-like build system
-        options.entry_points:
-            console_scripts: "\nnmk = nmk.__main__:main"
-        options.package_data:
-                nmk.model: "*.yml"
+            scripts:
+                nmk: nmk.__main__:main

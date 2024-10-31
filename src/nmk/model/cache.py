@@ -72,9 +72,9 @@ def safe_tar_extract(tar_path: Path, target_path: Path):
             try:
                 # Destination path *must* be a sub-folder/file of target path
                 dest_path.relative_to(target_path)
-            except ValueError:  # pragma: no cover
+            except ValueError as e:  # pragma: no cover
                 # Invalid entry
-                raise AssertionError(f"Invalid path in tar archive: {member.name}")
+                raise AssertionError(f"Invalid path in tar archive: {member.name}") from e
 
     # Extract all
     with tarfile.open(name=tar_path, mode="r|*") as tar:

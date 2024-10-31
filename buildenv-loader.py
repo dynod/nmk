@@ -136,7 +136,7 @@ class BuildEnvLoader:
         self.is_ci = "CI" in os.environ and len(os.environ["CI"]) > 0  # Check if running in CI
         self.venv_folder = self.read_config("venvFolder", "venv")  # Venv folder name
         self.venv_path = self.project_path / self.venv_folder  # Venv path for current project
-        self.requirements_file = self.read_config("requirements", "requirements.txt")  # Requirements file name
+        self.requirements_file_pattern = self.read_config("requirements", "requirements*.txt")  # Requirements files pattern
         self.prompt = self.read_config("prompt", "buildenv")  # Prompt for buildenv
         self.look_up = self.read_config("lookUp", "true").lower() not in ["false", "0", ""]  # Look up for git root folder
 
@@ -237,6 +237,13 @@ class BuildEnvLoader:
         """
         return ["pip", "wheel", "setuptools", "buildenv"]
 
+    @property
+    def requirement_files(self) -> List[str]:
+        """
+        List of requirement files to be installed (deduced from requirements files pattern)
+        """
+        return [req_file.name for req_file in self.project_path.glob(self.requirements_file_pattern)]
+
     def setup_venv(self, with_venv: Path = None) -> EnvContext:
         """
         Prepare python environment builder, and create environment if it doesn't exist yet
@@ -269,8 +276,13 @@ class BuildEnvLoader:
             # Install requirements
             logger.info("Installing requirements...")
             subprocess.run([str(context.executable), "-m", "pip", "install", "--upgrade"] + self.default_packages + pip_args, cwd=self.project_path, check=True)
-            if (self.project_path / self.requirements_file).is_file():
-                subprocess.run([str(context.executable), "-m", "pip", "install", "-r", self.requirements_file] + pip_args, cwd=self.project_path, check=True)
+            all_requirements = self.requirement_files
+            if len(all_requirements):
+                subprocess.run(
+                    [str(context.executable), "-m", "pip", "install"] + [f"--requirement={req_file}" for req_file in all_requirements] + pip_args,
+                    cwd=self.project_path,
+                    check=True,
+                )
 
             # If we get here, venv is valid
             logger.info("Python venv is ready!")
