@@ -5,7 +5,6 @@
 out
 venv
 .buildenv/
-setup.cfg
 .eggs/
 *.egg-info/
 *.pyc

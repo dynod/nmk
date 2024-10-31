@@ -109,13 +109,13 @@ class NmkModelFile:
                 with self.file.open() as f:
                     self.model = yaml.full_load(f)
             except Exception as e:
-                raise Exception(f"Project is malformed: {e}")
+                raise Exception(f"Project is malformed: {e}") from e
 
             # Validate model against grammar
             try:
                 jsonschema.validate(self.model, load_schema())
             except Exception as e:
-                raise Exception(f"Project contains invalid data: {e}")
+                raise Exception(f"Project contains invalid data: {e}") from e
 
             # Load references
             for ref_file_path in self.refs:
@@ -212,7 +212,7 @@ class NmkModelFile:
 
     @property
     def all_refs(self) -> List[str]:
-        return self.model[NmkModelK.REFS] if NmkModelK.REFS in self.model else []
+        return self.model.get(NmkModelK.REFS, [])
 
     @property
     def refs(self) -> List[str]:
@@ -233,7 +233,7 @@ class NmkModelFile:
                             k,
                             r[NmkModelK.REMOTE],
                             Path(self.make_absolute(Path(r[NmkModelK.LOCAL]))) if NmkModelK.LOCAL in r else None,
-                            r[NmkModelK.OVERRIDE] if NmkModelK.OVERRIDE in r else False,
+                            r.get(NmkModelK.OVERRIDE, False),
                         )
                         new_repos[k] = r
 
@@ -338,7 +338,7 @@ class NmkModelFile:
     def load_property(self, candidate: dict, key: str, default=None, mapper: Callable = None, task_name: str = None):
         # Load value from yml model (if any, otherwise handle default value), and potentially map it
         mapper = mapper if mapper is not None else (lambda x: x if task_name is None else lambda x, v: x)
-        value = candidate[key] if key in candidate else default
+        value = candidate.get(key, default)
         if task_name is None:
             return mapper(value) if value is not None else None
         else:

@@ -4,16 +4,9 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": "always"
         },
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true
     },
-    "black-formatter.args": [
-        "-l",
-        "160"
-    ],
-    "flake8.args": [
-        "--ignore=E203,E501,B902,W503"
-    ],
     "python.defaultInterpreterPath": "venv/bin/python",
     "python.autoComplete.extraPaths": [
         "src"
@@ -27,7 +20,7 @@
         "pyvenv",
         "sdist",
         "venv",
-        "loadme",
+        "pyproject",
         "dynod",
         "nmk",
         "pypi",

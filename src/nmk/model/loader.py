@@ -83,7 +83,7 @@ class NmkLoader:
                 try:
                     override_config = json.loads(config_str)
                 except Exception as e:
-                    raise Exception(f"Invalid Json fragment for --config option: {e}")
+                    raise Exception(f"Invalid Json fragment for --config option: {e}") from e
 
             # Single config string?
             else:

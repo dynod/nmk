@@ -66,7 +66,7 @@ def is_condition_set(value) -> bool:
         value(Any): value to be evaluated
     """
     # Condition depends on value type
-    if isinstance(value, list) or isinstance(value, dict):
+    if isinstance(value, (list, dict)):
         # List/dict: should not be empty
         return len(value) > 0
     if isinstance(value, str):
