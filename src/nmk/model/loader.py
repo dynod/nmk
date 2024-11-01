@@ -1,3 +1,4 @@
+import importlib.resources
 import json
 import os
 import re
@@ -52,6 +53,9 @@ class NmkLoader:
             NmkRootConfig.ENV: dict(os.environ),
         }.items():
             self.model.add_config(name, None, value)
+
+        # Init inner model loading
+        NmkModelFile(Path(importlib.resources.files("nmk.model")) / "internal.yml", self.repo_cache, self.model, [], is_internal=True)
 
         # Init recursive files loading
         NmkModelFile(self.model.args.project, self.repo_cache, self.model, [])

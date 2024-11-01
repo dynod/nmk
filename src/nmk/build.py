@@ -31,6 +31,9 @@ class NmkBuild:
             # Nothing to do
             root_tasks = []
 
+        # Handle prologue/epilogue
+        root_tasks = [self.model.tasks["prologue"]] + root_tasks + [self.model.tasks["epilogue"]]
+
         # Prepare build order
         for root_task in root_tasks:
             self._traverse_task(root_task, [])
@@ -78,22 +81,20 @@ class NmkBuild:
         if print_list is not None and len(print_list):
             self.print_config(print_list)
 
-        # Something to build?
-        if len(self.ordered_tasks):
-            # Do the build
-            NmkLogger.debug("Starting the build!")
-            max_task_len = max(len(t.name) for t in self.ordered_tasks)
-            for task in self.ordered_tasks:
-                build_logger = NmkLogWrapper(logging.getLogger((" " * (max_task_len - len(task.name))) + f"[{task.name}]"))
-                if self.model.args.dry_run:
-                    # Dry-run mode: don't call builder, just log
-                    self.task_prolog(task, build_logger)
-                elif self.needs_build(task, build_logger):
-                    # Task needs to be (re)built
-                    self.task_build(task, build_logger)
-                else:
-                    # Task skipped
-                    build_logger.debug("Task skipped, nothing to do")
+        # Do the build
+        NmkLogger.debug("Starting the build!")
+        max_task_len = max(len(t.name) for t in self.ordered_tasks)
+        for task in self.ordered_tasks:
+            build_logger = NmkLogWrapper(logging.getLogger((" " * (max_task_len - len(task.name))) + f"[{task.name}]"))
+            if self.model.args.dry_run:
+                # Dry-run mode: don't call builder, just log
+                self.task_prolog(task, build_logger)
+            elif self.needs_build(task, build_logger):
+                # Task needs to be (re)built
+                self.task_build(task, build_logger)
+            else:
+                # Task skipped
+                build_logger.debug("Task skipped, nothing to do")
 
         # Something done?
         NmkLogger.debug(f"{self.built_tasks} built tasks")
