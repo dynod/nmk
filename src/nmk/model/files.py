@@ -73,7 +73,7 @@ def load_schema() -> dict:
 
 # Recursive model file loader
 class NmkModelFile:
-    def __init__(self, project_ref: str, repo_cache: Path, model: NmkModel, refs: list[str]):
+    def __init__(self, project_ref: str, repo_cache: Path, model: NmkModel, refs: list[str], is_internal: bool = False):
         # Init properties
         self._repos = None
         self.repo_cache = repo_cache
@@ -85,8 +85,8 @@ class NmkModelFile:
             # Resolve local file from project reference
             self.file = self.resolve_project(project_ref)
 
-            # Remember project dir if first file
-            if not len(refs):
+            # Remember project dir if first file (and not an internal one)
+            if not is_internal and not len(refs):
                 p_dir = self.file.parent.resolve()
                 NmkLogger.debug(f"{NmkRootConfig.PROJECT_DIR} updated to {p_dir}")
                 model.config[NmkRootConfig.PROJECT_DIR].static_value = p_dir
@@ -95,12 +95,13 @@ class NmkModelFile:
                 # Also remember pip args from buildenv
                 model.pip_args = BuildEnvLoader(p_dir).pip_args
 
-            # Remember file path in model (to avoid recursive loading)
+            # Remember file path in model (to avoid recursive loading; and only if not an internal one)
             if self.file in model.file_paths:
                 # Already known file
                 NmkLogger.debug(f"{self.file} file already loaded, ignore...")
                 return
-            model.file_paths.append(self.file)
+            if not is_internal:
+                model.file_paths.append(self.file)
 
             # Load YAML model
             assert self.file.is_file(), "Project file not found"

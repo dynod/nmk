@@ -1,0 +1,9 @@
+# Internal NMK definitions
+tasks:
+  prologue:
+    description: Hook for preliminary tasks
+    emoji: airplane_departure
+
+  epilogue:
+    description: Hook for final tasks
+    emoji: airplane_arrival

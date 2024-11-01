@@ -8,14 +8,15 @@ class TestBuild(NmkTester):
         self.nmk("simplest.yml", extra_args=["unknownTask"], expected_error="Unknown task(s): unknownTask")
 
     def test_dry_run_default(self):
+        # Expect 5 run tasks: 3 from files + prologue/epilogue
         self.nmk("build_default.yml", extra_args=["--dry-run"])
         self.check_logs(
-            ["subA]] DEBUG 🛠  - My A task", "subB]] INFO 🛠  - My B task", "parentTask]] INFO 🛠  - The parent task", "3 built tasks"], check_order=True
+            ["subA]] DEBUG 🛠  - My A task", "subB]] INFO 🛠  - My B task", "parentTask]] INFO 🛠  - The parent task", "5 built tasks"], check_order=True
         )
 
     def test_dry_run_specified(self):
         self.nmk("build_default.yml", extra_args=["--dry-run", "subA"])
-        self.check_logs(["subA]] DEBUG 🛠  - My A task", "1 built tasks"], check_order=True)
+        self.check_logs(["subA]] DEBUG 🛠  - My A task", "3 built tasks"], check_order=True)
 
     def test_skip_unknown(self):
         self.nmk("build_default.yml", extra_args=["--skip", "unknown.task"], expected_error="unknown skipped task(s): unknown.task")
