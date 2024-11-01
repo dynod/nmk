@@ -246,8 +246,8 @@ class TestConfig(NmkTester):
         )
 
     def test_config_dot_ok(self):
-        self.nmk("config_dot_ok.yml", extra_args=["--print", "tryDotRef"])
-        self.check_logs('Config dump: { "tryDotRef": "_bar_" }')
+        self.nmk("config_dot_ok.yml", extra_args=["--print", "tryDotRef", "--print", "someMap"])
+        self.check_logs('Config dump: { "tryDotRef": "_bar_", "someMap": { "foo": "bar", "yo": 123 } }')
 
     def test_config_completion(self):
         # With final ones

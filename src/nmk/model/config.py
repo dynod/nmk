@@ -51,7 +51,7 @@ class NmkConfig(ABC):
         if isinstance(candidate, list):
             return [self._format(cache, c, resolved_from, path) for c in candidate]
         if isinstance(candidate, dict):
-            return {k: self._format(cache, v, resolved_from, path) for k, v in candidate.items()}
+            return {self._format(cache, k, resolved_from, path): self._format(cache, v, resolved_from, path) for k, v in candidate.items()}
         if not isinstance(candidate, str):
             # Nothing to format
             return candidate
