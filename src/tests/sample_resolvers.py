@@ -1,12 +1,24 @@
 from pathlib import Path
 
 from nmk.model.model import NmkModel
-from nmk.model.resolver import NmkConfigResolver, NmkDictConfigResolver, NmkIntConfigResolver, NmkListConfigResolver, NmkStrConfigResolver
+from nmk.model.resolver import (
+    NmkBoolConfigResolver,
+    NmkConfigResolver,
+    NmkDictConfigResolver,
+    NmkIntConfigResolver,
+    NmkListConfigResolver,
+    NmkStrConfigResolver,
+)
 
 
 class StrResolver(NmkStrConfigResolver):
     def get_value(self, name: str, qualifier: str) -> str:
         return f"my {qualifier} value"
+
+
+class BoolResolver(NmkBoolConfigResolver):
+    def get_value(self, name: str) -> bool:
+        return True
 
 
 class LyingResolver(NmkIntConfigResolver):

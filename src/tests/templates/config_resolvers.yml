@@ -4,3 +4,9 @@ config:
         __resolver__: tests.sample_resolvers.StrResolver
         params:
             qualifier: ${someValue}
+
+    someBool:
+        __resolver__: tests.sample_resolvers.BoolResolver
+
+    someOverridableBool:
+        __resolver__: tests.sample_resolvers.BoolResolver

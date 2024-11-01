@@ -113,10 +113,13 @@ class TestConfig(NmkTester):
             expected_error="While loading {project}: Unexpected type for loaded class tests.failling_resolvers.BadTypeResolver: got BadTypeResolver, expecting NmkConfigResolver subclass",
         )
 
-    def test_config_str_resolver(self):
-        # Test string resolver, with some parameters
-        self.nmk("config_str_resolver.yml", extra_args=["--print", "someResolved"])
-        self.check_logs('Config dump: { "someResolved": "my dynamic value" }')
+    def test_config_resolvers(self):
+        # Test resolvers:
+        #  - string one with some parameters
+        #  - bool one
+        self.prepare_project("config_resolvers.yml")
+        self.nmk("config_resolvers_override.yml", extra_args=["--print", "someResolved", "--print", "someBool", "--print", "someOverridableBool"])
+        self.check_logs('Config dump: { "someResolved": "my dynamic value", "someBool": true, "someOverridableBool": false }')
 
     def test_config_list_resolver(self):
         self.nmk("config_list_resolver.yml", extra_args=["--print", "someResolved"])
