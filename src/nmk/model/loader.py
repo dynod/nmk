@@ -5,7 +5,6 @@ import shutil
 import sys
 from argparse import Namespace
 from pathlib import Path
-from typing import List
 
 from nmk.errors import NmkNoLogsError
 from nmk.logs import NmkLogger, logging_setup
@@ -72,7 +71,7 @@ class NmkLoader:
         NmkLogger.debug(f"Updating {NmkRootConfig.PROJECT_FILES} now that all files are loaded")
         self.model.config[NmkRootConfig.PROJECT_FILES] = NmkStaticConfig(NmkRootConfig.PROJECT_FILES, self.model, None, list(self.model.file_paths))
 
-    def override_config(self, config_list: List[str]):
+    def override_config(self, config_list: list[str]):
         # Iterate on config
         for config_str in config_list:
             override_config = {}

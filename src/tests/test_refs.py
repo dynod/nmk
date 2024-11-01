@@ -124,7 +124,7 @@ class TestRefs(NmkTester):
         monkeypatch.setattr(subprocess, "run", record_process)
         self.nmk(
             "pip://definitely-unknown-package>=1.2!inside/unknown.yml",
-            expected_error="While loading pip://definitely-unknown-package>=1.2!inside/unknown.yml: Project file not found",
+            expected_error="While loading pip://definitely-unknown-package>=1.2!inside/unknown.yml: Can't find module 'definitely_unknown_package' even after having installed 'definitely-unknown-package>=1.2' package",
         )
         assert found_args == [sys.executable, "-m", "pip", "install", "definitely-unknown-package>=1.2"]
 
@@ -141,6 +141,6 @@ class TestRefs(NmkTester):
         self.prepare_project("buildenv.cfg")
         self.nmk(
             prj,
-            expected_error="While loading pip://some-unknown-package!foo.yml: Project file not found",
+            expected_error="While loading pip://some-unknown-package!foo.yml: Can't find module 'some_unknown_package' even after having installed 'some-unknown-package' package",
         )
         assert found_args == [sys.executable, "-m", "pip", "install", "some-unknown-package", "--require-virtualenv", "--some", "--fancy", "--args"]

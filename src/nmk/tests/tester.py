@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 from re import Pattern
-from typing import List, Union
+from typing import Union
 
 from pytest_multilog import TestHelper
 
@@ -29,7 +29,7 @@ class NmkBaseTester(TestHelper):
         return dst
 
     def nmk(
-        self, project: Union[Path, str], with_logs: bool = False, extra_args: List[str] = None, expected_error: Union[str, Pattern] = None, expected_rc: int = 0
+        self, project: Union[Path, str], with_logs: bool = False, extra_args: list[str] = None, expected_error: Union[str, Pattern] = None, expected_rc: int = 0
     ):
         # Prepare args and run nmk
         if isinstance(project, str) and not any(project.startswith(scheme) for scheme in URL_SCHEMES):

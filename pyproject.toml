@@ -7,8 +7,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nmk"
 dynamic = ["version"]
-requires-python = ">=3.8"
-classifiers = ["Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12"]
+requires-python = ">=3.9"
+classifiers = ["Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12"]
 dependencies = ["argcomplete", "coloredlogs", "pyyaml", "jsonschema", "rich", "requests", "buildenv"]
 description = "Next-gen make-like build system"
 
@@ -21,6 +21,14 @@ name = "The dynod project"
 [project.readme]
 file = "README.md"
 content-type = "text/markdown"
+
+[project.license]
+file = "LICENSE"
+
+[project.urls]
+Homepage = "https://github.com/dynod/nmk"
+Repository = "https://github.com/dynod/nmk"
+Issues = "https://github.com/dynod/nmk/issues?q=is%3Aopen+is%3Aissue"
 
 [project.scripts]
 nmk = "nmk.__main__:main"
