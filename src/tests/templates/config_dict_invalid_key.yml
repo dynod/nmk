@@ -1,0 +1,5 @@
+config:
+  someInvalidKey: 123
+  someMap:
+    foo: bar
+    ${someInvalidKey}: yo

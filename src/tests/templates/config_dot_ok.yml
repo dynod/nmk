@@ -2,3 +2,5 @@ config:
     tryDotRef: _${someMap.foo}_
     someMap:
         foo: bar
+        ${someDynKey}: 123
+    someDynKey: yo
