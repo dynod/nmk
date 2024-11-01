@@ -1,7 +1,6 @@
 import json
 import logging
 from datetime import datetime
-from typing import List
 
 from nmk.errors import NmkStopHereError
 from nmk.logs import NmkLogger, NmkLogWrapper
@@ -36,7 +35,7 @@ class NmkBuild:
         for root_task in root_tasks:
             self._traverse_task(root_task, [])
 
-    def _traverse_task(self, task: NmkTask, refering_tasks: List[NmkTask]):
+    def _traverse_task(self, task: NmkTask, refering_tasks: list[NmkTask]):
         # Cyclic dependency?
         assert task not in refering_tasks, f"Cyclic dependency: {task.name} referenced from tasks {' -> '.join(t.name for t in refering_tasks)}"
 
@@ -48,7 +47,7 @@ class NmkBuild:
         if task not in self.ordered_tasks:
             self.ordered_tasks.append(task)
 
-    def print_config(self, print_list: List[str]):
+    def print_config(self, print_list: list[str]):
         # Print config is required
         for k in print_list:
             assert k in self.model.config, f"Unknown config item key: {k}"

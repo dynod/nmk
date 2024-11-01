@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List
 
 from nmk.logs import NmkLogWrapper
 from nmk.model.model import NmkModel
@@ -24,11 +23,11 @@ class NmkTaskBuilder(ABC):
         pass
 
     @property
-    def inputs(self) -> List[Path]:
+    def inputs(self) -> list[Path]:
         return self.task.inputs
 
     @property
-    def outputs(self) -> List[Path]:
+    def outputs(self) -> list[Path]:
         return self.task.outputs
 
     @property

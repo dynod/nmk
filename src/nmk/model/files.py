@@ -1,8 +1,8 @@
 import re
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
-from typing import Callable, Dict, List, Union
+from typing import Callable, Union
 
 import jsonschema
 import yaml
@@ -62,7 +62,7 @@ class NmkRepo:
     override: bool = False
 
 
-@lru_cache(maxsize=None)
+@cache
 def load_schema() -> dict:
     model_file = Path(__file__).parent / "model.yml"
     NmkLogger.debug(f"Loading model schema from {model_file}")
@@ -73,7 +73,7 @@ def load_schema() -> dict:
 
 # Recursive model file loader
 class NmkModelFile:
-    def __init__(self, project_ref: str, repo_cache: Path, model: NmkModel, refs: List[str]):
+    def __init__(self, project_ref: str, repo_cache: Path, model: NmkModel, refs: list[str]):
         # Init properties
         self._repos = None
         self.repo_cache = repo_cache
@@ -211,15 +211,15 @@ class NmkModelFile:
         return f"{repo.remote}{'!' if '!' not in repo.remote and not repo.remote.startswith(GITHUB_SCHEME) else '/'}{rel_ref.as_posix()}"
 
     @property
-    def all_refs(self) -> List[str]:
+    def all_refs(self) -> list[str]:
         return self.model.get(NmkModelK.REFS, [])
 
     @property
-    def refs(self) -> List[str]:
+    def refs(self) -> list[str]:
         return list(map(self.resolve_ref, filter(lambda r: isinstance(r, str), self.all_refs)))
 
     @property
-    def repos(self) -> Dict[str, NmkRepo]:
+    def repos(self) -> dict[str, NmkRepo]:
         # Lazy loading
         if self._repos is None:
             self._repos = {}

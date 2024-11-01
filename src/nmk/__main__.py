@@ -1,6 +1,5 @@
 import sys
 import traceback
-from typing import List
 
 from nmk.build import NmkBuild
 from nmk.errors import NmkStopHereError
@@ -10,7 +9,7 @@ from nmk.parser import NmkParser
 
 
 # CLI entry point
-def nmk(argv: List[str]) -> int:
+def nmk(argv: list[str]) -> int:
     # Build parser and parse input args
     args = NmkParser().parse(argv)
     out = 0

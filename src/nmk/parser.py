@@ -1,7 +1,6 @@
 import logging
 from argparse import ZERO_OR_MORE, ArgumentParser, Namespace
 from pathlib import Path
-from typing import List
 
 import argcomplete
 
@@ -74,6 +73,6 @@ class NmkParser:
         # Handle completion
         argcomplete.autocomplete(self.parser)
 
-    def parse(self, argv: List[str]) -> Namespace:
+    def parse(self, argv: list[str]) -> Namespace:
         # Parse arguments
         return self.parser.parse_args(argv)

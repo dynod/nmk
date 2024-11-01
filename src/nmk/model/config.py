@@ -2,7 +2,7 @@ import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, List, Set, Union
+from typing import Callable, Union
 
 from nmk.model.keys import NmkRootConfig
 
@@ -27,7 +27,7 @@ class NmkConfig(ABC):
     def value(self) -> Union[str, int, bool, list, dict]:
         return self.resolve()
 
-    def resolve(self, cache: bool = True, resolved_from: Set[str] = None) -> Union[str, int, bool, list, dict]:
+    def resolve(self, cache: bool = True, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
         if not cache or not hasattr(self, "cached_value") or self.cached_value is None:
             # Get value from implementation
             out = self._get_value(cache, resolved_from)
@@ -42,7 +42,7 @@ class NmkConfig(ABC):
         return out
 
     def _format(
-        self, cache: bool, candidate: Union[str, int, bool, list, dict], resolved_from: Set[str] = None, path: Path = None
+        self, cache: bool, candidate: Union[str, int, bool, list, dict], resolved_from: set[str] = None, path: Path = None
     ) -> Union[str, int, bool, list, dict]:
         resolved_from = set(resolved_from) if resolved_from is not None else set()
         resolved_from.add(self.name)
@@ -123,7 +123,7 @@ class NmkConfig(ABC):
         return to_format
 
     @abstractmethod
-    def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> Union[str, int, bool, list, dict]:  # pragma: no cover
+    def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:  # pragma: no cover
         pass
 
     @property
@@ -136,7 +136,7 @@ class NmkConfig(ABC):
 class NmkStaticConfig(NmkConfig):
     static_value: Union[str, int, bool, list, dict]
 
-    def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> Union[str, int, bool, list, dict]:
+    def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
         # Simple static value
         return self._format(cache, self.static_value, resolved_from)
 
@@ -147,10 +147,10 @@ class NmkStaticConfig(NmkConfig):
 
 @dataclass
 class NmkMergedConfig(NmkConfig):
-    static_list: List[NmkStaticConfig] = field(default_factory=list)
+    static_list: list[NmkStaticConfig] = field(default_factory=list)
 
     # Recursive list resolution
-    def traverse_list(self, items: list, out_list: list, cache: bool, resolved_from: Set[str], holder):
+    def traverse_list(self, items: list, out_list: list, cache: bool, resolved_from: set[str], holder):
         for item in items:
             formatted_item = self._format(cache, item, resolved_from, path=holder.path)
             if isinstance(formatted_item, list):
@@ -161,7 +161,7 @@ class NmkMergedConfig(NmkConfig):
                 out_list.append(formatted_item)
 
     # Recursive dict resolution
-    def traverse_dict(self, items: dict, out_dict: dict, cache: bool, resolved_from: Set[str], holder):
+    def traverse_dict(self, items: dict, out_dict: dict, cache: bool, resolved_from: set[str], holder):
         for k, v in items.items():
             formatted_item = self._format(cache, v, resolved_from, path=holder.path)
             if isinstance(formatted_item, dict):
@@ -181,7 +181,7 @@ class NmkMergedConfig(NmkConfig):
 
 @dataclass
 class NmkListConfig(NmkMergedConfig):
-    def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> list:
+    def _get_value(self, cache: bool, resolved_from: set[str] = None) -> list:
         # Merge lists (recursively)
         out = []
         for holder in self.static_list:
@@ -195,7 +195,7 @@ class NmkListConfig(NmkMergedConfig):
 
 @dataclass
 class NmkDictConfig(NmkMergedConfig):
-    def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> dict:
+    def _get_value(self, cache: bool, resolved_from: set[str] = None) -> dict:
         # Merge dicts and lists (recursively)
         out = {}
         for holder in self.static_list:
@@ -212,11 +212,11 @@ class NmkResolvedConfig(NmkConfig):
     resolver: Callable
     params: NmkDictConfig
 
-    def resolve(self, cache: bool = True, resolved_from: Set[str] = None) -> Union[str, int, bool, list, dict]:
+    def resolve(self, cache: bool = True, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
         # Always disable cache if resolver is volatile
         return super().resolve(cache and not self.resolver.is_volatile(self.name), resolved_from)
 
-    def _get_value(self, cache: bool, resolved_from: Set[str] = None) -> Union[str, int, bool, list, dict]:
+    def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
         try:
             # Cache value from resolver if not done yet, or redo if value is declared to be volatile
             params = self.params.value if self.params is not None else {}

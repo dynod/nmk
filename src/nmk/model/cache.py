@@ -1,9 +1,9 @@
 import hashlib
+import importlib.resources
 import re
 import shutil
-import sys
 import tarfile
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -23,20 +23,6 @@ PIP_PATTERN = re.compile(PIP_SCHEME + "//(([^<>=/ ]+)[^/ ]*)$")
 first_download = True
 
 
-@lru_cache(maxsize=None)
-def venv_libs() -> Path:
-    # Find venv libs folder from sys
-    venv_root = Path(sys.executable).parent.parent
-    libs_candidates = list(
-        filter(
-            lambda x: x.name == "site-packages" and len(x.parts) > len(venv_root.parts) and list(venv_root.parts) == list(x.parts)[: len(venv_root.parts)],
-            map(Path, sys.path),
-        )
-    )
-    assert len(libs_candidates) == 1, "Unable to find venv libs root folder"
-    return libs_candidates[0]
-
-
 def log_install():
     # First download?
     global first_download
@@ -45,7 +31,7 @@ def log_install():
         NmkLogger.info("arrow_double_down", "Caching remote references...")
 
 
-@lru_cache(maxsize=None)
+@cache
 def pip_install(url: str, extra_pip_args: str) -> Path:
     # Check pip names
     m = PIP_PATTERN.match(url)
@@ -53,13 +39,26 @@ def pip_install(url: str, extra_pip_args: str) -> Path:
     pip_ref = m.group(1)
     package_name = m.group(2).replace("-", "_")
 
-    # Something to install?
-    repo_path = venv_libs() / package_name
-    if not repo_path.exists():
+    # Look for installed python module
+    def find_python_module(module) -> Path:
+        return Path(importlib.resources.files(package_name))
+
+    try:
+        # Something to install?
+        repo_path = find_python_module(package_name)
+    except ModuleNotFoundError:
+        # Module not found: trigger install
         log_install()
 
         # Trigger pip
         run_pip(["install", pip_ref], extra_args=extra_pip_args)
+
+        # Try to find path again
+        try:
+            repo_path = find_python_module(package_name)
+        except ModuleNotFoundError as e:
+            # Mismatch between wheel and module name, can't find files...
+            raise ValueError(f"Can't find module '{package_name}' even after having installed '{pip_ref}' package") from e
 
     return repo_path
 
@@ -91,7 +90,7 @@ def download_archive(repo_path: Path, url: str) -> Path:
     return dest_file
 
 
-@lru_cache(maxsize=None)
+@cache
 def download_file(root: Path, url: str) -> Path:
     # Cache path
     repo_path = root / hashlib.sha1(url.encode("utf-8")).hexdigest()
@@ -123,7 +122,7 @@ def download_file(root: Path, url: str) -> Path:
     return repo_path
 
 
-@lru_cache(maxsize=None)
+@cache
 def cache_remote(root: Path, remote: str, extra_pip_args: str) -> Path:
     # Make sure remote format is valid
     parts = remote.split("!")

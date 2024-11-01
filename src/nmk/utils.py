@@ -2,12 +2,11 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 
 from nmk.logs import NmkLogger
 
 
-def run_with_logs(args: List[str], logger=NmkLogger, check: bool = True, cwd: Path = None) -> subprocess.CompletedProcess:
+def run_with_logs(args: list[str], logger=NmkLogger, check: bool = True, cwd: Path = None) -> subprocess.CompletedProcess:
     """
     Execute subprocess, and logs output/error streams + error code
     """
@@ -24,7 +23,7 @@ def run_with_logs(args: List[str], logger=NmkLogger, check: bool = True, cwd: Pa
     return cp
 
 
-def run_pip(args: List[str], logger=NmkLogger, extra_args: str = "") -> str:
+def run_pip(args: list[str], logger=NmkLogger, extra_args: str = "") -> str:
     """
     Execute pip command, with logging
     """

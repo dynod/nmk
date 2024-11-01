@@ -3,7 +3,7 @@ import sys
 from argparse import Namespace
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Union
 
 from nmk.logs import NmkLogger
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkStaticConfig
@@ -13,7 +13,7 @@ from nmk.model.task import NmkTask
 CLASS_SEP = "."
 
 
-def contribute_python_path(paths: List[Path]):
+def contribute_python_path(paths: list[Path]):
     # Extra paths?
     added_paths = [p for p in [x.resolve() for x in paths] if str(p) not in sys.path]
     if len(added_paths):  # pragma: no branch
@@ -27,14 +27,14 @@ def contribute_python_path(paths: List[Path]):
 @dataclass
 class NmkModel:
     args: Namespace
-    file_paths: List[Path] = field(default_factory=list)
-    file_models: Dict[Path, object] = field(default_factory=dict)
-    config: Dict[str, NmkConfig] = field(default_factory=dict)
-    tasks: Dict[str, NmkTask] = field(default_factory=dict)
+    file_paths: list[Path] = field(default_factory=list)
+    file_models: dict[Path, object] = field(default_factory=dict)
+    config: dict[str, NmkConfig] = field(default_factory=dict)
+    tasks: dict[str, NmkTask] = field(default_factory=dict)
     default_task: NmkTask = None
-    tasks_config: Dict[str, NmkConfig] = field(default_factory=dict)
+    tasks_config: dict[str, NmkConfig] = field(default_factory=dict)
     pip_args: str = ""
-    overridden_refs: Dict[str, Path] = field(default_factory=dict)
+    overridden_refs: dict[str, Path] = field(default_factory=dict)
 
     def add_config(
         self,
