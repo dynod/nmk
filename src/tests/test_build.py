@@ -25,6 +25,18 @@ class TestBuild(NmkTester):
         self.nmk("build_default.yml", extra_args=["--skip", "subA"])
         self.check_logs(["subA]] DEBUG 🐛 - Task skipped, nothing to do", "0 built tasks"], check_order=True)
 
+    def test_skip_deps(self):
+        self.nmk("build_default.yml", extra_args=["--skip", "parentTask"])
+        self.check_logs(
+            [
+                "subA]] DEBUG 🐛 - Task skipped, nothing to do",
+                "subB]] DEBUG 🐛 - Task skipped, nothing to do",
+                "parentTask]] DEBUG 🐛 - Task skipped, nothing to do",
+                "0 built tasks",
+            ],
+            check_order=True,
+        )
+
     def test_no_builder(self):
         self.nmk("build_default.yml", extra_args=["subB"])
         self.check_logs(["subB]] DEBUG 🐛 - Task skipped, nothing to do", "1 built tasks"], check_order=True)

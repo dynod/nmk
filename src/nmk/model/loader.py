@@ -122,16 +122,18 @@ class NmkLoader:
             logging_setup(args)
 
     def validate_tasks(self):
-        # Iterate on tasks
+        # Iterate on tasks: pass 1 --> resolve references
         for task in self.model.tasks.values():
             # Resolve references
             task._resolve_subtasks()
             task._resolve_contribs()
 
-            # Is it a skipped one?
-            while task.name in self.model.args.skipped_tasks:
-                task.skipped = True
-                self.model.args.skipped_tasks.remove(task.name)
+        # Iterate on tasks: pass 2 --> skip tasks (and their sub-tasks)
+        filtered = set()
+        for filtered_name, task in filter(lambda t: t[0] in self.model.args.skipped_tasks, self.model.tasks.items()):
+            task._skip()
+            filtered.add(filtered_name)
 
         # Unknown skipped task?
-        assert len(self.model.args.skipped_tasks) == 0, f"unknown skipped task(s): {', '.join(self.model.args.skipped_tasks)}"
+        unknown_tasks = set(self.model.args.skipped_tasks) - filtered
+        assert len(unknown_tasks) == 0, f"unknown skipped task(s): {', '.join(list(unknown_tasks))}"

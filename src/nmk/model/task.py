@@ -80,6 +80,14 @@ class NmkTask:
             setattr(self, field, paths)
         return getattr(self, field)
 
+    def _skip(self):
+        # Skip this task
+        self.skipped = True
+
+        # Skip sub-tasks
+        for sub_task in self.subtasks:
+            sub_task._skip()
+
     @property
     def inputs(self) -> list[Path]:
         return self._resolve_files("_inputs")
