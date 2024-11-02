@@ -9,7 +9,7 @@ class TestBuild(NmkTester):
 
     def test_dry_run_default(self):
         # Expect 5 run tasks: 3 from files + prologue/epilogue
-        self.nmk("build_default.yml", extra_args=["--dry-run"])
+        self.nmk("build_default.yml", extra_args=["--dry-run"], with_prologue=True, with_epilogue=True)
         self.check_logs(
             ["subA]] DEBUG 🛠  - My A task", "subB]] INFO 🛠  - My B task", "parentTask]] INFO 🛠  - The parent task", "5 built tasks"], check_order=True
         )
