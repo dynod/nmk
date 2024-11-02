@@ -29,7 +29,14 @@ class NmkBaseTester(TestHelper):
         return dst
 
     def nmk(
-        self, project: Union[Path, str], with_logs: bool = False, extra_args: list[str] = None, expected_error: Union[str, Pattern] = None, expected_rc: int = 0
+        self,
+        project: Union[Path, str],
+        with_logs: bool = False,
+        extra_args: list[str] = None,
+        expected_error: Union[str, Pattern] = None,
+        expected_rc: int = 0,
+        with_epilogue: bool = False,
+        with_prologue: bool = False,
     ):
         # Prepare args and run nmk
         if isinstance(project, str) and not any(project.startswith(scheme) for scheme in URL_SCHEMES):
@@ -39,6 +46,10 @@ class NmkBaseTester(TestHelper):
         args = ["--root", self.test_folder.as_posix(), "-p", project]
         if not with_logs:
             args.append("--no-logs")
+        if not with_prologue:
+            args.extend(["--skip", "prologue"])
+        if not with_epilogue:
+            args.extend(["--skip", "epilogue"])
         if extra_args is not None:
             args.extend(extra_args)
         rc = nmk(args)
