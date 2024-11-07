@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Union
 
@@ -25,6 +25,7 @@ class NmkTask:
     run_unless: NmkConfig
     model: object
     subtasks: list[object] = None
+    refering_tasks: list[object] = field(default_factory=list)
     _inputs: list[Path] = None
     _outputs: list[Path] = None
     skipped: bool = False
@@ -58,8 +59,14 @@ class NmkTask:
     def _resolve_subtasks(self):
         # Resolved yet?
         if self.subtasks is None:
-            # Map names to
-            self.subtasks = list(filter(lambda t: t is not None, map(self.__resolve_task, self._deps)))
+            # Map names to tasks
+            self.subtasks = []
+            for task in filter(lambda t: t is not None, map(self.__resolve_task, self._deps)):
+                # Append to sub-tasks
+                self.subtasks.append(task)
+
+                # Remember the current task as a refering task
+                task.refering_tasks.append(self)
         return self.subtasks
 
     def _resolve_contribs(self):
@@ -84,9 +91,12 @@ class NmkTask:
         # Skip this task
         self.skipped = True
 
-        # Skip sub-tasks
+        # Iterate on sub-tasks
         for sub_task in self.subtasks:
-            sub_task._skip()
+            # Are all refering tasks skipped?
+            if all(t.skipped for t in sub_task.refering_tasks):
+                # Skip this sub-task as well
+                sub_task._skip()
 
     @property
     def inputs(self) -> list[Path]:
