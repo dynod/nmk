@@ -152,6 +152,10 @@ class TestConfig(NmkTester):
     def test_config_resolver_with_unknown_python_path(self):
         self.nmk("config_unknown_python_path_resolver.yml", expected_error="While loading {project}: Contributed python path is not found:")
 
+    def test_config_resolver_with_overriding_python_path(self):
+        self.nmk("config_python_path_resolver_override.yml", extra_args=["--print", "someResolved"])
+        self.check_logs('Config dump: { "someResolved": "my dynamic value from overridden python path" }')
+
     def test_config_recursive_resolve(self):
         self.nmk("config_recursive.yml", extra_args=["--print", "someConfig"])
         self.check_logs('Config dump: { "someConfig": "_abc/ghi/def_123_" }')
