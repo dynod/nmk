@@ -16,7 +16,7 @@ from nmk.model.builder import NmkTaskBuilder
 from nmk.model.cache import PIP_SCHEME, cache_remote
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig
 from nmk.model.keys import NmkRootConfig
-from nmk.model.model import NmkModel, contribute_python_path
+from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkConfigResolver
 from nmk.model.task import NmkTask
 
@@ -327,7 +327,7 @@ class NmkModelFile:
                 contributed_paths.append(candidate)
 
             # Extend python path
-            contribute_python_path(contributed_paths)
+            self.global_model.path_finder.contribute_path(contributed_paths)
 
         except Exception as e:
             self.__raise_with_refs(e)

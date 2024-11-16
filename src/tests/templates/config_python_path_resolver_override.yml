@@ -1,0 +1,6 @@
+path:
+    - override
+
+config:
+    someResolved:
+        __resolver__: buildenv.extension.StrResolver

@@ -1,4 +1,6 @@
 import importlib
+import importlib.abc
+import importlib.util
 import sys
 from argparse import Namespace
 from dataclasses import dataclass, field
@@ -13,15 +15,61 @@ from nmk.model.task import NmkTask
 CLASS_SEP = "."
 
 
-def contribute_python_path(paths: list[Path]):
-    # Extra paths?
-    added_paths = [p for p in [x.resolve() for x in paths] if str(p) not in sys.path]
-    if len(added_paths):  # pragma: no branch
+@dataclass
+class NmkPathFinder(importlib.abc.MetaPathFinder):
+    # Dict of contributed files from nmk files
+    _path_contribs: dict[str, Path] = field(default_factory=dict)
+
+    # Remember if a file has already been contributed through this finder
+    _path_found: dict[str, Path] = field(default_factory=dict)
+
+    # Remember if this finder has been added to the import system
+    _registered: bool = False
+
+    def custom_import(self, fullname: str):
+        # Check if path:
+        # * is a contributed one
+        # * is already loaded as system module
+        # * has not be found yet by this finder
+        if (fullname in self._path_found) and (fullname in sys.modules) and not self._path_found[fullname]:
+            # Custom loading of this module
+            spec = self.find_spec(fullname, None)
+            mod = importlib.util.module_from_spec(spec)
+
+            # Override cache for this module
+            sys.modules[fullname] = mod
+            spec.loader.exec_module(mod)
+            return mod
+
+        # Default import
+        return importlib.import_module(fullname)
+
+    def contribute_path(self, paths: list[Path]):
+        # Contribute to internal paths list
+        added_paths = [x.resolve() for x in paths]
         NmkLogger.debug(f"Contributed python paths: {added_paths}")
         for added_path in added_paths:
             # Path must be a directory
             assert added_path.is_dir(), f"Contributed python path is not found: {added_path}"
-            sys.path.insert(0, str(added_path))
+
+            # Remember all found python files
+            for f in added_path.rglob("*.py"):
+                # Build module name (remove py extension; also remove __init__ for packages)
+                name = CLASS_SEP.join(list(f.relative_to(added_path).parts)).removesuffix(".py").removesuffix(".__init__")
+                self._path_contribs[name] = f
+                self._path_found[name] = False
+
+            # A new path has been contributed, register in import system
+            if not self._registered:  # pragma: no branch
+                self._registered = True
+                sys.meta_path.append(self)
+
+    def find_spec(self, fullname: str, path: str, target=None):
+        # Find in contributes files
+        found_path = self._path_contribs.get(fullname, None)
+        if found_path:  # pragma: no branch
+            self._path_found[fullname] = True
+            return importlib.util.spec_from_file_location(fullname, found_path)
 
 
 @dataclass
@@ -35,6 +83,7 @@ class NmkModel:
     tasks_config: dict[str, NmkConfig] = field(default_factory=dict)
     pip_args: str = ""
     overridden_refs: dict[str, Path] = field(default_factory=dict)
+    path_finder: NmkPathFinder = field(default_factory=NmkPathFinder)
 
     def add_config(
         self,
@@ -96,10 +145,14 @@ class NmkModel:
         class_parts = qualified_class.split(CLASS_SEP)
 
         try:
-            # Load specified class
+            # Split module/class names
             mod_name = CLASS_SEP.join(class_parts[:-1])
             cls_name = class_parts[-1]
-            mod = importlib.import_module(mod_name)
+
+            # Import module using custom contributions
+            mod = self.path_finder.custom_import(mod_name)
+
+            # Load specified class
             assert hasattr(mod, cls_name), f"Can't find class {cls_name} in module {mod_name}"
             out = getattr(mod, cls_name)(self)
         except Exception as e:
