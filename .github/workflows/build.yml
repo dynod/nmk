@@ -19,8 +19,7 @@ jobs:
                     - "3.10"
                     - "3.11"
                     - "3.12"
-                command:
-                    - ./buildenv.sh run nmk tests
+                    - "3.13"
         runs-on: ${{ matrix.os }}
         steps:
             # Checkout and fetch tags
@@ -36,19 +35,16 @@ jobs:
               with:
                   python-version: ${{ matrix.version }}
 
-            # Trigger build and tests
+            # Trigger build and tests + archive output
             - name: Build and tests
               id: build_n_tests
               shell: bash
-              run: ${{ matrix.command }}
+              run: ./buildenv.sh run nmk tests
               continue-on-error: true
-
-            # Archive outputs (depending on build step)
-            - name: Archive the whole output (on failure)
-              if: steps.build_n_tests.outcome == 'failure'
+            - name: Archive build output
               uses: actions/upload-artifact@v4.3.3
               with:
-                  name: Outputs-${{ matrix.os }}-${{ matrix.version }}
+                  name: Output-${{ matrix.os }}-${{ matrix.version }}
                   path: |
                     .nmk/nmk.log*
                     out/
@@ -57,15 +53,19 @@ jobs:
               uses: actions/github-script@v7.0.1
               with:
                 script: |
-                    core.setFailed('Previous step failed')
-            - name: Archive artifacts (on success)
+                    core.setFailed('Build step failed')
+
+            # Package
+            - name: Package
+              shell: bash
+              run: ./buildenv.sh run nmk package
+            - name: Archive artifacts
               uses: actions/upload-artifact@v4.3.3
               with:
-                  name: Outputs-${{ matrix.os }}-${{ matrix.version }}
+                  name: Artifacts-${{ matrix.os }}-${{ matrix.version }}
                   path: |
-                    .nmk/nmk.log*
-                    out/
-                    !out/tests/
+                    out/artifacts/
+
 
             - name: Upload coverage information
               uses: codecov/codecov-action@v4.3.1
@@ -91,7 +91,7 @@ jobs:
               with:
                   python-version: "3.9"
             - name: Build
-              run: ./buildenv.sh run nmk build git.dirty
+              run: ./buildenv.sh run nmk package
 
             - name: Publish package on pypi.org
               uses: pypa/gh-action-pypi-publish@v1.5.0
