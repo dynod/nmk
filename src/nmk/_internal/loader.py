@@ -7,10 +7,10 @@ import sys
 from argparse import Namespace
 from pathlib import Path
 
+from nmk._internal.files import NmkModelFile
 from nmk.errors import NmkNoLogsError
 from nmk.logs import NmkLogger, logging_setup
 from nmk.model.config import NmkStaticConfig
-from nmk.model.files import NmkModelFile
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 

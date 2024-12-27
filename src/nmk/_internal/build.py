@@ -13,6 +13,10 @@ TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 class NmkBuild:
+    """
+    Main nmk build logic
+    """
+
     def __init__(self, model: NmkModel):
         self.model = model
         self.ordered_tasks = []

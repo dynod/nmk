@@ -10,10 +10,10 @@ from buildenv import BuildEnvLoader
 from rich.emoji import Emoji
 from rich.text import Text
 
+from nmk._internal.cache import PIP_SCHEME, cache_remote
 from nmk.errors import NmkFileLoadingError
 from nmk.logs import NmkLogger
 from nmk.model.builder import NmkTaskBuilder
-from nmk.model.cache import PIP_SCHEME, cache_remote
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel

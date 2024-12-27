@@ -8,12 +8,22 @@
 [![PyPI](https://img.shields.io/pypi/v/nmk)](https://pypi.org/project/nmk/)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://astral.sh/ruff)
 [![Code coverage](https://img.shields.io/codecov/c/github/dynod/nmk)](https://app.codecov.io/gh/dynod/nmk)
+[![Documentation Status](https://readthedocs.org/projects/nmk/badge/?version=stable)](https://nmk.readthedocs.io/)
 <!-- NMK-BADGES-END -->
 
 **`nmk`** is an alternative build system, designed following these simple requirements:
 * both multi-platform and easy install - available as a python module
 * shareable/reusable/factorized build logic between projects
+* language agnostic - each language support is done through plugins
+
+## Usage
+
+In an **`nmk`** project, just execute:
+```shell
+$ ./buildenv.sh # Load the build environment
+$ nmk           # Trigger the nmk build!
+```
 
 ## Documentation
 
-For the full **`nmk`** documentation, see https://github.com/dynod/nmk/wiki
+For the full **`nmk`** documentation, see https://nmk.readthedocs.io/

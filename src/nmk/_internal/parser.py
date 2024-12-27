@@ -5,7 +5,11 @@ from pathlib import Path
 import argcomplete
 
 from nmk import __version__
-from nmk.completion import ConfigCompleter, TasksCompleter
+from nmk._internal.completion import ConfigCompleter, TasksCompleter
+
+"""
+nmk CLI parsing logic
+"""
 
 
 class NmkParser:

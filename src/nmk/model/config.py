@@ -1,3 +1,7 @@
+"""
+nmk configuration objects
+"""
+
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -6,28 +10,51 @@ from typing import Callable, Union
 
 from nmk.model.keys import NmkRootConfig
 
-# Pattern to locate config reference in string
 CONFIG_REF_PATTERN = re.compile(r"\$\{([^ \}]+)\}")
+"""Pattern to locate config reference in string"""
 
-# Pattern to recognize final config items
+
 FINAL_ITEM_PATTERN = re.compile("^[A-Z0-9_]+$")
+"""Pattern to recognize final config items"""
 
 
 @dataclass
 class NmkConfig(ABC):
+    """
+    nmk configuration item base class
+    """
+
     name: str
+    """Item name"""
+
     model: object
+    """Model instance"""
+
     path: Path
+    """Defining project file path"""
 
     @property
     def is_final(self) -> bool:
+        """
+        Returns true if current item is a final one
+        """
         return FINAL_ITEM_PATTERN.match(self.name) is not None
 
     @property
     def value(self) -> Union[str, int, bool, list, dict]:
+        """
+        Returns current item value
+        """
         return self.resolve()
 
     def resolve(self, cache: bool = True, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
+        """
+        Resolves item value
+
+        :param cache: use cached value, if already resolved
+        :param resolved_from: set of item names referencing this item
+        :return: resolved item value
+        """
         if not cache or not hasattr(self, "cached_value") or self.cached_value is None:
             # Get value from implementation
             out = self._get_value(cache, resolved_from)
@@ -41,6 +68,7 @@ class NmkConfig(ABC):
 
         return out
 
+    # Process item references
     def _format(
         self, cache: bool, candidate: Union[str, int, bool, list, dict], resolved_from: set[str] = None, path: Path = None
     ) -> Union[str, int, bool, list, dict]:
@@ -124,17 +152,30 @@ class NmkConfig(ABC):
 
     @abstractmethod
     def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:  # pragma: no cover
+        """
+        Internal value access
+        """
         pass
 
     @property
     @abstractmethod
     def value_type(self) -> object:  # pragma: no cover
+        """
+        Value type for this item; to be overridden by sub-classes
+
+        :return: value type
+        """
         pass
 
 
 @dataclass
 class NmkStaticConfig(NmkConfig):
+    """
+    Static config item (defined in project file)
+    """
+
     static_value: Union[str, int, bool, list, dict]
+    """Project defined value"""
 
     def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
         # Simple static value
@@ -142,15 +183,33 @@ class NmkStaticConfig(NmkConfig):
 
     @property
     def value_type(self) -> object:
+        """
+        Value type for this static item
+
+        :return: value type
+        """
+
         return type(self.static_value)
 
 
 @dataclass
 class NmkMergedConfig(NmkConfig):
-    static_list: list[NmkStaticConfig] = field(default_factory=list)
+    """
+    Merged config item base class
+    """
 
-    # Recursive list resolution
+    static_list: list[NmkStaticConfig] = field(default_factory=list)
+    """List of merged static items"""
+
     def traverse_list(self, items: list, out_list: list, cache: bool, resolved_from: set[str], holder):
+        """
+        Recursive list resolution
+
+        :param items: list of items to be traversed
+        :param out_list: resolved output list
+        :param cache: use cache or not
+        :param resolved_from: set of item names referencing this item
+        """
         for item in items:
             formatted_item = self._format(cache, item, resolved_from, path=holder.path)
             if isinstance(formatted_item, list):
@@ -160,8 +219,16 @@ class NmkMergedConfig(NmkConfig):
                 # Simple list append
                 out_list.append(formatted_item)
 
-    # Recursive dict resolution
     def traverse_dict(self, items: dict, out_dict: dict, cache: bool, resolved_from: set[str], holder):
+        """
+        Recursive dict resolution
+
+        :param items: dict of items to be traversed
+        :param out_dict: resolved output dict
+        :param cache: use cache or not
+        :param resolved_from: set of item names referencing this item
+        """
+
         for k, v in items.items():
             formatted_item = self._format(cache, v, resolved_from, path=holder.path)
             if isinstance(formatted_item, dict):
@@ -181,6 +248,10 @@ class NmkMergedConfig(NmkConfig):
 
 @dataclass
 class NmkListConfig(NmkMergedConfig):
+    """
+    Merged list config item
+    """
+
     def _get_value(self, cache: bool, resolved_from: set[str] = None) -> list:
         # Merge lists (recursively)
         out = []
@@ -190,11 +261,20 @@ class NmkListConfig(NmkMergedConfig):
 
     @property
     def value_type(self) -> object:
+        """
+        Value type for this item
+
+        :return: list type
+        """
         return list
 
 
 @dataclass
 class NmkDictConfig(NmkMergedConfig):
+    """
+    Merged list config item
+    """
+
     def _get_value(self, cache: bool, resolved_from: set[str] = None) -> dict:
         # Merge dicts and lists (recursively)
         out = {}
@@ -204,16 +284,34 @@ class NmkDictConfig(NmkMergedConfig):
 
     @property
     def value_type(self) -> object:
+        """
+        Value type for this item
+
+        :return: dict type
+        """
         return dict
 
 
 @dataclass
 class NmkResolvedConfig(NmkConfig):
+    """
+    Resolved config item class
+    """
+
     resolver: Callable
+    """Config resolver instance for this item"""
+
     params: NmkDictConfig
+    """Resolver parameters"""
 
     def resolve(self, cache: bool = True, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
-        # Always disable cache if resolver is volatile
+        """
+        Resolves item value (with disabled cache if resolver is volatile)
+
+        :param cache: use cached value, if already resolved
+        :param resolved_from: set of item names referencing this item
+        :return: resolved item value
+        """
         return super().resolve(cache and not self.resolver.is_volatile(self.name), resolved_from)
 
     def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
@@ -232,6 +330,11 @@ class NmkResolvedConfig(NmkConfig):
 
     @property
     def value_type(self) -> object:
+        """
+        Value type for this item
+
+        :return: value type
+        """
         try:
             # Ask resolver for value type
             return self.resolver.get_type(self.name)

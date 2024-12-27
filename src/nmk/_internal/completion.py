@@ -3,9 +3,13 @@ import traceback
 from abc import ABC, abstractmethod
 from argparse import Action, ArgumentParser, Namespace
 
+from nmk._internal.loader import NmkLoader
 from nmk.model.config import FINAL_ITEM_PATTERN
-from nmk.model.loader import NmkLoader
 from nmk.model.model import NmkModel
+
+"""
+Contributing classes for CLI completion
+"""
 
 
 class ModelCompleter(ABC):

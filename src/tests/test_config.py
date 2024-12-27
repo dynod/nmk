@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from nmk.completion import ConfigCompleter
-from nmk.parser import NmkParser
+from nmk._internal.completion import ConfigCompleter
+from nmk._internal.parser import NmkParser
 from tests.utils import NmkTester
 
 

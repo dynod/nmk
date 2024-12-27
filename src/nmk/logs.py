@@ -10,40 +10,86 @@ from rich.text import Text
 
 from nmk import __version__
 
-# Displayed logs format
+"""
+Logs handlong for nmk
+"""
+
+
 LOG_FORMAT = "%(asctime)s (%(levelname).1s) %(name)s %(message)s"
+"""Displayed logs format"""
+
 LOG_FORMAT_DEBUG = "%(asctime)s.%(msecs)03d (%(levelname).1s) %(name)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d"
+"""File logs format"""
 
 
-# Main logger instance
 class NmkLogWrapper:
+    """
+    Wrapped logger, handling logs with emojis!
+
+    :param logger: logger instance to be wrapped
+    """
+
     def __init__(self, logger: logging.Logger):
-        self.logger = logger
+        self._logger = logger
 
     def __log(self, level: int, emoji: Union[str, Emoji, Text], line: str):
-        self.logger.log(level, f"{Emoji(emoji) if isinstance(emoji, str) else emoji} - {line}", stacklevel=3)
+        self._logger.log(level, f"{Emoji(emoji) if isinstance(emoji, str) else emoji} - {line}", stacklevel=3)
 
     def log(self, level: int, emoji: str, line: str):
+        """
+        Log provided message string + emoji, on required level
+
+        :param level: log level
+        :param emoji: emoji code or format string
+        :param line: message string to be logged
+        """
         self.__log(level, emoji, line)
 
     def info(self, emoji: str, line: str):
+        """
+        Log provided message string + emoji, on INFO level
+
+        :param emoji: emoji code or format string
+        :param line: message string to be logged
+        """
         self.__log(logging.INFO, emoji, line)
 
     def debug(self, line: str):
+        """
+        Log provided message string (with default emoji), on DEBUG level
+
+        :param line: message string to be logged
+        """
         self.__log(logging.DEBUG, "bug", line)
 
     def error(self, line: str):
+        """
+        Log provided message string (with default emoji), on ERROR level
+
+        :param line: message string to be logged
+        """
         self.__log(logging.ERROR, "skull", line)
 
     def warning(self, line: str):
+        """
+        Log provided message string (with default emoji), on WARNING level
+
+        :param line: message string to be logged
+        """
         self.__log(logging.WARNING, "exclamation", line)
 
 
-# Root logger
 NmkLogger = NmkLogWrapper(logging.getLogger("nmk"))
+"""Root logger instance"""
 
 
 def logging_setup(args: Namespace):
+    """
+    Logging setup for nmk
+
+    :param args: parsed args from the command line
+    """
+
     # Setup logging (if not disabled)
     if not args.no_logs:
         if len(args.log_file):
