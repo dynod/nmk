@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "nmk"
 dynamic = ["version"]
 requires-python = ">=3.9"
-classifiers = ["Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12"]
+classifiers = ["Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13"]
 dependencies = ["argcomplete", "coloredlogs", "pyyaml", "jsonschema", "rich", "requests", "buildenv"]
 description = "Next-gen make-like build system"
 
@@ -23,7 +23,7 @@ file = "README.md"
 content-type = "text/markdown"
 
 [project.license]
-file = "LICENSE"
+text = "MIT License"
 
 [project.urls]
 Homepage = "https://github.com/dynod/nmk"
