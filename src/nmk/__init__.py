@@ -1,3 +1,7 @@
+"""
+Python module for **nmk** tool
+"""
+
 from importlib.metadata import version
 
 __title__ = "nmk"

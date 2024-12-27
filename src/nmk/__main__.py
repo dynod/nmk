@@ -1,11 +1,11 @@
 import sys
 import traceback
 
-from nmk.build import NmkBuild
+from nmk._internal.build import NmkBuild
+from nmk._internal.loader import NmkLoader
+from nmk._internal.parser import NmkParser
 from nmk.errors import NmkStopHereError
 from nmk.logs import NmkLogger
-from nmk.model.loader import NmkLoader
-from nmk.parser import NmkParser
 
 
 # CLI entry point

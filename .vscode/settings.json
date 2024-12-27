@@ -21,6 +21,7 @@
         "sdist",
         "venv",
         "pyproject",
+        "rtype",
         "dynod",
         "nmk",
         "pypi",

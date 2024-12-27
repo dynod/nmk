@@ -1,3 +1,7 @@
+"""
+nmk main model
+"""
+
 import importlib
 import importlib.abc
 import importlib.util
@@ -12,11 +16,11 @@ from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolve
 from nmk.model.task import NmkTask
 
 # Class separator
-CLASS_SEP = "."
+_CLASS_SEP = "."
 
 
 @dataclass
-class NmkPathFinder(importlib.abc.MetaPathFinder):
+class _NmkPathFinder(importlib.abc.MetaPathFinder):
     # Dict of contributed files from nmk files
     _path_contribs: dict[str, Path] = field(default_factory=dict)
 
@@ -55,7 +59,7 @@ class NmkPathFinder(importlib.abc.MetaPathFinder):
             # Remember all found python files
             for f in added_path.rglob("*.py"):
                 # Build module name (remove py extension; also remove __init__ for packages)
-                name = CLASS_SEP.join(list(f.relative_to(added_path).parts)).removesuffix(".py").removesuffix(".__init__")
+                name = _CLASS_SEP.join(list(f.relative_to(added_path).parts)).removesuffix(".py").removesuffix(".__init__")
                 self._path_contribs[name] = f
                 self._path_found[name] = False
 
@@ -74,16 +78,39 @@ class NmkPathFinder(importlib.abc.MetaPathFinder):
 
 @dataclass
 class NmkModel:
+    """
+    nmk model definition
+    """
+
     args: Namespace
+    """Command line parsed args"""
+
     file_paths: list[Path] = field(default_factory=list)
+    """List of parsed project file paths"""
+
     file_models: dict[Path, object] = field(default_factory=dict)
+    """Dict of file models indexed by path"""
+
     config: dict[str, NmkConfig] = field(default_factory=dict)
+    """Dict of config item instances"""
+
     tasks: dict[str, NmkTask] = field(default_factory=dict)
+    """Dict of task instances"""
+
     default_task: NmkTask = None
+    """Default task instance"""
+
     tasks_config: dict[str, NmkConfig] = field(default_factory=dict)
+    """Inner tasks config dict"""
+
     pip_args: str = ""
+    """pip command extra args"""
+
     overridden_refs: dict[str, Path] = field(default_factory=dict)
-    path_finder: NmkPathFinder = field(default_factory=NmkPathFinder)
+    """Dict of overridden references"""
+
+    path_finder: _NmkPathFinder = field(default_factory=_NmkPathFinder)
+    """Path finder instance"""
 
     def add_config(
         self,
@@ -94,6 +121,18 @@ class NmkModel:
         task_config: bool = False,
         resolver_params: NmkDictConfig = None,
     ) -> NmkConfig:
+        """
+        Add a config item to model
+
+        :param name: config item name
+        :param path: project file defining this item
+        :param init_value: initial value for config item
+        :param resolver: resolver instance for this item
+        :param task_config: use inner task config dict
+        :param resolver_params: resolver parameters
+        :return: created config item instance
+        """
+
         # Real value?
         is_list = is_dict = False
         if init_value is not None:
@@ -141,12 +180,19 @@ class NmkModel:
         return config_dict[name]
 
     def load_class(self, qualified_class: str, expected_type: object) -> object:
-        assert CLASS_SEP in qualified_class, f"Invalid class qualified name: {qualified_class} (missing separator: {CLASS_SEP})"
-        class_parts = qualified_class.split(CLASS_SEP)
+        """
+        Create referenced class instance
+
+        :param qualified_class: fully qualified class name
+        :param expected_type: expected instance type
+        :return: created class instance
+        """
+        assert _CLASS_SEP in qualified_class, f"Invalid class qualified name: {qualified_class} (missing separator: {_CLASS_SEP})"
+        class_parts = qualified_class.split(_CLASS_SEP)
 
         try:
             # Split module/class names
-            mod_name = CLASS_SEP.join(class_parts[:-1])
+            mod_name = _CLASS_SEP.join(class_parts[:-1])
             cls_name = class_parts[-1]
 
             # Import module using custom contributions
@@ -165,6 +211,12 @@ class NmkModel:
         return out
 
     def add_task(self, task: NmkTask):
+        """
+        Add task instance to model
+
+        :param task: task instance to be added
+        """
+
         NmkLogger.debug(f"{'Override' if task.name in self.tasks else 'New'} task {task.name}")
 
         # Shortcut to task model in builder
@@ -175,16 +227,36 @@ class NmkModel:
         self.tasks[task.name] = task
 
     def set_default_task(self, name: str):
+        """
+        Default task setter
+
+        :param name: name of the new default task
+        """
+
         # Just point to default task
         NmkLogger.debug(f"New default task: {name}")
         self.default_task = self.tasks[name]
 
     def replace_remote(self, remote: str, local: Path):
+        """
+        Replace remote reference by local remote reference
+
+        :param remote: remote name
+        :param local: local remote path
+        """
+
         # Remember remote ref to be replaced by a local one
         NmkLogger.debug(f"Override all remote refs to {remote} by {local}")
         self.overridden_refs[remote] = local
 
     def check_remote_ref(self, remote: str) -> Path:
+        """
+        Check remote reference to potentially replace it by its local equivalent
+
+        :param remote: remote name
+        :return: resolved remote path
+        """
+
         # Replace potentially overridden remote ref by its local equivalent
         for prefix in self.overridden_refs:
             if remote.startswith(prefix):

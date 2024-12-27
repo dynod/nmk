@@ -6,22 +6,42 @@ from typing import Union
 from pytest_multilog import TestHelper
 
 from nmk.__main__ import nmk
-from nmk.model.files import URL_SCHEMES
+from nmk._internal.files import URL_SCHEMES
 
 
 class NmkBaseTester(TestHelper):
+    """
+    Base test class for nmk plugins
+    """
+
     @property
     def nmk_cache(self) -> Path:
+        """
+        Path to nmk folder for this test
+        """
+
         return self.test_folder / ".nmk"
 
     @property
     def templates_root(self) -> Path:  # pragma: no cover
+        """
+        Path to templates for this test
+        """
+
         raise AssertionError("Should be overridden!")
 
     def template(self, name: str) -> Path:
+        """
+        Resolver test template (relative to templates root)
+        """
+
         return self.templates_root / name
 
     def prepare_project(self, name: str) -> Path:
+        """
+        Copy specified template to test project
+        """
+
         # Copy template in test folder
         src = self.template(name)
         dst = self.test_folder / src.name
@@ -38,6 +58,10 @@ class NmkBaseTester(TestHelper):
         with_epilogue: bool = False,
         with_prologue: bool = False,
     ):
+        """
+        Run nmk with specified arguments
+        """
+
         # Prepare args and run nmk
         if isinstance(project, str) and not any(project.startswith(scheme) for scheme in URL_SCHEMES):
             project = self.template(project)

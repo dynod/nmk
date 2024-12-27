@@ -1,5 +1,5 @@
-from nmk.completion import TasksCompleter
-from nmk.parser import NmkParser
+from nmk._internal.completion import TasksCompleter
+from nmk._internal.parser import NmkParser
 from tests.utils import NmkTester
 
 

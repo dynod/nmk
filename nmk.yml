@@ -4,6 +4,7 @@ refs:
     - pip://nmk-github!plugin.yml
     - pip://nmk-python!plugin.yml
     - pip://nmk-vscode!plugin.yml
+    - pip://nmk-doc!plugin.yml
     - <workspace>/shared.yml
     - workspace:
         local: ../../shared
