@@ -34,6 +34,4 @@ Or, if you prefer to get back to a Windows **`cmd`** shell, you can load the bui
 If you want to create a new **`nmk`** project, you can simply bootstrap the build environment by following [these instructions](https://buildenv.readthedocs.io/en/stable/usage.html).
 
 You'll then have to create an nmk [project file](file).
-**`nmk`** project comes with following examples you can clone or simply get inspiration from:
-* [sample python project](https://github.com/dynod/nmk-python-sample)
-* [sample rust project](https://github.com/dynod/nmk-rust-sample)
+**`nmk`** project comes with following examples you can clone or simply get inspiration from (see [programming languages examples](plugins))

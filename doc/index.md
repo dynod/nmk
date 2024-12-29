@@ -11,6 +11,7 @@
 install
 usage
 file
+plugins
 ```
 
 ## Indices and tables
