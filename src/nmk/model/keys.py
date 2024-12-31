@@ -31,3 +31,6 @@ class NmkRootConfig:
 
     ENV = "ENV"
     """Current **nmk** process environment variables"""
+
+    PACKAGES_REFS = "PACKAGESREFS"
+    """List of python packages referenced by the current project"""

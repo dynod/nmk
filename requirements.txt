@@ -11,8 +11,8 @@ build
 buildenv
 coloredlogs
 jsonschema
-myst-parser
 nmk-base
+nmk-doc
 nmk-vscode
 pytest-cov
 pytest-multilog
@@ -22,9 +22,7 @@ requests
 rich
 ruff
 setuptools
-sphinx
 sphinx-autoapi
-sphinx_rtd_theme
 wheel
 
 

@@ -211,6 +211,8 @@ class TestConfig(NmkTester):
                 "--print",
                 "BASEDIR",
                 "--print",
+                "PACKAGESREFS",
+                "--print",
                 "foo",
             ],
         )
@@ -225,6 +227,7 @@ class TestConfig(NmkTester):
             + f'"PROJECTDIR": "{json_serialized_path(self.templates_root)}", '
             + f'"PROJECTDIR_NMK": "{json_serialized_path(self.templates_root / ".nmk")}", '
             + f'"PROJECTFILES": [ "{json_serialized_path(self.template("config_basedir_ref.yml"))}" ], '
+            + '"PACKAGESREFS": [], '
             + f'"foo": "{json_serialized_path(self.templates_root)}/foo"'
         )
 
@@ -258,7 +261,7 @@ class TestConfig(NmkTester):
         configs = ConfigCompleter()(
             "", None, None, NmkParser().parse(["--root", self.test_folder.as_posix(), "-p", self.template("config_sample.yml").as_posix()])
         )
-        assert len(configs) == 6 + 8  # 6 provided one + 8 built-ins
+        assert len(configs) == 6 + 9  # 6 provided one + 9 built-ins
         assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict", "otherDict"])
 
         # Without final ones

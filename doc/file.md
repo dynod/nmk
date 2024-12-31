@@ -312,6 +312,7 @@ Using the **`${r!name}`** syntax will try to convert the referenced value to a p
   * if the referenced value is a dict, all dict values will be converted to a relative path
   * if any relative path conversion fails (value is not relative to project path), the build will fail
 
+(builtin-config)=
 ### Built-in config items
 
 Following items are built-in and contributed by **`nmk`** itself
@@ -325,6 +326,7 @@ Name | Type | Description
 **`PROJECTFILES`** | list | list of all resolved project files (by following references from main project file)
 **`ENV`** | dict | current **`nmk`** process environment variables
 **`BASEDIR`** | str | path to the parent directory of the currently processed project file
+**`PACKAGESREFS`** | list | list of all referenced python packages from project files (using **`pip://`** style references)<br> <br>*<span style="color:green">Added in version 1.1</span>*
 
 
 ***

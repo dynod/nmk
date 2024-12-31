@@ -12,6 +12,7 @@ install
 usage
 file
 plugins
+changelog
 ```
 
 ## Indices and tables
