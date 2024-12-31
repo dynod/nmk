@@ -31,13 +31,29 @@ def log_install():
         NmkLogger.info("arrow_double_down", "Caching remote references...")
 
 
+# Referenced wheels set
+_referenced_wheels: set[str] = set()
+
+
+# Remember referenced wheels
+def _remember_referenced_wheel(referenced_wheel: str):
+    _referenced_wheels.add(referenced_wheel)
+
+
+# Get referenced wheels from references
+def get_referenced_wheels() -> list[str]:
+    return sorted(list(_referenced_wheels))
+
+
 @cache
 def pip_install(url: str, extra_pip_args: str) -> Path:
     # Check pip names
     m = PIP_PATTERN.match(url)
     assert m is not None, f"Malformed pip reference: {url}"
     pip_ref = m.group(1)
-    package_name = m.group(2).replace("-", "_")
+    wheel_name = m.group(2)
+    _remember_referenced_wheel(wheel_name)
+    package_name = wheel_name.replace("-", "_")
 
     # Look for installed python module
     def find_python_module(module) -> Path:

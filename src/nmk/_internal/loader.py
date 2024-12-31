@@ -7,6 +7,7 @@ import sys
 from argparse import Namespace
 from pathlib import Path
 
+from nmk._internal.cache import get_referenced_wheels
 from nmk._internal.files import NmkModelFile
 from nmk.errors import NmkNoLogsError
 from nmk.logs import NmkLogger, logging_setup
@@ -51,6 +52,7 @@ class NmkLoader:
             NmkRootConfig.PROJECT_NMK_DIR: "",  # Will be updated as soon as initial project is loaded
             NmkRootConfig.PROJECT_FILES: [],  # Will be updated as soon as files are loaded
             NmkRootConfig.ENV: dict(os.environ),
+            NmkRootConfig.PACKAGES_REFS: [],  # Will be updated as soon as files are loaded
         }.items():
             self.model.add_config(name, None, value)
 
@@ -71,9 +73,10 @@ class NmkLoader:
             file_model.load_config()
             file_model.load_tasks()
 
-        # Refresh project files list
-        NmkLogger.debug(f"Updating {NmkRootConfig.PROJECT_FILES} now that all files are loaded")
+        # Refresh items once the whole model is loaded
+        NmkLogger.debug("Updating settings now that all files are loaded")
         self.model.config[NmkRootConfig.PROJECT_FILES] = NmkStaticConfig(NmkRootConfig.PROJECT_FILES, self.model, None, list(self.model.file_paths))
+        self.model.config[NmkRootConfig.PACKAGES_REFS] = NmkStaticConfig(NmkRootConfig.PACKAGES_REFS, self.model, None, get_referenced_wheels())
 
     def override_config(self, config_list: list[str]):
         # Iterate on config
