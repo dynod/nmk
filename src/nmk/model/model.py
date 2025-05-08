@@ -205,9 +205,9 @@ class NmkModel:
             raise Exception(f"Can't instantiate class {qualified_class}: {e}") from e
 
         # Verify type is as expected
-        assert isinstance(
-            out, expected_type
-        ), f"Unexpected type for loaded class {qualified_class}: got {type(out).__name__}, expecting {expected_type.__name__} subclass"
+        assert isinstance(out, expected_type), (
+            f"Unexpected type for loaded class {qualified_class}: got {type(out).__name__}, expecting {expected_type.__name__} subclass"
+        )
         return out
 
     def add_task(self, task: NmkTask):

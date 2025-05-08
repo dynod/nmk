@@ -10,9 +10,17 @@ from typing import Callable, Union
 
 from nmk.model.keys import NmkRootConfig
 
-CONFIG_REF_PATTERN = re.compile(r"\$\{([^ \}]+)\}")
+CONFIG_REF_PATTERN = re.compile(r"(^|[^$])(\$\{([^ \}]+)\})")
 """Pattern to locate config reference in string"""
 
+# Group indexes for config refs
+_CONFIG_REF_FULL = 0
+_CONFIG_REF_PREFIX = 1
+_CONFIG_REF_TO_REPLACE = 2
+_CONFIG_REF_NAME = 3
+
+# Escaped reference prefix
+_ESCAPED_REF_PREFIX = "$${"
 
 FINAL_ITEM_PATTERN = re.compile("^[A-Z0-9_]+$")
 """Pattern to recognize final config items"""
@@ -55,12 +63,20 @@ class NmkConfig(ABC):
         :param resolved_from: set of item names referencing this item
         :return: resolved item value
         """
-        if not cache or not hasattr(self, "cached_value") or self.cached_value is None:
+
+        # Check for volatile item
+        is_volatile = self.volatile if hasattr(self, "volatile") else False
+
+        # Check for cached value
+        cached_value = self.cached_value if hasattr(self, "cached_value") else None
+
+        # Check for cached value
+        if not cache or cached_value is None or is_volatile:
             # Get value from implementation
             out = self._get_value(cache, resolved_from)
 
-            # Cache resolved value?
-            if cache:
+            # Cache resolved value? (unless volatile)
+            if cache and not is_volatile:
                 self.cached_value = out
         else:
             # Use cached value
@@ -91,7 +107,7 @@ class NmkConfig(ABC):
             m = CONFIG_REF_PATTERN.search(to_format)
             if m is not None:
                 # Look for referenced config item name
-                ref_name = m.group(1)
+                ref_name = m.group(_CONFIG_REF_NAME)
 
                 # Relative path reference
                 relative_path = ref_name.startswith("r!")
@@ -143,12 +159,14 @@ class NmkConfig(ABC):
                         raise AssertionError(f"Invalid relative path reference: {m.group(0)}") from e
 
                 # Replace with resolved value
-                begin, end = m.span(0)
-                if m.group(0) == to_format and not isinstance(ref_value, str):
+                begin, end = m.span(_CONFIG_REF_TO_REPLACE)
+                if m.group(_CONFIG_REF_FULL) == to_format and not isinstance(ref_value, str):
                     # Stop here, with raw non-string value
                     return ref_value
                 to_format = to_format[0:begin] + str(ref_value) + to_format[end:]
-        return to_format
+
+        # Return formatted value (handling escaped prefix only if resolving at top level)
+        return to_format.replace(_ESCAPED_REF_PREFIX, "${") if (len(resolved_from) == 1) else to_format
 
     @abstractmethod
     def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:  # pragma: no cover
@@ -176,6 +194,14 @@ class NmkStaticConfig(NmkConfig):
 
     static_value: Union[str, int, bool, list, dict]
     """Project defined value"""
+
+    volatile: bool = False
+    """Disable cache for this item"""
+
+    def __post_init__(self):
+        # Consider string items containing escaped references ($${xxx}) as volatile
+        if isinstance(self.static_value, str) and _ESCAPED_REF_PREFIX in self.static_value:
+            self.volatile = True
 
     def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
         # Simple static value

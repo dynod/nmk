@@ -312,6 +312,28 @@ Using the **`${r!name}`** syntax will try to convert the referenced value to a p
   * if the referenced value is a dict, all dict values will be converted to a relative path
   * if any relative path conversion fails (value is not relative to project path), the build will fail
 
+(refs-escaping)=
+#### Escaped references
+
+*<span style="color:green">Added in version 1.1.1</span>*
+
+Sometimes a config item value may contain a string similar the **`nmk`** reference syntax (i.e. **`${SomethingThatIsNotAnNmkConfigItem}`**).
+In order to prevent **`nmk`** trying to resolve this as another config item, it is possible to escape this reference by doubling the **`$`** sign.
+
+Example:
+
+> file.yml:
+> ```yaml
+> config:
+>   someConfig: $${SomeUnknownItem}
+> ```
+> 
+> Resulting config value:
+> ```shell
+> $ nmk -p file.yml --print someConfig -q
+> { "someConfig": "${SomeUnknownItem}" }
+> ```
+
 (builtin-config)=
 ### Built-in config items
 

@@ -20,7 +20,7 @@ import sys
 from configparser import ConfigParser
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Union
+from typing import Union
 from venv import EnvBuilder
 
 VENV_OK = "venvOK"
@@ -225,20 +225,20 @@ class BuildEnvLoader:
         """
         Additional arguments for "pip install" commands, read from **buildenv.cfg** project config file.
         """
-        config_args = self.read_config("pipInstallArgs", "", resolve=True)
+        config_args = " ".join(self.read_config("pipInstallArgs", "", resolve=True).splitlines(keepends=False))
 
         # Systematically force the "--require-virtualenv" option
         return "--require-virtualenv" + (" " if len(config_args) else "") + config_args
 
     @property
-    def default_packages(self) -> List[str]:
+    def default_packages(self) -> list[str]:
         """
         List of packages installed by default when bootstrapping the buildenv
         """
-        return ["pip", "wheel", "setuptools", "buildenv"]
+        return ["pip", "wheel", "setuptools", "buildenv<2"]
 
     @property
-    def requirement_files(self) -> List[str]:
+    def requirement_files(self) -> list[str]:
         """
         List of requirement files to be installed (deduced from requirements files pattern)
         """
@@ -290,7 +290,7 @@ class BuildEnvLoader:
 
         return context
 
-    def setup(self, args: List[str]) -> int:
+    def setup(self, args: list[str]) -> int:
         """
         Prepare python venv if not done yet. Then invoke build env manager.
 
