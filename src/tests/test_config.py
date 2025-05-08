@@ -270,3 +270,14 @@ class TestConfig(NmkTester):
         )
         assert len(configs) == 6  # 6 provided one only (all built-ins are final)
         assert all(t in configs for t in ["someInt", "someString", "someBool", "someList", "someDict", "otherDict"])
+
+    def test_config_escape(self):
+        # Test escaping
+        self.nmk("config_escape.yml", extra_args=["--print", "someString", "--print", "someOtherString", "--print", "someReferringStr"])
+        self.check_logs(
+            "Config dump: { "
+            + '"someString": "${NotAnNmkConfigItem}", '
+            + '"someOtherString": "some/path/${with}/escaped/${path}", '
+            + '"someReferringStr": "__${NotAnNmkConfigItem}__"'
+            + " }"
+        )

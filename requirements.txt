@@ -7,22 +7,18 @@
 #
 
 argcomplete
-build
 buildenv
 coloredlogs
 jsonschema
+nmk-badges
 nmk-base
 nmk-doc
+nmk-github
+nmk-python
 nmk-vscode
-pytest-cov
-pytest-multilog
-pytest-xdist
 pyyaml
 requests
 rich
-ruff
-setuptools
 sphinx-autoapi
-wheel
 
 
