@@ -8,10 +8,16 @@ Only interface and important behavior changes are listed here.
 The fully detailed changelog is also available on [Github](https://github.com/dynod/nmk/releases)
 ```
 
-## Release 1.1.1
+## Release 1.1
+
+### 1.1.2
+
+* Fix types resolution for config item pure references (see {ref}`Resolved config item type<resolved-config-type>`)
+
+### 1.1.1
 
 * Added capability to escape config item references (see {ref}`Escaped references<refs-escaping>`)
 
-## Release 1.1
+### 1.1.0
 
 * New **`PACKAGESREFS`** {ref}`built-in<builtin-config>` config item, listing all referenced python packages from project files.

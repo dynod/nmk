@@ -253,15 +253,41 @@ Example:
 > file.yml:
 > ```yaml
 > config:
->   someString: --${someOtherString}--
 >   someOtherString: foo
+>   someString: --${someOtherString}--
 > ```
 > 
 > Resulting config value:
 > ```shell
 > $ nmk -p file.yml --print someString -q
 > { "someString": "--foo--" }
-> ``
+> ```
+
+(resolved-config-type)=
+#### Resolved config item type
+
+The type of a config item referencing another item is computed according to the reference string itself:
+* if the string contains other chars than the reference itself (e.g. **`/some/path/${name}`**), the resolved item is always a string
+* if the string is a pure reference (i.e. it **only** contains the reference string, e.g. **`${someOtherItem})`**), the resolved item uses the same type than the referenced item
+
+```{note}
+When using pure references, the referenced items **must** be declared **before** the reference itself, otherwise **`nmk`** won't be able to inherit the referenced type.
+```
+
+Example:
+
+> file.yml:
+> ```yaml
+> config:
+>   someBool: true
+>   someRef: ${someBool}
+> ```
+> 
+> Resulting config value:
+> ```shell
+> $ nmk -p file.yml --print someRef -q
+> { "someRef": true }
+> ```
 
 #### Object values
 

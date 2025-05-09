@@ -281,3 +281,12 @@ class TestConfig(NmkTester):
             + '"someReferringStr": "__${NotAnNmkConfigItem}__"'
             + " }"
         )
+
+    def test_config_inherit_type(self):
+        # Test inheriting type
+        self.nmk("config_inherit_type.yml", extra_args=["--print", "someBool"])
+        self.check_logs('Config dump: { "someBool": true }')
+
+        # Test inheriting type with override
+        self.nmk("config_inherit_type_ref.yml", extra_args=["--print", "someBool"])
+        self.check_logs('Config dump: { "someBool": false }')
