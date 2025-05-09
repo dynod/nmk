@@ -1,0 +1,5 @@
+refs:
+    - config_inherit_type.yml
+
+config:
+    someBool: false

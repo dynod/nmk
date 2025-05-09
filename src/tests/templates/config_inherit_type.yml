@@ -1,0 +1,3 @@
+config:
+    someOtherBool: true
+    someBool: ${someOtherBool}

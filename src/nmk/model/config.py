@@ -26,6 +26,29 @@ FINAL_ITEM_PATTERN = re.compile("^[A-Z0-9_]+$")
 """Pattern to recognize final config items"""
 
 
+# Compute reference name (+doted segments) from config reference
+def _get_ref_name(m: re.Match, name: str, model) -> tuple[str, bool, list[str]]:
+    # Look for referenced config item name
+    ref_name: str = m.group(_CONFIG_REF_NAME)
+
+    # Relative path reference
+    relative_path = ref_name.startswith("r!")
+    if relative_path:
+        ref_name = ref_name[2:]
+
+    # Handle doted references (for dicts)
+    if "." in ref_name:
+        segments = ref_name.split(".")
+        ref_name = segments[0]
+    else:
+        segments = None
+
+    # Resolve from config
+    assert ref_name in model.config, f"Unknown '{ref_name}' config referenced from '{name}' config"
+
+    return ref_name, relative_path, segments
+
+
 @dataclass
 class NmkConfig(ABC):
     """
@@ -106,30 +129,17 @@ class NmkConfig(ABC):
         while m is not None:
             m = CONFIG_REF_PATTERN.search(to_format)
             if m is not None:
-                # Look for referenced config item name
-                ref_name = m.group(_CONFIG_REF_NAME)
-
-                # Relative path reference
-                relative_path = ref_name.startswith("r!")
-                if relative_path:
-                    ref_name = ref_name[2:]
+                # Look for referenced config item name, and potential doted segments + relative path option
+                ref_name, relative_path, segments = _get_ref_name(m, self.name, self.model)
 
                 if ref_name == NmkRootConfig.BASE_DIR:
                     # Resolve current path
                     ref_value = str(path if path is not None else self.path)
                 else:
-                    # Handle doted references (for dicts)
-                    if "." in ref_name:
-                        segments = ref_name.split(".")
-                        ref_name = segments[0]
-                    else:
-                        segments = None
-
-                    # Resolve from config
+                    # Check for cyclic reference
                     assert ref_name not in resolved_from, f"Cyclic string substitution: resolving (again!) '{ref_name}' config from '{self.name}' config"  # NOQA:B028
-                    assert ref_name in self.model.config, f"Unknown '{ref_name}' config referenced from '{self.name}' config"  # NOQA:B028
 
-                    # Resolve reference
+                    # Resolve reference from config
                     ref_value = self.model.config[ref_name].resolve(cache, resolved_from)
 
                     # Doted reference?
@@ -199,9 +209,21 @@ class NmkStaticConfig(NmkConfig):
     """Disable cache for this item"""
 
     def __post_init__(self):
-        # Consider string items containing escaped references ($${xxx}) as volatile
-        if isinstance(self.static_value, str) and _ESCAPED_REF_PREFIX in self.static_value:
-            self.volatile = True
+        # Detect value type once for all
+        self._type = type(self.static_value)
+
+        # Specific handling for string items
+        if isinstance(self.static_value, str):
+            # Consider string items containing escaped references ($${xxx}) as volatile
+            if _ESCAPED_REF_PREFIX in self.static_value:
+                self.volatile = True
+            else:
+                # Check for reference
+                m = CONFIG_REF_PATTERN.match(self.static_value)
+                if m is not None and m.group(_CONFIG_REF_FULL) == self.static_value:
+                    # Value is actually a simple reference: use referenced item type
+                    ref_name, _, _ = _get_ref_name(m, self.name, self.model)
+                    self._type = self.model.config[ref_name].value_type
 
     def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
         # Simple static value
@@ -215,7 +237,7 @@ class NmkStaticConfig(NmkConfig):
         :return: value type
         """
 
-        return type(self.static_value)
+        return self._type
 
 
 @dataclass
