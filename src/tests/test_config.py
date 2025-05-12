@@ -273,12 +273,16 @@ class TestConfig(NmkTester):
 
     def test_config_escape(self):
         # Test escaping
-        self.nmk("config_escape.yml", extra_args=["--print", "someString", "--print", "someOtherString", "--print", "someReferringStr"])
+        self.nmk(
+            "config_escape.yml",
+            extra_args=["--print", "someString", "--print", "someOtherString", "--print", "someReferringStr", "--print", "someDict"],
+        )
         self.check_logs(
             "Config dump: { "
             + '"someString": "${NotAnNmkConfigItem}", '
             + '"someOtherString": "some/path/${with}/escaped/${path}", '
-            + '"someReferringStr": "__${NotAnNmkConfigItem}__"'
+            + '"someReferringStr": "__${NotAnNmkConfigItem}__", '
+            + '"someDict": { "someKey": "${buriedEscapedItem}" }'
             + " }"
         )
 
