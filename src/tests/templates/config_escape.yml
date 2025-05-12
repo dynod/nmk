@@ -2,3 +2,5 @@ config:
     someString: $${NotAnNmkConfigItem}
     someOtherString: some/path/$${with}/escaped/$${path}
     someReferringStr: __${someString}__
+    someDict:
+        someKey: $${buriedEscapedItem}

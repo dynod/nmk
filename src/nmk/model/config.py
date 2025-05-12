@@ -258,14 +258,13 @@ class NmkMergedConfig(NmkConfig):
         :param cache: use cache or not
         :param resolved_from: set of item names referencing this item
         """
-        for item in items:
-            formatted_item = self._format(cache, item, resolved_from, path=holder.path)
-            if isinstance(formatted_item, list):
+        for value in items:
+            if isinstance(value, list):
                 # Go deeper in this sub-list
-                self.traverse_list(formatted_item, out_list, cache, resolved_from, holder)
+                self.traverse_list(value, out_list, cache, resolved_from, holder)
             else:
                 # Simple list append
-                out_list.append(formatted_item)
+                out_list.append(value)
 
     def traverse_dict(self, items: dict, out_dict: dict, cache: bool, resolved_from: set[str], holder):
         """
@@ -277,21 +276,20 @@ class NmkMergedConfig(NmkConfig):
         :param resolved_from: set of item names referencing this item
         """
 
-        for k, v in items.items():
-            formatted_item = self._format(cache, v, resolved_from, path=holder.path)
-            if isinstance(formatted_item, dict):
+        for k, value in items.items():
+            if isinstance(value, dict):
                 # Recursively merge this dict
                 if k not in out_dict:
                     out_dict[k] = {}
-                self.traverse_dict(formatted_item, out_dict[k], cache, resolved_from, holder)
-            elif isinstance(formatted_item, list):
+                self.traverse_dict(value, out_dict[k], cache, resolved_from, holder)
+            elif isinstance(value, list):
                 # Recursively merge this list
                 if k not in out_dict:
                     out_dict[k] = []
-                self.traverse_list(formatted_item, out_dict[k], cache, resolved_from, holder)
+                self.traverse_list(value, out_dict[k], cache, resolved_from, holder)
             else:
                 # Simple item: override
-                out_dict[k] = formatted_item
+                out_dict[k] = value
 
 
 @dataclass
