@@ -6,7 +6,7 @@ Use **`nmk -h`** to get live help about these options in the terminal.
 
 ```
 user@host:~$ $ nmk -h
-usage: nmk [-h] [-V] [-q | --info | -v] [--log-file L] [--no-logs] [-r R] [--no-cache] [-p P] [--config JSON|K=V] [--print K] [--dry-run] [--force]
+usage: nmk [-h] [-V] [-q | --info | -v] [--log-file L] [--no-logs] [--log-prefix PREFIX] [-r R] [--no-cache] [-p P] [--config JSON|K=V] [--print K] [--dry-run] [--force]
            [--skip SKIPPED_TASKS]
            [task ...]
 
@@ -25,6 +25,7 @@ logging options:
   -v, --verbose         verbose mode (all messages, including debug ones)
   --log-file L          write logs to L (default: {ROOTDIR}/.nmk/nmk.log)
   --no-logs             disable logging
+  --log-prefix PREFIX   prefix for all log messages
 
 root folder options:
   -r R, --root R        root folder (default: virtual env parent)
@@ -64,9 +65,16 @@ kept before being deleted. At the moment, log file size + backup count is hard c
 ### Disabling logs
 Logs can be completely disabled (both displayed and persisted ones) if the **`--no-logs`** option is used.
 
+(parser-log-prefix)=
+### Prefix
+
+*<span style="color:green">Added in version 1.2.0</span>*
+
+Top level tools that call **`nmk`** can add a log prefix thanks to the **`--log-prefix`**, in order to help identifying different runs (e.g. for different nmk projects folders). See `<prefix>` location in logs displays formats below.
+
 ### Format
 In quiet/info mode, logs are displayed using this format:
-> **`<day> <time> (<level>) <logger>|[<task>] <emoji> - <string>`**
+> **`<day> <time> (<level>) <prefix> <logger>|[<task>] <emoji> - <string>`**
 
 Example:
 ```
@@ -74,8 +82,8 @@ Example:
 2022-02-15 18:21:16 (I) nmk 🏁 - Nothing to do
 ```
 
-In verbose mode, logs are displayed with a bit mode details, using this format:
-> **`<day> <time>.<ms> (<level>) <logger>|[<task>] <emoji> - <string> - <file>:<function>:<line>`**
+In verbose mode, logs are displayed with a bit more details, using this format:
+> **`<day> <time>.<ms> (<level>) <prefix> <logger>|[<task>] <emoji> - <string> - <file>:<function>:<line>`**
 
 Example:
 ```

@@ -11,14 +11,14 @@ from rich.text import Text
 from nmk import __version__
 
 """
-Logs handlong for nmk
+Logs handling for nmk
 """
 
 
-LOG_FORMAT = "%(asctime)s (%(levelname).1s) %(name)s %(message)s"
+LOG_FORMAT = "%(asctime)s (%(levelname).1s) %(prefix)s%(name)s %(message)s"
 """Displayed logs format"""
 
-LOG_FORMAT_DEBUG = "%(asctime)s.%(msecs)03d (%(levelname).1s) %(name)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d"
+LOG_FORMAT_DEBUG = "%(asctime)s.%(msecs)03d (%(levelname).1s) %(prefix)s%(name)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d"
 """File logs format"""
 
 
@@ -29,11 +29,22 @@ class NmkLogWrapper:
     :param logger: logger instance to be wrapped
     """
 
+    # Class-level prefix
+    _prefix: str = ""
+
     def __init__(self, logger: logging.Logger):
-        self._logger = logger
+        self._original_logger = logger
+        self._refresh_logger()
 
     def __log(self, level: int, emoji: Union[str, Emoji, Text], line: str):
         self._logger.log(level, f"{Emoji(emoji) if isinstance(emoji, str) else emoji} - {line}", stacklevel=3)
+
+    @classmethod
+    def _set_prefix(cls, prefix: str):
+        cls._prefix = f"{prefix} " if prefix else ""
+
+    def _refresh_logger(self):
+        self._logger = logging.LoggerAdapter(self._original_logger, {"prefix": NmkLogWrapper._prefix})
 
     def log(self, level: int, emoji: str, line: str):
         """
@@ -103,6 +114,10 @@ def logging_setup(args: Namespace):
 
         # Colored logs install
         coloredlogs.install(level=args.log_level, fmt=LOG_FORMAT if args.log_level > logging.DEBUG else LOG_FORMAT_DEBUG)
+
+    # Refresh prefix with configured one
+    NmkLogWrapper._set_prefix(args.log_prefix)
+    NmkLogger._refresh_logger()
 
     # First log line
     NmkLogger.debug(f"----- nmk version {__version__} -----")
