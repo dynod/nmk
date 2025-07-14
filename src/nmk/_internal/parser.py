@@ -49,6 +49,7 @@ class NmkParser:
             "--log-file", metavar="L", default="{ROOTDIR}/.nmk/nmk.log", help="write logs to L (default: {ROOTDIR}/.nmk/nmk.log)"
         ).completer = argcomplete.completers.FilesCompleter(directories=True)
         lg.add_argument("--no-logs", action="store_true", default=False, help="disable logging")
+        lg.add_argument("--log-prefix", metavar="PREFIX", default=None, help="prefix for all log messages")
 
         # Root folder
         rg = self.parser.add_argument_group("root folder options")

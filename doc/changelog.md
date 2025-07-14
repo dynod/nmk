@@ -8,6 +8,12 @@ Only interface and important behavior changes are listed here.
 The fully detailed changelog is also available on [Github](https://github.com/dynod/nmk/releases)
 ```
 
+## Release 1.2
+
+### 1.2.0
+
+* New **`--log-prefix`** option (see {ref}`Logs prefix<parser-log-prefix>`)
+
 ## Release 1.1
 
 ### 1.1.2
