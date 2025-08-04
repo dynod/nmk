@@ -158,3 +158,24 @@ class TestBuild(NmkTester):
         self.nmk(
             "build_conditional_if.yml", extra_args=["errorBuild"], expected_error=f"Can't compute value type to evaluate conditional behavior: {os.path.sep}tmp"
         )
+
+    def test_logging_prefix(self):
+        # Try with standard logging builder (to check that logging tweak for prefix works for all logs)
+        expected_log = self.test_folder / "some.log"
+        self.nmk("build_standard_logging.yml", extra_args=["--log-file", expected_log.as_posix(), "--log-prefix", "foo"], with_logs=True)
+        assert expected_log.is_file()
+
+        # Check expected prefix + standard log
+        log_lines = expected_log.read_text(encoding="utf-8", errors="ignore").splitlines(keepends=False)
+        assert all(" foo " in line for line in log_lines)
+        assert any("foo root This is a standard debug message" in line for line in log_lines)
+
+    def test_no_logging_prefix(self):
+        # Try with standard logging builder (to check that logging tweak for prefix works for all logs)
+        expected_log = self.test_folder / "some.log"
+        self.nmk("build_standard_logging.yml", extra_args=["--log-file", expected_log.as_posix()], with_logs=True)
+        assert expected_log.is_file()
+
+        # Check standard log only (no prefix)
+        log_lines = expected_log.read_text(encoding="utf-8", errors="ignore").splitlines(keepends=False)
+        assert any("root This is a standard debug message" in line for line in log_lines)

@@ -29,22 +29,11 @@ class NmkLogWrapper:
     :param logger: logger instance to be wrapped
     """
 
-    # Class-level prefix
-    _prefix: str = ""
-
     def __init__(self, logger: logging.Logger):
-        self._original_logger = logger
-        self._refresh_logger()
+        self._logger = logger
 
     def __log(self, level: int, emoji: Union[str, Emoji, Text], line: str):
         self._logger.log(level, f"{Emoji(emoji) if isinstance(emoji, str) else emoji} - {line}", stacklevel=3)
-
-    @classmethod
-    def _set_prefix(cls, prefix: str):
-        cls._prefix = f"{prefix} " if prefix else ""
-
-    def _refresh_logger(self):
-        self._logger = logging.LoggerAdapter(self._original_logger, {"prefix": NmkLogWrapper._prefix})
 
     def log(self, level: int, emoji: str, line: str):
         """
@@ -115,9 +104,19 @@ def logging_setup(args: Namespace):
         # Colored logs install
         coloredlogs.install(level=args.log_level, fmt=LOG_FORMAT if args.log_level > logging.DEBUG else LOG_FORMAT_DEBUG)
 
-    # Refresh prefix with configured one
-    NmkLogWrapper._set_prefix(args.log_prefix)
-    NmkLogger._refresh_logger()
+        # Add prefix keyword if configured
+        used_logs_prefix = (args.log_prefix + " ") if args.log_prefix else ""
+        _old_record_factory = logging.getLogRecordFactory()
+
+        def _prefixed_log_record_factory(*p_args, **kw_args):
+            """
+            Custom log record factory to add prefix
+            """
+            record = _old_record_factory(*p_args, **kw_args)
+            record.prefix = used_logs_prefix
+            return record
+
+        logging.setLogRecordFactory(_prefixed_log_record_factory)
 
     # First log line
     NmkLogger.debug(f"----- nmk version {__version__} -----")
