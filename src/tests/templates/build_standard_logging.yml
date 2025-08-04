@@ -1,0 +1,5 @@
+tasks:
+    sampleTask:
+        description: Hello world
+        builder: tests.sample_tasks.StandardLoggingBuilder
+        default: true

@@ -1,3 +1,4 @@
+import logging
 import shutil
 
 from nmk.model.builder import NmkTaskBuilder
@@ -43,3 +44,9 @@ class CountInputsBuilder(NmkTaskBuilder):
     def build(self):
         # Count inputs!
         self.logger.warning(f"Inputs count: {len(self.inputs)}")
+
+
+class StandardLoggingBuilder(NmkTaskBuilder):
+    def build(self):
+        # Nothing to do but log some messages
+        logging.debug("This is a standard debug message")
