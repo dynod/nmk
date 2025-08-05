@@ -46,7 +46,7 @@ class NmkParser:
             help="verbose mode (all messages, including debug ones)",
         )
         lg.add_argument(
-            "--log-file", metavar="L", default="{ROOTDIR}/.nmk/nmk.log", help="write logs to L (default: {ROOTDIR}/.nmk/nmk.log)"
+            "--log-file", metavar="L", default="{PROJECTDIR_NMK}/nmk.log", help="write logs to L (default: {PROJECTDIR_NMK}/nmk.log)"
         ).completer = argcomplete.completers.FilesCompleter(directories=True)
         lg.add_argument("--no-logs", action="store_true", default=False, help="disable logging")
         lg.add_argument("--log-prefix", metavar="PREFIX", default=None, help="prefix for all log messages")

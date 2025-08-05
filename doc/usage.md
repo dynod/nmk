@@ -6,8 +6,8 @@ Use **`nmk -h`** to get live help about these options in the terminal.
 
 ```
 user@host:~$ $ nmk -h
-usage: nmk [-h] [-V] [-q | --info | -v] [--log-file L] [--no-logs] [--log-prefix PREFIX] [-r R] [--no-cache] [-p P] [--config JSON|K=V] [--print K] [--dry-run] [--force]
-           [--skip SKIPPED_TASKS]
+usage: nmk [-h] [-V] [-q | --info | -v] [--log-file L] [--no-logs] [--log-prefix PREFIX] [-r R] [--no-cache] [-p P] [--config JSON|K=V] [--print K]
+           [--dry-run] [--force] [--skip SKIPPED_TASKS]
            [task ...]
 
 Next-gen make-like build system
@@ -23,7 +23,7 @@ logging options:
   -q, --quiet           quiet mode (only warning/error messages)
   --info                default mode
   -v, --verbose         verbose mode (all messages, including debug ones)
-  --log-file L          write logs to L (default: {ROOTDIR}/.nmk/nmk.log)
+  --log-file L          write logs to L (default: {PROJECTDIR_NMK}/nmk.log)
   --no-logs             disable logging
   --log-prefix PREFIX   prefix for all log messages
 
@@ -54,9 +54,17 @@ build options:
 - **`-q, --quiet`**: only warning (**[W]**) and error (**[E]**) logs will be displayed
 - **`-v, --verbose`**: all logs (including debug (**[D]**) ones) will be displayed
 
+(parser-log-file)=
 ### File
 In addition to the displayed ones, logs are persisted in a file, configured with **`--log-file`** option.
-Default log file is **`{ROOTDIR}/.nmk/nmk.log`** (**`{ROOTDIR}`** being the root folder -- see below).
+Default log file is **`{PROJECTDIR_NMK}/nmk.log`** (**`{PROJECTDIR_NMK}`** being the project **`.nmk/`** subfolder).
+
+```{note}
+Value for this option can contain keywords representing directories known to **`nmk`**; see {ref}`built-in config items<builtin-config>`. 
+Allowed keyword are **`{PROJECTDIR}`**, **`{PROJECTDIR_NMK}`**, **`{ROOTDIR}`** and **`{ROOTDIR_NMK}`**.
+```
+
+*<span style="color:orange">Changed in version 1.3.0</span>* -- Previous default value was **`{ROOTDIR}/.nmk/nmk.log`**
 
 The log file is logging all levels (including debug one), whatever is the chosen level for stdout display (see above).
 It uses a rotating mechanism, to start a new log file as soon as a given size (1MB) is reached. Up to 5 backup log files are
