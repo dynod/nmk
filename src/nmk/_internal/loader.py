@@ -5,12 +5,14 @@ import re
 import shutil
 import sys
 from argparse import Namespace
+from logging.handlers import MemoryHandler
 from pathlib import Path
+from typing import Union
 
 from nmk._internal.cache import get_referenced_wheels
 from nmk._internal.files import NmkModelFile
 from nmk.errors import NmkNoLogsError
-from nmk.logs import NmkLogger, logging_setup
+from nmk.logs import NmkLogger, logging_finalize_setup, logging_initial_setup
 from nmk.model.config import NmkStaticConfig
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
@@ -22,7 +24,7 @@ CONFIG_STRING_PATTERN = re.compile("^([^ =]+)=(.*)$")
 class NmkLoader:
     def __init__(self, args: Namespace, with_logs: bool = True):
         # Finish args parsing
-        self.finish_parsing(args, with_logs)
+        self._logs_mem_handler = self.finish_parsing(args, with_logs)
 
         # Prepare repo cache and empty model
         self.root_nmk_dir = args.nmk_dir
@@ -59,8 +61,20 @@ class NmkLoader:
         # Init inner model loading
         NmkModelFile(Path(importlib.resources.files("nmk.model")) / "internal.yml", self.repo_cache, self.model, [], is_internal=True)
 
-        # Init recursive files loading
-        NmkModelFile(self.model.args.project, self.repo_cache, self.model, [])
+        # Init recursive files loading (with logs setup finalization callback to be called once project dir is known)
+        NmkModelFile(
+            self.model.args.project,
+            self.repo_cache,
+            self.model,
+            [],
+            known_project_dir_callback=lambda m: logging_finalize_setup(
+                log_file_str=self.model.args.log_file,
+                model_paths_keywords={
+                    k: m.config[k].value for k in [NmkRootConfig.ROOT_DIR, NmkRootConfig.ROOT_NMK_DIR, NmkRootConfig.PROJECT_DIR, NmkRootConfig.PROJECT_NMK_DIR]
+                },
+                memory_handler=self._logs_mem_handler,
+            ),
+        )
 
         # Loop 1: load python paths
         for m in self.model.file_models.values():
@@ -103,7 +117,7 @@ class NmkLoader:
                 for k, v in override_config.items():
                     self.model.add_config(k, None, v)
 
-    def finish_parsing(self, args: Namespace, with_logs: bool):
+    def finish_parsing(self, args: Namespace, with_logs: bool) -> Union[None, MemoryHandler]:
         # Handle root folder
         if args.root is None:  # pragma: no cover
             # By default, root dir is the parent folder of currently running venv
@@ -122,7 +136,7 @@ class NmkLoader:
 
         # Setup logging
         if with_logs:
-            logging_setup(args)
+            return logging_initial_setup(args)
 
     def validate_tasks(self):
         # Iterate on tasks: pass 1 --> resolve references

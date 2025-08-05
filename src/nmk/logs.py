@@ -1,4 +1,5 @@
 import logging
+import logging.handlers
 from argparse import Namespace
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -20,6 +21,9 @@ LOG_FORMAT = "%(asctime)s (%(levelname).1s) %(prefix)s%(name)s %(message)s"
 
 LOG_FORMAT_DEBUG = "%(asctime)s.%(msecs)03d (%(levelname).1s) %(prefix)s%(name)s %(message)s - %(filename)s:%(funcName)s:%(lineno)d"
 """File logs format"""
+
+# One megabyte
+_ONE_MB = 1024 * 1024
 
 
 class NmkLogWrapper:
@@ -83,23 +87,21 @@ NmkLogger = NmkLogWrapper(logging.getLogger("nmk"))
 """Root logger instance"""
 
 
-def logging_setup(args: Namespace):
+def logging_initial_setup(args: Namespace) -> Union[logging.handlers.MemoryHandler, None]:
     """
     Logging setup for nmk
 
     :param args: parsed args from the command line
+    :return: memory handler used for logging, or None if no logs are enabled
     """
 
     # Setup logging (if not disabled)
+    mem_handler = None
     if not args.no_logs:
-        if len(args.log_file):
-            # Handle output log file (generate it from pattern, and create parent folder if needed)
-            logging.basicConfig(force=True, level=logging.DEBUG)
-            log_file = Path(args.log_file.format(ROOTDIR=args.root))
-            log_file.parent.mkdir(parents=True, exist_ok=True)
-            handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5, encoding="utf-8")
-            handler.setFormatter(logging.Formatter(LOG_FORMAT_DEBUG, datefmt=coloredlogs.DEFAULT_DATE_FORMAT))
-            logging.getLogger().addHandler(handler)
+        # Basic init, with memory handler (to be flushed later)
+        logging.basicConfig(force=True, level=logging.DEBUG)
+        mem_handler = logging.handlers.MemoryHandler(capacity=_ONE_MB, target=None, flushLevel=logging.FATAL)
+        logging.getLogger().addHandler(mem_handler)
 
         # Colored logs install
         coloredlogs.install(level=args.log_level, fmt=LOG_FORMAT if args.log_level > logging.DEBUG else LOG_FORMAT_DEBUG)
@@ -123,3 +125,32 @@ def logging_setup(args: Namespace):
     NmkLogger.debug(f"called with args: {args}")
     if args.no_cache:
         NmkLogger.debug("Cache cleared!")
+    return mem_handler
+
+
+def logging_finalize_setup(log_file_str: str, model_paths_keywords: dict[str, str], memory_handler: Union[logging.handlers.MemoryHandler, None]):
+    """
+    Finalize logs setup, once nmk project folder has been setup
+
+    :param log_file_str: log file path pattern (from command line args)
+    :param model_paths_keywords: keywords to be used in the log file path pattern (computed from nmk model)
+    :param memory_handler: memory handler used for logging, or None if no logs are enabled
+    """
+
+    if not memory_handler:
+        # No logs to write, just return
+        return
+
+    if log_file_str:
+        # Handle output log file (generate it from pattern, and create parent folder if needed)
+        log_file = Path(log_file_str.format(**model_paths_keywords))
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        file_handler = RotatingFileHandler(log_file, maxBytes=_ONE_MB, backupCount=5, encoding="utf-8")
+        file_handler.setFormatter(logging.Formatter(LOG_FORMAT_DEBUG, datefmt=coloredlogs.DEFAULT_DATE_FORMAT))
+        logging.getLogger().addHandler(file_handler)
+
+        # Provide log file handler to pending memory handler
+        memory_handler.setTarget(file_handler)
+
+    # Just close the memory handler to flush pending logs
+    memory_handler.close()

@@ -73,7 +73,9 @@ def load_schema() -> dict:
 
 # Recursive model file loader
 class NmkModelFile:
-    def __init__(self, project_ref: str, repo_cache: Path, model: NmkModel, refs: list[str], is_internal: bool = False):
+    def __init__(
+        self, project_ref: str, repo_cache: Path, model: NmkModel, refs: list[str], is_internal: bool = False, known_project_dir_callback: Callable = None
+    ):
         # Init properties
         self._repos = None
         self.repo_cache = repo_cache
@@ -91,6 +93,9 @@ class NmkModelFile:
                 NmkLogger.debug(f"{NmkRootConfig.PROJECT_DIR} updated to {p_dir}")
                 model.config[NmkRootConfig.PROJECT_DIR].static_value = p_dir
                 model.config[NmkRootConfig.PROJECT_NMK_DIR].static_value = p_dir / ".nmk"
+                if known_project_dir_callback:  # pragma: no branch
+                    # Notify callback that all dirs are known
+                    known_project_dir_callback(model)
 
                 # Also remember pip args from buildenv
                 model.pip_args = BuildEnvLoader(p_dir).pip_args
