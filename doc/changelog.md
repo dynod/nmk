@@ -10,6 +10,10 @@ The fully detailed changelog is also available on [Github](https://github.com/dy
 
 ## Release 1.3
 
+### 1.3.1
+
+* Now supports simple config override for int and bool values (see {ref}`Extra configuration<extra-cli-config>`)
+
 ### 1.3.0
 
 * Changed default value for **`--log-file`** option (see {ref}`Logs file<parser-log-file>`)

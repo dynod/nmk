@@ -109,6 +109,8 @@ Configuration is defined as an object value for **`config`** top-level project p
 
 Any project file can override a config item defined by another referenced project file, with behavior explained in following chapters.
 
+Note that config items can also be overridden from the {ref}`command line<extra-cli-config>`.
+
 #### Overridden value type
 
 When overriding an item, the value type can't change (e.g. a string item must be overridden by a string value)

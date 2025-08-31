@@ -21,14 +21,12 @@
         "sdist",
         "venv",
         "pyproject",
+        "pyright",
         "rtype",
         "dynod",
         "nmk",
         "pypi",
         "buildenv"
-    ],
-    "python.analysis.extraPaths": [
-        "src"
     ],
     "python.testing.pytestEnabled": true,
     "files.watcherExclude": {

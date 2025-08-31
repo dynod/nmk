@@ -150,11 +150,15 @@ Project file is a [YAML](https://yaml.org/) file, and has to conform with [this 
 
 Configuration is handled through the **`config`** node of project files.
 
+(extra-cli-config)=
 ### Extra configuration
 
 In addition to project files content, extra configuration can be provided through the **`--config`** option. This option allows to define additional config items, or override config items from project files. The option value must be either:
 - a valid json object
-- or a K=V string, allowing to configure a K item with V string value (only string value allowed, other types shall be contributed through JSON format)
+- or a K=V string, allowing to configure a K item with V string value; only following value types are allowed, other types shall be contributed through JSON format:
+  - **string**
+  - **int** (if overridden existing item is an **int**)  *<span style="color:green">Added in version 1.3.1</span>*
+  - **bool** (if overridden existing item is a **bool**) *<span style="color:green">Added in version 1.3.1</span>*
 
 ```{note}
 - The **`--config`** options contributed configuration is applied __after__ the whole project file model has been loaded.

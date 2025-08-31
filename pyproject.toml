@@ -47,6 +47,11 @@ file = "out/.pythonversion"
 [tool.distutils.bdist_wheel]
 plat-name = "any"
 
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+
 [tool.ruff]
 line-length = 160
 
