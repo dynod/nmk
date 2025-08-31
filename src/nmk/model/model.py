@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Union
 
+from nmk._internal.envbackend import EnvBackend
 from nmk.logs import NmkLogger
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkStaticConfig
 from nmk.model.task import NmkTask
@@ -112,14 +113,14 @@ class NmkModel:
     tasks_config: dict[str, NmkConfig] = field(default_factory=dict)
     """Inner tasks config dict"""
 
-    pip_args: str = ""
-    """pip command extra args"""
-
     overridden_refs: dict[str, Path] = field(default_factory=dict)
     """Dict of overridden references"""
 
     path_finder: _NmkPathFinder = field(default_factory=_NmkPathFinder)
     """Path finder instance"""
+
+    env_backend: Union[EnvBackend, None] = None
+    """Python environment backend, created when first project file is loaded"""
 
     def add_config(
         self,

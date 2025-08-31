@@ -42,6 +42,7 @@ def run_pip(args: list[str], logger=NmkLogger, extra_args: str = "") -> str:
     :param logger: logger instance
     :param extra_args: extra arguments (split on spaces and passed to pip command)
     :return: executed pip command stdout
+    :deprecate: This function is deprecated, go through buildenv's EnvBackend API instead
     """
     all_args = [sys.executable, "-m", "pip"] + args + list(filter(lambda x: len(x) > 0, extra_args.strip(" ").split(" ")))
     return run_with_logs(all_args, logger).stdout

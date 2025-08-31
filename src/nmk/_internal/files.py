@@ -6,7 +6,6 @@ from typing import Callable, Union
 
 import jsonschema
 import yaml
-from buildenv import BuildEnvLoader
 from rich.emoji import Emoji
 from rich.text import Text
 
@@ -19,6 +18,8 @@ from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkConfigResolver
 from nmk.model.task import NmkTask
+
+from .envbackend import EnvBackendFactory
 
 # Known URL schemes
 GITHUB_SCHEME = "github:"
@@ -97,8 +98,8 @@ class NmkModelFile:
                     # Notify callback that all dirs are known
                     known_project_dir_callback(model)
 
-                # Also remember pip args from buildenv
-                model.pip_args = BuildEnvLoader(p_dir).pip_args
+                # Also setup env backend from project directory
+                model.env_backend = EnvBackendFactory.detect(p_dir)
 
             # Remember file path in model (to avoid recursive loading; and only if not an internal one)
             if self.file in model.file_paths:
@@ -151,7 +152,7 @@ class NmkModelFile:
         # URL?
         if self.is_url(project_ref):
             # Cache-able reference
-            return cache_remote(self.repo_cache, self.convert_url(project_ref), self.global_model.pip_args)
+            return cache_remote(self.repo_cache, self.convert_url(project_ref), self.global_model.env_backend)
 
         # Default case: assumed to be a local path
         return Path(project_ref)
