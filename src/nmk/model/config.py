@@ -6,7 +6,7 @@ import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Union
+from typing import Any, Callable, Union
 
 from nmk.model.keys import NmkRootConfig
 
@@ -24,6 +24,9 @@ _ESCAPED_REF_PREFIX = "$${"
 
 FINAL_ITEM_PATTERN = re.compile("^[A-Z0-9_]+$")
 """Pattern to recognize final config items"""
+
+ConfigTypes = Union[str, int, bool, list[Any], dict[str, Any]]
+"""Used config item types"""
 
 
 # Compute reference name (+doted segments) from config reference
@@ -72,13 +75,13 @@ class NmkConfig(ABC):
         return FINAL_ITEM_PATTERN.match(self.name) is not None
 
     @property
-    def value(self) -> Union[str, int, bool, list, dict]:
+    def value(self) -> ConfigTypes:
         """
         Returns current item value
         """
         return self.resolve()
 
-    def resolve(self, cache: bool = True, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
+    def resolve(self, cache: bool = True, resolved_from: Union[set[str], None] = None) -> ConfigTypes:
         """
         Resolves item value
 
@@ -108,9 +111,7 @@ class NmkConfig(ABC):
         return out
 
     # Process item references
-    def _format(
-        self, cache: bool, candidate: Union[str, int, bool, list, dict], resolved_from: set[str] = None, path: Path = None
-    ) -> Union[str, int, bool, list, dict]:
+    def _format(self, cache: bool, candidate: ConfigTypes, resolved_from: Union[set[str], None] = None, path: Union[Path, None] = None) -> ConfigTypes:
         resolved_from = set(resolved_from) if resolved_from is not None else set()
         resolved_from.add(self.name)
 
@@ -179,7 +180,7 @@ class NmkConfig(ABC):
         return to_format.replace(_ESCAPED_REF_PREFIX, "${") if (len(resolved_from) == 1) else to_format
 
     @abstractmethod
-    def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:  # pragma: no cover
+    def _get_value(self, cache: bool, resolved_from: Union[set[str], None] = None) -> ConfigTypes:  # pragma: no cover
         """
         Internal value access
         """
@@ -187,7 +188,7 @@ class NmkConfig(ABC):
 
     @property
     @abstractmethod
-    def value_type(self) -> object:  # pragma: no cover
+    def value_type(self) -> type[Any]:  # pragma: no cover
         """
         Value type for this item; to be overridden by sub-classes
 
@@ -202,7 +203,7 @@ class NmkStaticConfig(NmkConfig):
     Static config item (defined in project file)
     """
 
-    static_value: Union[str, int, bool, list, dict]
+    static_value: Union[str, int, bool, list[Any], dict[str, Any]]
     """Project defined value"""
 
     volatile: bool = False
@@ -210,7 +211,7 @@ class NmkStaticConfig(NmkConfig):
 
     def __post_init__(self):
         # Detect value type once for all
-        self._type = type(self.static_value)
+        self._type: type[Any] = type(self.static_value)
 
         # Specific handling for string items
         if isinstance(self.static_value, str):
@@ -225,12 +226,12 @@ class NmkStaticConfig(NmkConfig):
                     ref_name, _, _ = _get_ref_name(m, self.name, self.model)
                     self._type = self.model.config[ref_name].value_type
 
-    def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
+    def _get_value(self, cache: bool, resolved_from: Union[set[str], None] = None) -> ConfigTypes:
         # Simple static value
         return self._format(cache, self.static_value, resolved_from)
 
     @property
-    def value_type(self) -> object:
+    def value_type(self) -> type[Any]:
         """
         Value type for this static item
 
@@ -246,7 +247,7 @@ class NmkMergedConfig(NmkConfig):
     Merged config item base class
     """
 
-    static_list: list[NmkStaticConfig] = field(default_factory=list)
+    static_list: list[NmkStaticConfig] = field(default_factory=list[NmkStaticConfig])
     """List of merged static items"""
 
     def traverse_list(self, items: list, out_list: list, cache: bool, resolved_from: set[str], holder):
@@ -306,7 +307,7 @@ class NmkListConfig(NmkMergedConfig):
         return out
 
     @property
-    def value_type(self) -> object:
+    def value_type(self) -> type[Any]:
         """
         Value type for this item
 
@@ -329,7 +330,7 @@ class NmkDictConfig(NmkMergedConfig):
         return out
 
     @property
-    def value_type(self) -> object:
+    def value_type(self) -> type[Any]:
         """
         Value type for this item
 
@@ -375,7 +376,7 @@ class NmkResolvedConfig(NmkConfig):
             raise Exception(f"Error occurred while resolving config {self.name}: {e}") from e
 
     @property
-    def value_type(self) -> object:
+    def value_type(self) -> type[Any]:
         """
         Value type for this item
 

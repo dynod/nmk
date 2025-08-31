@@ -9,7 +9,7 @@ import sys
 from argparse import Namespace
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union
+from typing import Any, Callable, Union
 
 from nmk.logs import NmkLogger
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkStaticConfig
@@ -76,6 +76,15 @@ class _NmkPathFinder(importlib.abc.MetaPathFinder):
             return importlib.util.spec_from_file_location(fullname, found_path)
 
 
+# Supported types adaptation
+_SUPPORTED_TYPES_ADAPTATION: dict[type[Any], dict[type[Any], Callable[[Any], Any]]] = {
+    str: {  # At the moment, only support str->int and str->bool adaptations
+        int: lambda x: int(x),
+        bool: lambda x: x.lower() == "true",
+    }
+}
+
+
 @dataclass
 class NmkModel:
     """
@@ -115,11 +124,12 @@ class NmkModel:
     def add_config(
         self,
         name: str,
-        path: Path,
-        init_value: Union[str, int, bool, list, dict] = None,
+        path: Union[Path, None],
+        init_value: Union[Union[str, int, bool, list[Any], dict[str, Any]], None] = None,
         resolver: object = None,
         task_config: bool = False,
-        resolver_params: NmkDictConfig = None,
+        resolver_params: Union[NmkDictConfig, None] = None,
+        adapt_type: bool = False,
     ) -> NmkConfig:
         """
         Add a config item to model
@@ -130,6 +140,7 @@ class NmkModel:
         :param resolver: resolver instance for this item
         :param task_config: use inner task config dict
         :param resolver_params: resolver parameters
+        :param adapt_type: when overriding, adapt value type to overridden type (if possible, works for str->int and str->bool)
         :return: created config item instance
         """
 
@@ -138,7 +149,7 @@ class NmkModel:
         if init_value is not None:
             # Yes: with real value read from file
             NmkLogger.debug(f"New static config {name} with value: {init_value}")
-            cfg = NmkStaticConfig(name, self, path, init_value)
+            cfg = None
             is_list = isinstance(init_value, list)
             is_dict = isinstance(init_value, dict)
             new_type = type(init_value)
@@ -163,7 +174,16 @@ class NmkModel:
 
             # Check for type change
             old_type = config_dict[name].value_type
-            assert new_type == old_type, f"Unexpected type change for config {name} ({old_type.__name__} --> {new_type.__name__})"
+            if adapt_type and (old_type in _SUPPORTED_TYPES_ADAPTATION.get(new_type, [])):
+                NmkLogger.debug(f"Adapting config {name} from {new_type.__name__} to {old_type.__name__}")
+                init_value = _SUPPORTED_TYPES_ADAPTATION[new_type][old_type](init_value)
+            else:
+                # Types can't differ if no adaptation required
+                assert new_type == old_type, f"Unexpected type change for config {name} ({old_type.__name__} --> {new_type.__name__})"
+
+        # Create instance if not done yet
+        if init_value is not None and cfg is None:
+            cfg = NmkStaticConfig(name, self, path, init_value)
 
         # Add config to model
         if is_list or is_dict:

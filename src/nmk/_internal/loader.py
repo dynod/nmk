@@ -96,6 +96,7 @@ class NmkLoader:
         # Iterate on config
         for config_str in config_list:
             override_config = {}
+            adapt_type = False
 
             # Json fragment?
             if config_str[0] == "{":
@@ -109,13 +110,16 @@ class NmkLoader:
             else:
                 m = CONFIG_STRING_PATTERN.match(config_str)
                 assert m is not None, f"Config option is neither a json object nor a K=V string: {config_str}"
+
+                # Prepare config overide (and adapt type from string if possible)
                 override_config = {m.group(1): m.group(2)}
+                adapt_type = True
 
             # Override model config with command-line values
             if len(override_config):
                 NmkLogger.debug(f"Overriding config from --config option ({config_str})")
                 for k, v in override_config.items():
-                    self.model.add_config(k, None, v)
+                    self.model.add_config(name=k, path=None, init_value=v, adapt_type=adapt_type)
 
     def finish_parsing(self, args: Namespace, with_logs: bool) -> Union[None, MemoryHandler]:
         # Handle root folder

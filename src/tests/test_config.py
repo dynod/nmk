@@ -89,6 +89,14 @@ class TestConfig(NmkTester):
     def test_config_override_bad_type(self):
         self.nmk("config_sample.yml", extra_args=["--config", '{"someList":65}'], expected_error="Unexpected type change for config someList (list --> int)")
 
+    def test_config_override_adapt_int(self):
+        self.nmk("config_sample.yml", extra_args=["--config", "someInt=13579", "--print", "someInt"])
+        self.check_logs(["Adapting config someInt from str to int", 'Config dump: { "someInt": 13579 }'])
+
+    def test_config_override_adapt_bool(self):
+        self.nmk("config_sample.yml", extra_args=["--config", "someBool=true", "--print", "someBool"])
+        self.check_logs(["Adapting config someBool from str to bool", 'Config dump: { "someBool": true }'])
+
     def test_config_invalid_resolver(self):
         self.nmk("config_invalid_resolver.yml", expected_error="While loading {project}: Invalid class qualified name: AbcDef (missing separator: .)")
 
