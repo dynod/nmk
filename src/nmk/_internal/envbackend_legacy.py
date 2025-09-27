@@ -38,6 +38,12 @@ class EnvBackend:
 
         return "venv"
 
+    @property
+    def use_requirements(self) -> bool:
+        """This backend uses requirements.txt files"""
+
+        return True
+
 
 # Dummy factory
 class EnvBackendFactory:
