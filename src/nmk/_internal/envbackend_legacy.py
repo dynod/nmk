@@ -32,6 +32,12 @@ class EnvBackend:
         pip_args = BuildEnvLoader(self._project_path).pip_args if self._project_path is not None else ""
         run_pip(["install"] + packages, extra_args=pip_args)
 
+    @property
+    def venv_name(self) -> str:
+        """venv folder name"""
+
+        return "venv"
+
 
 # Dummy factory
 class EnvBackendFactory:
