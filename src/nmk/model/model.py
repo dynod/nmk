@@ -106,7 +106,7 @@ class NmkModel:
     tasks: dict[str, NmkTask] = field(default_factory=dict[str, NmkTask])
     """Dict of task instances"""
 
-    default_task: NmkTask | None = None
+    default_task: Union[NmkTask, None] = None
     """Default task instance"""
 
     tasks_config: dict[str, NmkConfig] = field(default_factory=dict[str, NmkConfig])
