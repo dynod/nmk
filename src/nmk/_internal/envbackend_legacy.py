@@ -44,6 +44,12 @@ class EnvBackend:
 
         return True
 
+    def is_legacy(self) -> bool:
+        """
+        State if this backend is considered legacy
+        """
+        return True
+
 
 # Dummy factory
 class EnvBackendFactory:
