@@ -30,3 +30,8 @@ config:
             description: Next-gen make-like build system
             scripts:
                 nmk: nmk.__main__:main
+        tool:
+            coverage:
+                run:
+                    omit:
+                        - src/nmk/_internal/envbackend_legacy.py

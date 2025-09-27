@@ -2,6 +2,8 @@ import re
 import subprocess
 import sys
 
+from _pytest.monkeypatch import MonkeyPatch
+
 from nmk.utils import is_windows
 from tests.utils import NmkTester
 
@@ -113,34 +115,17 @@ class TestRefs(NmkTester):
     def test_unknown_pip_reference(self):
         self.nmk("pip://nmk!unknown.yml", expected_error="While loading pip://nmk!unknown.yml: Project file not found")
 
-    def test_pip_install(self, monkeypatch):
+    def test_pip_install(self, monkeypatch: MonkeyPatch):
         found_args = []
 
-        def record_process(all_args, check, capture_output, text, encoding, cwd, errors):
+        def record_process(all_args: list[str], *args, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
             nonlocal found_args
             found_args = all_args
             return subprocess.CompletedProcess(all_args, 0, "", "")
 
-        monkeypatch.setattr(subprocess, "run", record_process)
+        monkeypatch.setattr(subprocess, "run", record_process)  # pyright: ignore[reportUnknownArgumentType]
         self.nmk(
             "pip://definitely-unknown-package>=1.2!inside/unknown.yml",
             expected_error="While loading pip://definitely-unknown-package>=1.2!inside/unknown.yml: Can't find module 'definitely_unknown_package' even after having installed 'definitely-unknown-package>=1.2' package",
         )
         assert found_args == [sys.executable, "-m", "pip", "install", "definitely-unknown-package>=1.2"]
-
-    def test_pip_extra_args(self, monkeypatch):
-        found_args = []
-
-        def record_process(all_args, check, capture_output, text, encoding, cwd, errors):
-            nonlocal found_args
-            found_args = all_args
-            return subprocess.CompletedProcess(all_args, 0, "", "")
-
-        monkeypatch.setattr(subprocess, "run", record_process)
-        prj = self.prepare_project("pip_ref.yml")
-        self.prepare_project("buildenv.cfg")
-        self.nmk(
-            prj,
-            expected_error="While loading pip://some-unknown-package!foo.yml: Can't find module 'some_unknown_package' even after having installed 'some-unknown-package' package",
-        )
-        assert found_args == [sys.executable, "-m", "pip", "install", "some-unknown-package", "--require-virtualenv", "--some", "--fancy", "--args"]

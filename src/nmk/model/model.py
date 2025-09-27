@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Union
 
-from nmk._internal.envbackend import EnvBackend
+from nmk._internal.envbackend import EnvBackend, EnvBackendFactory
 from nmk.logs import NmkLogger
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkStaticConfig
 from nmk.model.task import NmkTask
@@ -23,10 +23,10 @@ _CLASS_SEP = "."
 @dataclass
 class _NmkPathFinder(importlib.abc.MetaPathFinder):
     # Dict of contributed files from nmk files
-    _path_contribs: dict[str, Path] = field(default_factory=dict)
+    _path_contribs: dict[str, Path] = field(default_factory=dict[str, Path])
 
     # Remember if a file has already been contributed through this finder
-    _path_found: dict[str, Path] = field(default_factory=dict)
+    _path_found: dict[str, Path] = field(default_factory=dict[str, Path])
 
     # Remember if this finder has been added to the import system
     _registered: bool = False
@@ -34,9 +34,8 @@ class _NmkPathFinder(importlib.abc.MetaPathFinder):
     def custom_import(self, fullname: str):
         # Check if path:
         # * is a contributed one
-        # * is already loaded as system module
         # * has not be found yet by this finder
-        if (fullname in self._path_found) and (fullname in sys.modules) and not self._path_found[fullname]:
+        if (fullname in self._path_found) and not self._path_found[fullname]:
             # Custom loading of this module
             spec = self.find_spec(fullname, None)
             mod = importlib.util.module_from_spec(spec)
@@ -69,7 +68,7 @@ class _NmkPathFinder(importlib.abc.MetaPathFinder):
                 self._registered = True
                 sys.meta_path.append(self)
 
-    def find_spec(self, fullname: str, path: str, target=None):
+    def find_spec(self, fullname: str, path: Union[str, None], target: Union[object, None] = None):
         # Find in contributes files
         found_path = self._path_contribs.get(fullname, None)
         if found_path:  # pragma: no branch
@@ -95,31 +94,38 @@ class NmkModel:
     args: Namespace
     """Command line parsed args"""
 
-    file_paths: list[Path] = field(default_factory=list)
+    file_paths: list[Path] = field(default_factory=list[Path])
     """List of parsed project file paths"""
 
-    file_models: dict[Path, object] = field(default_factory=dict)
+    file_models: dict[Path, object] = field(default_factory=dict[Path, object])
     """Dict of file models indexed by path"""
 
-    config: dict[str, NmkConfig] = field(default_factory=dict)
+    config: dict[str, NmkConfig] = field(default_factory=dict[str, NmkConfig])
     """Dict of config item instances"""
 
-    tasks: dict[str, NmkTask] = field(default_factory=dict)
+    tasks: dict[str, NmkTask] = field(default_factory=dict[str, NmkTask])
     """Dict of task instances"""
 
-    default_task: NmkTask = None
+    default_task: NmkTask | None = None
     """Default task instance"""
 
-    tasks_config: dict[str, NmkConfig] = field(default_factory=dict)
+    tasks_config: dict[str, NmkConfig] = field(default_factory=dict[str, NmkConfig])
     """Inner tasks config dict"""
 
-    overridden_refs: dict[str, Path] = field(default_factory=dict)
+    pip_args: str = ""
+    """
+    pip command extra args
+
+    :deprecated: This field is deprecated and is always empty, go through buildenv's EnvBackend API instead
+    """
+
+    overridden_refs: dict[str, Path] = field(default_factory=dict[str, Path])
     """Dict of overridden references"""
 
     path_finder: _NmkPathFinder = field(default_factory=_NmkPathFinder)
     """Path finder instance"""
 
-    env_backend: Union[EnvBackend, None] = None
+    env_backend: EnvBackend = EnvBackendFactory.detect()
     """Python environment backend, created when first project file is loaded"""
 
     def add_config(

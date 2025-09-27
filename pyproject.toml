@@ -35,7 +35,7 @@ nmk = "nmk.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-exclude = ["tests"]
+exclude = ["tests*"]
 namespaces = false
 
 [tool.setuptools.package-data]
@@ -70,4 +70,4 @@ data_file = "out/.coverage"
 concurrency = ["thread"]
 disable_warnings = ["no-data-collected"]
 branch = true
-omit = ["src/tests/*"]
+omit = ["src/tests/*", "src/nmk/_internal/envbackend_legacy.py"]

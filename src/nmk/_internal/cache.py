@@ -10,7 +10,6 @@ from zipfile import ZipFile
 import requests
 
 from nmk.logs import NmkLogger
-from nmk.utils import run_pip
 
 from .envbackend import EnvBackend
 
@@ -72,9 +71,7 @@ def pip_install(url: str, env_backend: EnvBackend) -> Path:
         assert env_backend.is_mutable(), (
             "Can't install plugins in this environment; please try updating your requirements.txt first, and relaunch this buildenv shell"
         )
-
-        # Trigger pip
-        run_pip(["install", pip_ref], extra_args=env_backend._pip_args)
+        env_backend.add_packages([pip_ref])
 
         # Try to find path again
         try:
