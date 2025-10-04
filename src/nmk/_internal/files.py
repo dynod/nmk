@@ -87,6 +87,9 @@ class NmkModelFile:
         try:
             # Resolve local file from project reference
             self.file = self.resolve_project(project_ref)
+            if self.file is None:
+                # Can't load this file for now
+                return
 
             # Remember project dir if first file (and not an internal one)
             if not is_internal and not len(refs):
@@ -148,7 +151,7 @@ class NmkModelFile:
         scheme_candidate = project_path.parts[0]
         return not project_path.is_absolute() and scheme_candidate in URL_SCHEMES
 
-    def resolve_project(self, project_ref: str) -> Path:
+    def resolve_project(self, project_ref: str) -> Union[Path, None]:
         # URL?
         if self.is_url(project_ref):
             # Cache-able reference

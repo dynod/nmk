@@ -129,3 +129,13 @@ class TestRefs(NmkTester):
             expected_error="While loading pip://definitely-unknown-package>=1.2!inside/unknown.yml: Can't find module 'definitely_unknown_package' even after having installed 'definitely-unknown-package>=1.2' package",
         )
         assert found_args == [sys.executable, "-m", "pip", "install", "definitely-unknown-package>=1.2"]
+
+    def test_pip_ref_not_mutable(self, monkeypatch: MonkeyPatch):
+        # Test a pip ref with a (faked) non-mutable backend
+        try:
+            from buildenv2._backends.pip import LegacyPipBackend as EnvBackend
+        except ImportError:
+            from nmk._internal.envbackend_legacy import EnvBackend
+        monkeypatch.setattr(EnvBackend, "is_mutable", lambda slf: False)  # pyright: ignore[reportUnknownLambdaType, reportUnknownArgumentType]
+        self.nmk("pip://foo!bar.yml")
+        self.check_logs("Can't install plugins in this environment; just adding foo to requirements and skip reference for now.")
