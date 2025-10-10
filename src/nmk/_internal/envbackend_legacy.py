@@ -50,6 +50,20 @@ class EnvBackend:
         """
         return True
 
+    def lock(self, lockfile: Union[Path, None] = None) -> int:
+        """
+        Create a lockfile for this environment, so that next time the environment is loaded, it will be restored to this state
+
+        :param lockfile: path to the lockfile to create (None to use default path for this backend)
+        :return: command exit code
+        """
+        assert self._project_path is not None, "project path must be set to use lock"
+        pkg_list = run_pip(["freeze"])
+        with (lockfile or self._project_path / "requirements.txt").open("w") as f:
+            f.write(pkg_list)
+
+        return 0
+
 
 # Dummy factory
 class EnvBackendFactory:
