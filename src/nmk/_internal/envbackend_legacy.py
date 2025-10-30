@@ -64,6 +64,15 @@ class EnvBackend:
 
         return 0
 
+    def upgrade(self) -> int:
+        """
+        Upgrade all packages in the environment to their latest versions
+
+        :return: command exit code
+        """
+        self.add_packages(["-r", "requirements.txt", "--upgrade"])
+        return 0
+
 
 # Dummy factory
 class EnvBackendFactory:
