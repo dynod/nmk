@@ -102,7 +102,7 @@ class NmkModelFile:
                     known_project_dir_callback(model)
 
                 # Also setup env backend from project directory
-                model.env_backend = EnvBackendFactory.detect(p_dir)
+                model.env_backend = EnvBackendFactory.detect(p_dir, verbose_subprocess=False)
 
             # Remember file path in model (to avoid recursive loading; and only if not an internal one)
             if self.file in model.file_paths:

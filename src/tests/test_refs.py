@@ -118,10 +118,10 @@ class TestRefs(NmkTester):
     def test_pip_install(self, monkeypatch: MonkeyPatch):
         found_args = []
 
-        def record_process(all_args: list[str], *args, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        def record_process(args: list[str], *p_args, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
             nonlocal found_args
-            found_args = all_args
-            return subprocess.CompletedProcess(all_args, 0, "", "")
+            found_args = args
+            return subprocess.CompletedProcess(args, 0, "", "")
 
         monkeypatch.setattr(subprocess, "run", record_process)  # pyright: ignore[reportUnknownArgumentType]
         self.nmk(

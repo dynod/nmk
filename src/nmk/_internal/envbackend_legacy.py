@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import Union
 
@@ -39,6 +40,12 @@ class EnvBackend:
         return "venv"
 
     @property
+    def venv_root(self) -> Path:
+        """venv root path"""
+
+        return Path(sys.executable).parent.parent
+
+    @property
     def use_requirements(self) -> bool:
         """This backend uses requirements.txt files"""
 
@@ -64,22 +71,22 @@ class EnvBackend:
 
         return 0
 
-    def upgrade(self) -> int:
+    def upgrade(self, full: bool = True) -> int:
         """
         Upgrade all packages in the environment to their latest versions
 
         :return: command exit code
         """
-        self.add_packages(["-r", "requirements.txt", "--upgrade"])
+        self.add_packages(["-r", "requirements.txt"] + (["--upgrade"] if full else []))
         return 0
 
 
 # Dummy factory
 class EnvBackendFactory:
     @staticmethod
-    def create(name: str, project_path: Path) -> EnvBackend:
+    def create(name: str, project_path: Path, verbose_subprocess: bool = True) -> EnvBackend:
         return EnvBackend(project_path)
 
     @staticmethod
-    def detect(project_path: Union[Path, None] = None) -> EnvBackend:
+    def detect(project_path: Union[Path, None] = None, verbose_subprocess: bool = True) -> EnvBackend:
         return EnvBackend(project_path)

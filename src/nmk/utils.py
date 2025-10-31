@@ -42,7 +42,7 @@ def run_pip(args: list[str], logger: NmkLogWrapper = NmkLogger, extra_args: str 
     :param logger: logger instance
     :param extra_args: extra arguments (split on spaces and passed to pip command)
     :return: executed pip command stdout
-    :deprecate: This function will be deprecated as soon as buildenv 2.0 is rolled out
+    :deprecated: This function will be deprecated as soon as buildenv 2.0 is rolled out
     """
     logger.debug("nmk plugin developers: the nmk.utils.run_pip utility will be deprecated as soon as buildenv 2.0 is rolled out")
     all_args = [sys.executable, "-m", "pip"] + args + list(filter(lambda x: len(x) > 0, extra_args.strip(" ").split(" ")))

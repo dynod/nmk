@@ -125,7 +125,7 @@ class NmkModel:
     path_finder: _NmkPathFinder = field(default_factory=_NmkPathFinder)
     """Path finder instance"""
 
-    env_backend: EnvBackend = EnvBackendFactory.detect()
+    env_backend: EnvBackend = EnvBackendFactory.detect(verbose_subprocess=False)
     """Python environment backend, created when first project file is loaded"""
 
     def add_config(
