@@ -51,12 +51,6 @@ class EnvBackend:
 
         return True
 
-    def is_legacy(self) -> bool:
-        """
-        State if this backend is considered legacy
-        """
-        return True
-
     def lock(self, lockfile: Union[Path, None] = None) -> int:
         """
         Create a lockfile for this environment, so that next time the environment is loaded, it will be restored to this state
