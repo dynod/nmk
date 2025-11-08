@@ -1,3 +1,4 @@
+import logging
 import sys
 from pathlib import Path
 from typing import Union
@@ -51,7 +52,7 @@ class EnvBackend:
 
         return True
 
-    def lock(self, lockfile: Union[Path, None] = None) -> int:
+    def lock(self, lockfile: Union[Path, None] = None, log_level: int = logging.INFO) -> int:
         """
         Create a lockfile for this environment, so that next time the environment is loaded, it will be restored to this state
 
