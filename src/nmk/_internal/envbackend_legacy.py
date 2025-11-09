@@ -13,6 +13,12 @@ class EnvBackend:
     def __init__(self, project_path: Union[Path, None] = None):
         self._project_path = project_path
 
+    @property
+    def version(self) -> int:
+        """Backend version number (always legacy)"""
+
+        return 1
+
     def is_mutable(self) -> bool:
         """
         State if this backend supports installing packages update once created
