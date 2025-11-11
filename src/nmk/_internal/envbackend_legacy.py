@@ -81,6 +81,29 @@ class EnvBackend:
         self.add_packages(["-r", "requirements.txt"] + (["--upgrade"] if full else []))
         return 0
 
+    def install_project(self, editable: bool, wheel_path: Union[Path, None] = None):
+        # Install current project using pip
+        assert editable or wheel_path, "Either editable or wheel_path must be specified"
+        install_args = ["install"]
+        if editable:
+            install_args.extend(
+                [
+                    "-e",
+                    ".",
+                    "--no-deps",  # skip dependencies to avoid reinstalling everything
+                    "--no-build-isolation",  # disable dependencies install when building for "editable" mode
+                ]
+            )
+        else:
+            install_args.extend(
+                [
+                    str(wheel_path),
+                    "--no-deps",  # but skip dependencies to avoid reinstalling everything (deps are already installed by py.venv task)
+                    "--force-reinstall",  # force reinstall because otherwise install will be skipped if version didn't changed
+                ]
+            )
+        run_pip(install_args)
+
 
 # Dummy factory
 class EnvBackendFactory:
