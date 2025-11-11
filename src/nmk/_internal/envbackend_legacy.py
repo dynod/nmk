@@ -19,6 +19,12 @@ class EnvBackend:
 
         return 1
 
+    @property
+    def name(self) -> str:
+        """Backend name (always 'legacy')"""
+
+        return "legacy"
+
     def is_mutable(self) -> bool:
         """
         State if this backend supports installing packages update once created
@@ -58,21 +64,15 @@ class EnvBackend:
 
         return True
 
-    def lock(self, lockfile: Union[Path, None] = None, log_level: int = logging.INFO) -> int:
+    def dump(self, output_file: Path, log_level: int = logging.INFO):
         """
-        Create a lockfile for this environment, so that next time the environment is loaded, it will be restored to this state
-
-        :param lockfile: path to the lockfile to create (None to use default path for this backend)
-        :return: command exit code
+        Dump installed packages to a requirements-style file
         """
-        assert self._project_path is not None, "project path must be set to use lock"
+        assert self._project_path is not None, "project path must be set to use dump"
         pkg_list = run_pip(["freeze"])
-        with (lockfile or self._project_path / "requirements.txt").open("w") as f:
-            f.write(pkg_list)
+        output_file.write_text(pkg_list)
 
-        return 0
-
-    def upgrade(self, full: bool = True) -> int:
+    def upgrade(self, full: bool = True, only_deps: bool = False) -> int:
         """
         Upgrade all packages in the environment to their latest versions
 
