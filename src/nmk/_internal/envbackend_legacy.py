@@ -35,6 +35,22 @@ class EnvBackend:
         # buildenv 1.X implementation: mutable (based on pip)
         return True
 
+    @property
+    def _pip_args(self) -> str:
+        # Pip args loaded from legacy buildenv configuration
+        return BuildEnvLoader(self._project_path).pip_args if self._project_path is not None else ""
+
+    @property
+    def project_path(self) -> Path:
+        assert self._project_path is not None, "Project path is not set"
+        return self._project_path
+
+    def subprocess(
+        self, args: list[str], check: bool = True, cwd: Union[Path, None] = None, env: Union[dict[str, str], None] = None, verbose: Union[bool, None] = None
+    ):
+        # Delegate to deprecated run_pip utility
+        return run_pip(args, extra_args=self._pip_args)
+
     def add_packages(self, packages: list[str]):
         """
         Add packages to the environment
@@ -42,9 +58,7 @@ class EnvBackend:
         :param packages: list of packages to add
         """
 
-        # Delegate to deprecated run_pip utility
-        pip_args = BuildEnvLoader(self._project_path).pip_args if self._project_path is not None else ""
-        run_pip(["install"] + packages, extra_args=pip_args)
+        self.subprocess(["install"] + packages)
 
     @property
     def venv_name(self) -> str:
@@ -80,29 +94,6 @@ class EnvBackend:
         """
         self.add_packages(["-r", "requirements.txt"] + (["--upgrade"] if full else []))
         return 0
-
-    def install_project(self, editable: bool, wheel_path: Union[Path, None] = None):
-        # Install current project using pip
-        assert editable or wheel_path, "Either editable or wheel_path must be specified"
-        install_args = ["install"]
-        if editable:
-            install_args.extend(
-                [
-                    "-e",
-                    ".",
-                    "--no-deps",  # skip dependencies to avoid reinstalling everything
-                    "--no-build-isolation",  # disable dependencies install when building for "editable" mode
-                ]
-            )
-        else:
-            install_args.extend(
-                [
-                    str(wheel_path),
-                    "--no-deps",  # but skip dependencies to avoid reinstalling everything (deps are already installed by py.venv task)
-                    "--force-reinstall",  # force reinstall because otherwise install will be skipped if version didn't changed
-                ]
-            )
-        run_pip(install_args)
 
 
 # Dummy factory
