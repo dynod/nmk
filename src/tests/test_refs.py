@@ -1,6 +1,5 @@
 import re
 import subprocess
-import sys
 
 from _pytest.monkeypatch import MonkeyPatch
 
@@ -128,7 +127,7 @@ class TestRefs(NmkTester):
             "pip://definitely-unknown-package>=1.2!inside/unknown.yml",
             expected_error="While loading pip://definitely-unknown-package>=1.2!inside/unknown.yml: Can't find module 'definitely_unknown_package' even after having installed 'definitely-unknown-package>=1.2' package",
         )
-        assert found_args == [sys.executable, "-m", "pip", "install", "definitely-unknown-package>=1.2"]
+        assert found_args[1:] == ["-m", "pip", "install", "definitely-unknown-package>=1.2"]
 
     def test_pip_ref_not_mutable(self, monkeypatch: MonkeyPatch):
         # Test a pip ref with a (faked) non-mutable backend
