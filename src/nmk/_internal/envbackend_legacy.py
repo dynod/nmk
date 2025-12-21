@@ -95,6 +95,16 @@ class EnvBackend:
         self.add_packages(["-r", "requirements.txt"] + (["--upgrade"] if full else []))
         return 0
 
+    def print_updates(self, old_packages: dict[str, str]):
+        """
+        Pretty print packages updates to stdout
+
+        :param old_packages: map of old installed packages versions (indexed by package name)
+        """
+
+        # Nothing to do in legacy mode
+        pass
+
 
 # Dummy factory
 class EnvBackendFactory:
