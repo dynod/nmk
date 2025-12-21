@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable, Union, cast
 
 import jsonschema
 import yaml
@@ -103,6 +103,9 @@ class NmkModelFile:
 
                 # Also setup env backend from project directory
                 model.env_backend = EnvBackendFactory.detect(p_dir, verbose_subprocess=False)
+                if hasattr(model.env_backend, "_pip_args"):  # pragma: no branch
+                    # Legacy backend: also set legacy pip args if any
+                    model.pip_args = cast(str, model.env_backend._pip_args)  # type: ignore
 
             # Remember file path in model (to avoid recursive loading; and only if not an internal one)
             if self.file in model.file_paths:

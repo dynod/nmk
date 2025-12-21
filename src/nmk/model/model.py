@@ -116,7 +116,7 @@ class NmkModel:
     """
     pip command extra args
 
-    :deprecated: This field is deprecated and is always empty, go through buildenv's EnvBackend API instead
+    :deprecated: This field is deprecated and is only set when used with the legacy EnvBackend.
     """
 
     overridden_refs: dict[str, Path] = field(default_factory=dict[str, Path])
