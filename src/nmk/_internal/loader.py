@@ -7,7 +7,6 @@ import sys
 from argparse import Namespace
 from logging.handlers import MemoryHandler
 from pathlib import Path
-from typing import Union
 
 from nmk._internal.cache import get_referenced_wheels
 from nmk._internal.files import NmkModelFile
@@ -121,7 +120,7 @@ class NmkLoader:
                 for k, v in override_config.items():
                     self.model.add_config(name=k, path=None, init_value=v, adapt_type=adapt_type)
 
-    def finish_parsing(self, args: Namespace, with_logs: bool) -> Union[None, MemoryHandler]:
+    def finish_parsing(self, args: Namespace, with_logs: bool) -> None | MemoryHandler:
         # Handle root folder
         if args.root is None:  # pragma: no cover
             # By default, root dir is the parent folder of currently running venv

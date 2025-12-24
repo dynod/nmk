@@ -1,7 +1,6 @@
 import shutil
 from pathlib import Path
 from re import Pattern
-from typing import Union
 
 from pytest_multilog import TestHelper
 
@@ -50,10 +49,10 @@ class NmkBaseTester(TestHelper):
 
     def nmk(
         self,
-        project: Union[Path, str],
+        project: Path | str,
         with_logs: bool = False,
-        extra_args: Union[list[str], None] = None,
-        expected_error: Union[str, Pattern[str], None] = None,
+        extra_args: list[str] | None = None,
+        expected_error: str | Pattern[str] | None = None,
         expected_rc: int = 0,
         with_epilogue: bool = False,
         with_prologue: bool = False,
