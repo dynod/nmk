@@ -7,9 +7,10 @@ import importlib.abc
 import importlib.util
 import sys
 from argparse import Namespace
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Union
+from typing import Any
 
 from nmk.logs import NmkLogger
 from nmk.model.config import NmkConfig, NmkDictConfig, NmkListConfig, NmkResolvedConfig, NmkStaticConfig
@@ -124,11 +125,11 @@ class NmkModel:
     def add_config(
         self,
         name: str,
-        path: Union[Path, None],
-        init_value: Union[Union[str, int, bool, list[Any], dict[str, Any]], None] = None,
+        path: Path | None,
+        init_value: str | int | bool | list[Any] | dict[str, Any] | None = None,
         resolver: object = None,
         task_config: bool = False,
-        resolver_params: Union[NmkDictConfig, None] = None,
+        resolver_params: NmkDictConfig | None = None,
         adapt_type: bool = False,
     ) -> NmkConfig:
         """

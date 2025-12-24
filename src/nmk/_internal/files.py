@@ -1,8 +1,8 @@
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from typing import Callable, Union
 
 import jsonschema
 import yaml
@@ -337,7 +337,7 @@ class NmkModelFile:
         except Exception as e:
             self.__raise_with_refs(e)
 
-    def load_emoji(self, candidate: str) -> Union[Emoji, Text]:
+    def load_emoji(self, candidate: str) -> Emoji | Text:
         # May be a renderable text
         return Text.from_markup(candidate) if ":" in candidate else Emoji(candidate)
 

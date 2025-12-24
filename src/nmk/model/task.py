@@ -4,7 +4,6 @@ Nmk task module
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union
 
 from rich.emoji import Emoji
 from rich.text import Text
@@ -27,7 +26,7 @@ class NmkTask:
     silent: bool
     """Task silent mode"""
 
-    emoji: Union[Emoji, Text]
+    emoji: Emoji | Text
     """Task emoji or rich text string"""
 
     builder: object
@@ -37,8 +36,8 @@ class NmkTask:
     """Task builder parameters"""
 
     _deps: list[str]
-    _append_to: Union[str, list[str]]
-    _prepend_to: Union[str, list[str]]
+    _append_to: str | list[str]
+    _prepend_to: str | list[str]
     _inputs_cfg: NmkListConfig
     _outputs_cfg: NmkListConfig
 
@@ -63,7 +62,7 @@ class NmkTask:
     skipped: bool = False
     """Task skip mode"""
 
-    def __resolve_task(self, name: Union[str, list[str]]) -> object:
+    def __resolve_task(self, name: str | list[str]) -> object:
         if name is not None:
             # Iterate on candidate names until we find a known one
             name_list = name if isinstance(name, list) else [name]
@@ -74,7 +73,7 @@ class NmkTask:
                 raise AssertionError(f"Can't find any of candidates ({name_list}) referenced by {self.name} task")
         return None
 
-    def __contribute_dep(self, name: Union[str, list[str]], append: bool):
+    def __contribute_dep(self, name: str | list[str], append: bool):
         t = self.__resolve_task(name)
         if t is not None and self.name not in t._deps:
             # Ascendant dependency which is not yet contributed:

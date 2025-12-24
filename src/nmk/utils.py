@@ -2,7 +2,6 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Union
 
 from nmk.logs import NmkLogger
 
@@ -72,7 +71,7 @@ def create_dir_symlink(target: Path, link: Path):
         os.symlink(target, link)  # pragma: no cover
 
 
-def is_condition_set(value: Union[list, dict, str, bool, int]) -> bool:
+def is_condition_set(value: list | dict | str | bool | int) -> bool:
     """
     Verify if task condition is considered to be "true", depending on provided value
 

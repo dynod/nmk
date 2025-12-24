@@ -3,7 +3,6 @@ Config item resolvers
 """
 
 from abc import ABC, abstractmethod
-from typing import Union
 
 from nmk.model.model import NmkModel
 
@@ -20,7 +19,7 @@ class NmkConfigResolver(ABC):
         """model instance"""
 
     @abstractmethod
-    def get_value(self, name: str) -> Union[str, int, bool, list, dict]:  # pragma: no cover
+    def get_value(self, name: str) -> str | int | bool | list | dict:  # pragma: no cover
         """
         Get item current value
 

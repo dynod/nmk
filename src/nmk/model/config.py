@@ -4,9 +4,10 @@ nmk configuration objects
 
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Union
+from typing import Any
 
 from nmk.model.keys import NmkRootConfig
 
@@ -25,7 +26,7 @@ _ESCAPED_REF_PREFIX = "$${"
 FINAL_ITEM_PATTERN = re.compile("^[A-Z0-9_]+$")
 """Pattern to recognize final config items"""
 
-ConfigTypes = Union[str, int, bool, list[Any], dict[str, Any]]
+ConfigTypes = str | int | bool | list[Any] | dict[str, Any]
 """Used config item types"""
 
 
@@ -81,7 +82,7 @@ class NmkConfig(ABC):
         """
         return self.resolve()
 
-    def resolve(self, cache: bool = True, resolved_from: Union[set[str], None] = None) -> ConfigTypes:
+    def resolve(self, cache: bool = True, resolved_from: set[str] | None = None) -> ConfigTypes:
         """
         Resolves item value
 
@@ -111,7 +112,7 @@ class NmkConfig(ABC):
         return out
 
     # Process item references
-    def _format(self, cache: bool, candidate: ConfigTypes, resolved_from: Union[set[str], None] = None, path: Union[Path, None] = None) -> ConfigTypes:
+    def _format(self, cache: bool, candidate: ConfigTypes, resolved_from: set[str] | None = None, path: Path | None = None) -> ConfigTypes:
         resolved_from = set(resolved_from) if resolved_from is not None else set()
         resolved_from.add(self.name)
 
@@ -180,7 +181,7 @@ class NmkConfig(ABC):
         return to_format.replace(_ESCAPED_REF_PREFIX, "${") if (len(resolved_from) == 1) else to_format
 
     @abstractmethod
-    def _get_value(self, cache: bool, resolved_from: Union[set[str], None] = None) -> ConfigTypes:  # pragma: no cover
+    def _get_value(self, cache: bool, resolved_from: set[str] | None = None) -> ConfigTypes:  # pragma: no cover
         """
         Internal value access
         """
@@ -203,7 +204,7 @@ class NmkStaticConfig(NmkConfig):
     Static config item (defined in project file)
     """
 
-    static_value: Union[str, int, bool, list[Any], dict[str, Any]]
+    static_value: str | int | bool | list[Any] | dict[str, Any]
     """Project defined value"""
 
     volatile: bool = False
@@ -226,7 +227,7 @@ class NmkStaticConfig(NmkConfig):
                     ref_name, _, _ = _get_ref_name(m, self.name, self.model)
                     self._type = self.model.config[ref_name].value_type
 
-    def _get_value(self, cache: bool, resolved_from: Union[set[str], None] = None) -> ConfigTypes:
+    def _get_value(self, cache: bool, resolved_from: set[str] | None = None) -> ConfigTypes:
         # Simple static value
         return self._format(cache, self.static_value, resolved_from)
 
@@ -351,7 +352,7 @@ class NmkResolvedConfig(NmkConfig):
     params: NmkDictConfig
     """Resolver parameters"""
 
-    def resolve(self, cache: bool = True, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
+    def resolve(self, cache: bool = True, resolved_from: set[str] = None) -> str | int | bool | list | dict:
         """
         Resolves item value (with disabled cache if resolver is volatile)
 
@@ -361,7 +362,7 @@ class NmkResolvedConfig(NmkConfig):
         """
         return super().resolve(cache and not self.resolver.is_volatile(self.name), resolved_from)
 
-    def _get_value(self, cache: bool, resolved_from: set[str] = None) -> Union[str, int, bool, list, dict]:
+    def _get_value(self, cache: bool, resolved_from: set[str] = None) -> str | int | bool | list | dict:
         try:
             # Cache value from resolver if not done yet, or redo if value is declared to be volatile
             params = self.params.value if self.params is not None else {}

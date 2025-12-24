@@ -3,7 +3,6 @@ import logging.handlers
 from argparse import Namespace
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Union
 
 import coloredlogs
 from rich.emoji import Emoji
@@ -36,7 +35,7 @@ class NmkLogWrapper:
     def __init__(self, logger: logging.Logger):
         self._logger = logger
 
-    def __log(self, level: int, emoji: Union[str, Emoji, Text], line: str):
+    def __log(self, level: int, emoji: str | Emoji | Text, line: str):
         self._logger.log(level, f"{Emoji(emoji) if isinstance(emoji, str) else emoji} - {line}", stacklevel=3)
 
     def log(self, level: int, emoji: str, line: str):
@@ -87,7 +86,7 @@ NmkLogger = NmkLogWrapper(logging.getLogger("nmk"))
 """Root logger instance"""
 
 
-def logging_initial_setup(args: Namespace) -> Union[logging.handlers.MemoryHandler, None]:
+def logging_initial_setup(args: Namespace) -> logging.handlers.MemoryHandler | None:
     """
     Logging setup for nmk
 
@@ -128,7 +127,7 @@ def logging_initial_setup(args: Namespace) -> Union[logging.handlers.MemoryHandl
     return mem_handler
 
 
-def logging_finalize_setup(log_file_str: str, model_paths_keywords: dict[str, str], memory_handler: Union[logging.handlers.MemoryHandler, None]):
+def logging_finalize_setup(log_file_str: str, model_paths_keywords: dict[str, str], memory_handler: logging.handlers.MemoryHandler | None):
     """
     Finalize logs setup, once nmk project folder has been setup
 
