@@ -2,15 +2,16 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
-from nmk.logs import NmkLogger
+from nmk.logs import NmkLogger, NmkLogWrapper
 
 """
 Miscellaneous utility functions
 """
 
 
-def run_with_logs(args: list[str], logger=NmkLogger, check: bool = True, cwd: Path = None) -> subprocess.CompletedProcess:
+def run_with_logs(args: list[str], logger: NmkLogWrapper = NmkLogger, check: bool = True, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
     """
     Execute subprocess, and logs output/error streams + error code
 
@@ -33,7 +34,7 @@ def run_with_logs(args: list[str], logger=NmkLogger, check: bool = True, cwd: Pa
     return cp
 
 
-def run_pip(args: list[str], logger=NmkLogger, extra_args: str = "") -> str:
+def run_pip(args: list[str], logger: NmkLogWrapper = NmkLogger, extra_args: str = "") -> str:  # pragma: no cover
     """
     Execute pip command, with logging
 
@@ -41,7 +42,9 @@ def run_pip(args: list[str], logger=NmkLogger, extra_args: str = "") -> str:
     :param logger: logger instance
     :param extra_args: extra arguments (split on spaces and passed to pip command)
     :return: executed pip command stdout
+    :deprecated: This function will be deprecated as soon as buildenv 2.0 is rolled out
     """
+    logger.debug("nmk plugin developers: the nmk.utils.run_pip utility will be deprecated as soon as buildenv 2.0 is rolled out")
     all_args = [sys.executable, "-m", "pip"] + args + list(filter(lambda x: len(x) > 0, extra_args.strip(" ").split(" ")))
     return run_with_logs(all_args, logger).stdout
 
@@ -71,7 +74,7 @@ def create_dir_symlink(target: Path, link: Path):
         os.symlink(target, link)  # pragma: no cover
 
 
-def is_condition_set(value: list | dict | str | bool | int) -> bool:
+def is_condition_set(value: list[Any] | dict[Any, Any] | str | bool | int) -> bool:
     """
     Verify if task condition is considered to be "true", depending on provided value
 

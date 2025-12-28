@@ -10,7 +10,8 @@ from zipfile import ZipFile
 import requests
 
 from nmk.logs import NmkLogger
-from nmk.utils import run_pip
+
+from ..envbackend import EnvBackend
 
 # If remote is not that fast...
 DOWNLOAD_TIMEOUT = 30
@@ -46,7 +47,7 @@ def get_referenced_wheels() -> list[str]:
 
 
 @cache
-def pip_install(url: str, extra_pip_args: str) -> Path:
+def pip_install(url: str, env_backend: EnvBackend) -> Path | None:
     # Check pip names
     m = PIP_PATTERN.match(url)
     assert m is not None, f"Malformed pip reference: {url}"
@@ -56,7 +57,7 @@ def pip_install(url: str, extra_pip_args: str) -> Path:
     package_name = wheel_name.replace("-", "_")
 
     # Look for installed python module
-    def find_python_module(module) -> Path:
+    def find_python_module(module: str) -> Path:
         return Path(importlib.resources.files(package_name))
 
     try:
@@ -66,8 +67,11 @@ def pip_install(url: str, extra_pip_args: str) -> Path:
         # Module not found: trigger install
         log_install()
 
-        # Trigger pip
-        run_pip(["install", pip_ref], extra_args=extra_pip_args)
+        # Trigger install only if env backend is mutable
+        if not env_backend.is_mutable():
+            NmkLogger.warning(f"Can't install plugins in this environment; just adding {pip_ref} to requirements and skip reference for now.")
+            return None
+        env_backend.add_packages([pip_ref])
 
         # Try to find path again
         try:
@@ -139,14 +143,18 @@ def download_file(root: Path, url: str) -> Path:
 
 
 @cache
-def cache_remote(root: Path, remote: str, extra_pip_args: str) -> Path:
+def cache_remote(root: Path, remote: str, env_backend: EnvBackend) -> Path | None:
     # Make sure remote format is valid
     parts = remote.split("!")
     assert len(parts) in [1, 2] and all(len(p) > 0 for p in parts), f"Unsupported repo remote syntax: {remote}"
     remote_url = parts[0]
     sub_folder = Path(parts[1]) if len(parts) == 2 else Path()
 
+    # Resolve remote to local path; may be None if pip install is not possible
+    local_ref_folder = pip_install(remote_url, env_backend) if remote_url.startswith(PIP_SCHEME) else download_file(root, remote_url)
+
     # Path will be relative to extracted folder (if suffix is specified)
-    out = (pip_install(remote_url, extra_pip_args) if remote_url.startswith(PIP_SCHEME) else download_file(root, remote_url)) / sub_folder
-    NmkLogger.debug(f"Cached remote path: {remote} --> {out}")
-    return out
+    if local_ref_folder is not None:
+        local_ref_folder = local_ref_folder / sub_folder
+        NmkLogger.debug(f"Cached remote path: {remote} --> {local_ref_folder}")
+    return local_ref_folder

@@ -1,4 +1,6 @@
-from nmk.utils import create_dir_symlink
+import sys
+
+from nmk.utils import create_dir_symlink, run_with_logs
 from tests.utils import NmkTester
 
 
@@ -15,3 +17,8 @@ class TestUtils(NmkTester):
         create_dir_symlink(foo, bar)
         bar_file = bar / "sample.txt"
         assert bar_file.is_file()
+
+    def test_run_with_logs(self):
+        # Version check
+        cp = run_with_logs([sys.executable, "--version"])
+        assert cp.stdout.strip().startswith("Python 3")

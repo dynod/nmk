@@ -3,4 +3,4 @@ path:
 
 config:
     someResolved:
-        __resolver__: buildenv.extension.StrResolver
+        __resolver__: rich.layout.StrResolver
