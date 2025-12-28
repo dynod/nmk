@@ -109,7 +109,7 @@ def logging_initial_setup(args: Namespace) -> logging.handlers.MemoryHandler | N
         used_logs_prefix = (args.log_prefix + " ") if args.log_prefix else ""
         _old_record_factory = logging.getLogRecordFactory()
 
-        def _prefixed_log_record_factory(*p_args, **kw_args):
+        def _prefixed_log_record_factory(*p_args, **kw_args) -> logging.LogRecord:
             """
             Custom log record factory to add prefix
             """
@@ -127,6 +127,17 @@ def logging_initial_setup(args: Namespace) -> logging.handlers.MemoryHandler | N
     return mem_handler
 
 
+def _build_logfile_path(log_file_str: str, model_paths_keywords: dict[str, str]) -> Path:
+    """
+    Build the log file path from a pattern and model paths keywords
+
+    :param log_file_str: log file path pattern (from command line args)
+    :param model_paths_keywords: keywords to be used in the log file path pattern (computed from nmk model)
+    :return: Path to the log file
+    """
+    return Path(log_file_str.format(**model_paths_keywords))
+
+
 def logging_finalize_setup(log_file_str: str, model_paths_keywords: dict[str, str], memory_handler: logging.handlers.MemoryHandler | None):
     """
     Finalize logs setup, once nmk project folder has been setup
@@ -142,14 +153,34 @@ def logging_finalize_setup(log_file_str: str, model_paths_keywords: dict[str, st
 
     if log_file_str:
         # Handle output log file (generate it from pattern, and create parent folder if needed)
-        log_file = Path(log_file_str.format(**model_paths_keywords))
+        log_file = _build_logfile_path(log_file_str, model_paths_keywords)
         log_file.parent.mkdir(parents=True, exist_ok=True)
         file_handler = RotatingFileHandler(log_file, maxBytes=_ONE_MB, backupCount=5, encoding="utf-8")
         file_handler.setFormatter(logging.Formatter(LOG_FORMAT_DEBUG, datefmt=coloredlogs.DEFAULT_DATE_FORMAT))
-        logging.getLogger().addHandler(file_handler)
+        logging.root.addHandler(file_handler)
 
         # Provide log file handler to pending memory handler
         memory_handler.setTarget(file_handler)
 
     # Just close the memory handler to flush pending logs
     memory_handler.close()
+
+
+def logging_shutdown(args: Namespace, model_keywords: dict[str, str]):
+    """
+    Shutdown nmk logging (i.e. remove file handler if any)
+
+    :param args: parsed args from the command line
+    :param model_keywords: keywords to be used in the log file path pattern (computed from nmk model)
+    """
+
+    log_file = _build_logfile_path(args.log_file, model_keywords)
+
+    for handler in logging.root.handlers:
+        # Flush all anyway
+        handler.flush()
+
+        # If this is our log file handler, close it
+        if isinstance(handler, RotatingFileHandler) and (Path(handler.baseFilename) == log_file):
+            handler.close()
+            logging.getLogger().removeHandler(handler)

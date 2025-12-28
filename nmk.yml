@@ -1,32 +1,29 @@
 refs:
-    # Plugins reference
-    - pip://nmk-badges!plugin.yml
-    - pip://nmk-github!plugin.yml
-    - pip://nmk-python!plugin.yml
-    - pip://nmk-vscode!plugin.yml
-    - pip://nmk-doc!plugin.yml
-    - <workspace>/shared.yml
-    - workspace:
-        local: ../../shared
-        remote: github://dynod/workspace/main/shared
+  # Plugins reference
+  - pip://nmk-badges!plugin.yml
+  - pip://nmk-github!plugin.yml
+  - pip://nmk-python!plugin.yml
+  - pip://nmk-vscode!plugin.yml
+  - pip://nmk-doc!plugin.yml
+  - <workspace>/shared.yml
+  - workspace:
+      local: ../../shared
+      remote: github://dynod/workspace/main/shared
 
 config:
-    # Python package
-    pythonPackage: nmk
-    
-    # Nmk dependencies
-    pythonPackageRequirements:
-        - argcomplete
-        - coloredlogs
-        - pyyaml
-        - jsonschema
-        - rich
-        - requests
-        - buildenv
+  # Nmk dependencies
+  pythonPackageRequirements:
+    - argcomplete
+    - coloredlogs
+    - pyyaml
+    - jsonschema
+    - rich
+    - requests
+    - buildenv
 
-    # Extra project data
-    pythonProjectFileItems:
-        project:
-            description: Next-gen make-like build system
-            scripts:
-                nmk: nmk.__main__:main
+  # Extra project data
+  pythonProjectFileItems:
+    project:
+      description: Next-gen make-like build system
+      scripts:
+        nmk: nmk.__main__:main

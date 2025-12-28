@@ -1,11 +1,12 @@
 import sys
 import traceback
+from typing import cast
 
 from nmk._internal.build import NmkBuild
 from nmk._internal.loader import NmkLoader
 from nmk._internal.parser import NmkParser
 from nmk.errors import NmkStopHereError
-from nmk.logs import NmkLogger
+from nmk.logs import NmkLogger, logging_shutdown
 
 
 # CLI entry point
@@ -13,6 +14,7 @@ def nmk(argv: list[str]) -> int:
     # Build parser and parse input args
     args = NmkParser().parse(argv)
     out = 0
+    model = None
 
     try:
         # Load build model
@@ -28,6 +30,10 @@ def nmk(argv: list[str]) -> int:
             list(map(NmkLogger.error, str(e).split("\n")))
             list(map(NmkLogger.debug, "".join(traceback.format_tb(e.__traceback__)).split("\n")))
             out = 1
+    finally:
+        # Flush all log handlers
+        if model:
+            logging_shutdown(args, {n: cast(str, v.value) for n, v in model.config.items() if v.is_final})
     return out
 
 

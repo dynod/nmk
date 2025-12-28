@@ -43,7 +43,10 @@
             "label": "nmk tests",
             "type": "shell",
             "command": "source .buildenv/activate.sh && nmk tests",
-            "group": "test",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
             "runOptions": {
                 "runOn": "default"
             },
