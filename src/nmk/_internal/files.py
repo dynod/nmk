@@ -3,10 +3,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
+from typing import cast
 
 import jsonschema
 import yaml
-from buildenv import BuildEnvLoader
 from rich.emoji import Emoji
 from rich.text import Text
 
@@ -19,6 +19,8 @@ from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkConfigResolver
 from nmk.model.task import NmkTask
+
+from ..envbackend import EnvBackendFactory
 
 # Known URL schemes
 GITHUB_SCHEME = "github:"
@@ -86,6 +88,9 @@ class NmkModelFile:
         try:
             # Resolve local file from project reference
             self.file = self.resolve_project(project_ref)
+            if self.file is None:
+                # Can't load this file for now
+                return
 
             # Remember project dir if first file (and not an internal one)
             if not is_internal and not len(refs):
@@ -97,8 +102,11 @@ class NmkModelFile:
                     # Notify callback that all dirs are known
                     known_project_dir_callback(model)
 
-                # Also remember pip args from buildenv
-                model.pip_args = BuildEnvLoader(p_dir).pip_args
+                # Also setup env backend from project directory
+                model.env_backend = EnvBackendFactory.detect(p_dir, verbose_subprocess=False)
+                if hasattr(model.env_backend, "_pip_args"):  # pragma: no branch
+                    # Legacy backend: also set legacy pip args if any
+                    model.pip_args = cast(str, model.env_backend._pip_args)  # type: ignore
 
             # Remember file path in model (to avoid recursive loading; and only if not an internal one)
             if self.file in model.file_paths:
@@ -147,11 +155,11 @@ class NmkModelFile:
         scheme_candidate = project_path.parts[0]
         return not project_path.is_absolute() and scheme_candidate in URL_SCHEMES
 
-    def resolve_project(self, project_ref: str) -> Path:
+    def resolve_project(self, project_ref: str) -> Path | None:
         # URL?
         if self.is_url(project_ref):
             # Cache-able reference
-            return cache_remote(self.repo_cache, self.convert_url(project_ref), self.global_model.pip_args)
+            return cache_remote(self.repo_cache, self.convert_url(project_ref), self.global_model.env_backend)
 
         # Default case: assumed to be a local path
         return Path(project_ref)
