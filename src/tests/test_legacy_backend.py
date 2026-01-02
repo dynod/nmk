@@ -57,3 +57,8 @@ class TestLegacyBackend(TestHelper):
         ret_code = backend.upgrade(full=True)
         assert ret_code == 0
         assert called_args[-4:] == ["-r", "requirements.txt", "--upgrade", "--require-virtualenv"]
+
+    def test_installed_packages(self, backend: EnvBackend):
+        installed = backend.installed_packages
+        assert isinstance(installed, dict)
+        assert len(installed) == 0

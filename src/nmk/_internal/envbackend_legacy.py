@@ -102,6 +102,17 @@ class EnvBackend:
         # Nothing to do in legacy mode
         pass
 
+    @property
+    def installed_packages(self) -> dict[str, str]:
+        """
+        List installed packages in this environment
+
+        :return: map of installed packages versions (indexed by package name)
+        """
+
+        # Nothing to do in legacy mode
+        return {}
+
 
 # Dummy factory
 class EnvBackendFactory:
