@@ -33,6 +33,9 @@ Issues = "https://github.com/dynod/nmk/issues?q=is%3Aopen+is%3Aissue"
 [project.scripts]
 nmk = "nmk.__main__:main"
 
+[dependency-groups]
+dev = ["nmk-badges", "nmk-base", "nmk-doc", "nmk-github", "nmk-python", "nmk-vscode", "sphinx-autoapi"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 exclude = ["tests*"]

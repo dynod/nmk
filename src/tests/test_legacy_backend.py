@@ -61,4 +61,5 @@ class TestLegacyBackend(TestHelper):
     def test_installed_packages(self, backend: EnvBackend):
         installed = backend.installed_packages
         assert isinstance(installed, dict)
-        assert len(installed) == 0
+        assert len(installed) > 0
+        assert "nmk" in installed
