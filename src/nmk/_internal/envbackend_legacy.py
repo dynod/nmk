@@ -1,3 +1,4 @@
+import importlib.metadata
 import logging
 import sys
 from pathlib import Path
@@ -110,8 +111,8 @@ class EnvBackend:
         :return: map of installed packages versions (indexed by package name)
         """
 
-        # Nothing to do in legacy mode
-        return {}
+        # Just list stuff from distributions metadata
+        return {dist.metadata["Name"]: dist.metadata["Version"] for dist in importlib.metadata.distributions()}
 
 
 # Dummy factory
