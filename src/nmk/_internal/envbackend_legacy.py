@@ -37,7 +37,7 @@ class EnvBackend:
 
     @property
     def _pip_args(self) -> str:
-        # Pip args loaded from legacy buildenv configuration
+        # Pip install args loaded from legacy buildenv configuration
         return BuildEnvLoader(self._project_path).pip_args if self._project_path is not None else ""
 
     @property
@@ -47,7 +47,7 @@ class EnvBackend:
 
     def subprocess(self, args: list[str], check: bool = True, cwd: Path | None = None, env: dict[str, str] | None = None, verbose: bool | None = None):
         # Delegate to deprecated run_pip utility
-        return run_pip(args, extra_args=self._pip_args)
+        return run_pip(args, extra_args=self._pip_args if args[0] == "install" else "")
 
     def add_packages(self, packages: list[str]):
         """
