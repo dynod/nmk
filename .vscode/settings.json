@@ -34,7 +34,7 @@
     },
     "editor.formatOnSave": true,
     "[yaml]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode"
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "task.allowAutomaticTasks": "on",
     "terminal.integrated.defaultProfile.windows": "Git Bash",

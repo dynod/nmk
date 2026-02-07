@@ -132,7 +132,7 @@ class TestRefs(NmkTester):
     def test_pip_ref_not_mutable(self, monkeypatch: MonkeyPatch):
         # Test a pip ref with a (faked) non-mutable backend
         try:
-            from buildenv2._backends.pip import LegacyPipBackend as EnvBackend
+            from buildenv.backends._pip import LegacyPipBackend as EnvBackend
         except ImportError:
             from nmk._internal.envbackend_legacy import EnvBackend
         monkeypatch.setattr(EnvBackend, "is_mutable", lambda slf: False)  # pyright: ignore[reportUnknownLambdaType, reportUnknownArgumentType]
