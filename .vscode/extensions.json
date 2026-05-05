@@ -6,6 +6,7 @@
         "ms-python.python",
         "esbenp.prettier-vscode",
         "ms-vscode.live-server",
+        "jebbs.plantuml",
         "eamodio.gitlens",
         "streetsidesoftware.code-spell-checker"
     ]

@@ -8,6 +8,12 @@ Only interface and important behavior changes are listed here.
 The fully detailed changelog is also available on [Github](https://github.com/dynod/nmk/releases)
 ```
 
+## Release 1.5
+
+### 1.5.0
+
+- Change documentation theme
+
 ## Release 1.4
 
 ### 1.4.0
