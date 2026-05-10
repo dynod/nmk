@@ -115,6 +115,17 @@ class EnvBackend:
         # Just list stuff from distributions metadata
         return {dist.metadata["Name"]: dist.metadata["Version"] for dist in importlib.metadata.distributions()}
 
+    @property
+    def is_locked(self) -> bool:
+        """
+        State if this environment is locked (i.e. if it has a lockfile)
+
+        :return: True if environment is locked
+        """
+
+        # No locking mechanism in legacy backend
+        return False
+
 
 # Dummy factory
 class EnvBackendFactory:

@@ -35,6 +35,9 @@ class TestLegacyBackend(TestHelper):
     def test_use_requirements(self, backend: EnvBackend):
         assert backend.use_requirements is True
 
+    def test_locked(self, backend: EnvBackend):
+        assert not backend.is_locked
+
     def test_print_updates(self, backend: EnvBackend):
         # Simple run for coverage
         backend.print_updates({})
