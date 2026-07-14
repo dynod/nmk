@@ -91,11 +91,11 @@ class TestConfig(NmkTester):
 
     def test_config_override_adapt_int(self):
         self.nmk("config_sample.yml", extra_args=["--config", "someInt=13579", "--print", "someInt"])
-        self.check_logs(["Adapting config someInt from str to int", 'Config dump: { "someInt": 13579 }'])
+        self.check_logs(["Adapting config someInt value from str to int", 'Config dump: { "someInt": 13579 }'])
 
     def test_config_override_adapt_bool(self):
         self.nmk("config_sample.yml", extra_args=["--config", "someBool=true", "--print", "someBool"])
-        self.check_logs(["Adapting config someBool from str to bool", 'Config dump: { "someBool": true }'])
+        self.check_logs(["Adapting config someBool value from str to bool", 'Config dump: { "someBool": true }'])
 
     def test_config_invalid_resolver(self):
         self.nmk("config_invalid_resolver.yml", expected_error="While loading {project}: Invalid class qualified name: AbcDef (missing separator: .)")
@@ -199,6 +199,10 @@ class TestConfig(NmkTester):
 
     def test_config_override_final(self):
         self.nmk("config_override_final.yml", expected_error="While loading {project}: Can't override final config BASEDIR")
+
+    def test_config_override_bool_with_ref(self):
+        self.nmk("config_override_bool_with_ref.yml", extra_args=["--print", "someBool"])
+        self.check_logs('Config dump: { "someBool": true }')
 
     def test_config_builtin(self):
         self.nmk(

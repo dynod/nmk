@@ -157,16 +157,15 @@ class NmkModel:
         if init_value is not None:
             # Yes: with real value read from file
             NmkLogger.debug(f"New static config {name} with value: {init_value}")
-            cfg = None
+            cfg = NmkStaticConfig(name, self, path, init_value)
             is_list = isinstance(init_value, list)
             is_dict = isinstance(init_value, dict)
-            new_type = type(init_value)
         else:
             # No: with resolver
             assert resolver is not None, f"Internal error: resolver is not set for config {name}"
             NmkLogger.debug(f"New dynamic config {name} with resolver class {type(resolver).__name__}")
             cfg = NmkResolvedConfig(name, self, path, resolver, resolver_params)
-            new_type = cfg.value_type
+        new_type = cfg.value_type
 
         # Config object to work with
         config_dict = self.tasks_config if task_config else self.config
@@ -182,16 +181,13 @@ class NmkModel:
 
             # Check for type change
             old_type = config_dict[name].value_type
-            if adapt_type and (old_type in _SUPPORTED_TYPES_ADAPTATION.get(new_type, [])):
-                NmkLogger.debug(f"Adapting config {name} from {new_type.__name__} to {old_type.__name__}")
+            if adapt_type and (old_type in _SUPPORTED_TYPES_ADAPTATION.get(new_type, [])) and init_value is not None:
                 init_value = _SUPPORTED_TYPES_ADAPTATION[new_type][old_type](init_value)
+                NmkLogger.debug(f"Adapting config {name} value from {new_type.__name__} to {old_type.__name__}: {init_value}")
+                cfg = NmkStaticConfig(name, self, path, init_value)
             else:
                 # Types can't differ if no adaptation required
                 assert new_type == old_type, f"Unexpected type change for config {name} ({old_type.__name__} --> {new_type.__name__})"
-
-        # Create instance if not done yet
-        if init_value is not None and cfg is None:
-            cfg = NmkStaticConfig(name, self, path, init_value)
 
         # Add config to model
         if is_list or is_dict:
