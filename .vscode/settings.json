@@ -7,12 +7,10 @@
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true
     },
-    "python.defaultInterpreterPath": "venv/bin/python",
     "python.autoComplete.extraPaths": [
         "src"
     ],
     "cSpell.words": [
-        "isort",
         "noqa",
         "pycache",
         "pylint",

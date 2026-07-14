@@ -1,0 +1,6 @@
+refs:
+  - config_sample.yml
+
+config:
+  otherBool: true
+  someBool: ${otherBool}
