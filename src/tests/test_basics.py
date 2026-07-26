@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from tests.utils import NmkTester
 
 
@@ -7,7 +9,10 @@ class TestBasics(NmkTester):
     def test_project_not_found(self):
         self.nmk(Path("/missing/project.yml"), expected_error="While loading /missing/project.yml: Project file not found")
 
-    def test_simplest_project_with_logs(self):
+    def test_simplest_project_with_logs(self, monkeypatch: pytest.MonkeyPatch):
+        # Also fake env containing a bash reference (same syntax as nmk references)
+        monkeypatch.setenv("SOME_FAKE_ENV", "with some ${unknownItem} reference")
+
         self.nmk(self.prepare_project("simplest.yml"), with_logs=True)
         assert self.nmk_cache.exists()
         assert (self.nmk_cache / "nmk.log").is_file()
