@@ -44,56 +44,67 @@ build options:
   --skip SKIPPED_TASKS  skip specified task
 ```
 
-***
+---
 
 ## Logging
 
 ### Levels
+
 **`nmk`** prints logs on different levels, and stdout log display can be configured using one of the verbosity options:
+
 - **`--info`** (default): only info (**[I]**) and higher level logs will be displayed
 - **`-q, --quiet`**: only warning (**[W]**) and error (**[E]**) logs will be displayed
 - **`-v, --verbose`**: all logs (including debug (**[D]**) ones) will be displayed
 
 (parser-log-file)=
+
 ### File
+
 In addition to the displayed ones, logs are persisted in a file, configured with **`--log-file`** option.
 Default log file is **`{PROJECTDIR_NMK}/nmk.log`** (**`{PROJECTDIR_NMK}`** being the project **`.nmk/`** subfolder).
 
 ```{note}
-Value for this option can contain keywords representing directories known to **`nmk`**; see {ref}`built-in config items<builtin-config>`. 
-Allowed keyword are **`{PROJECTDIR}`**, **`{PROJECTDIR_NMK}`**, **`{ROOTDIR}`** and **`{ROOTDIR_NMK}`**.
+Value for this option can contain keywords representing directories known to **`nmk`**; see {ref}`built-in config items<builtin-config>`.
+Allowed keywords are **`{PROJECTDIR}`**, **`{PROJECTDIR_NMK}`**, **`{ROOTDIR}`** and **`{ROOTDIR_NMK}`**.
 ```
 
-*<span style="color:orange">Changed in version 1.3.0</span>* -- Previous default value was **`{ROOTDIR}/.nmk/nmk.log`**
+_<span style="color:orange">Changed in version 1.3.0</span>_ -- Previous default value was **`{ROOTDIR}/.nmk/nmk.log`**
 
 The log file is logging all levels (including debug one), whatever is the chosen level for stdout display (see above).
 It uses a rotating mechanism, to start a new log file as soon as a given size (1MB) is reached. Up to 5 backup log files are
 kept before being deleted. At the moment, log file size + backup count is hard coded and can't be configured.
 
 ### Disabling logs
+
 Logs can be completely disabled (both displayed and persisted ones) if the **`--no-logs`** option is used.
 
 (parser-log-prefix)=
+
 ### Prefix
 
-*<span style="color:green">Added in version 1.2.0</span>*
+_<span style="color:green">Added in version 1.2.0</span>_
 
 Top level tools that call **`nmk`** can add a log prefix thanks to the **`--log-prefix`**, in order to help identifying different runs (e.g. for different nmk projects folders). See `<prefix>` location in logs displays formats below.
 
 ### Format
+
 In quiet/info mode, logs are displayed using this format:
+
 > **`<day> <time> (<level>) <prefix> <logger>|[<task>] <emoji> - <string>`**
 
 Example:
+
 ```
 2022-02-15 18:21:16 (I) nmk ⏬ - Caching remote references...
 2022-02-15 18:21:16 (I) nmk 🏁 - Nothing to do
 ```
 
 In verbose mode, logs are displayed with a bit more details, using this format:
+
 > **`<day> <time>.<ms> (<level>) <prefix> <logger>|[<task>] <emoji> - <string> - <file>:<function>:<line>`**
 
 Example:
+
 ```
 2022-02-16 08:02:06.641 (D) nmk 🐛 - ----- nmk version 0.0.0.post27+gb055fcc ----- - logs.py:logging_setup:62
 2022-02-16 08:02:06.641 (D) nmk 🐛 - called with args: Namespace(config=None, dry_run=False, log_file='{ROOTDIR}/.nmk/nmk.log', log_level=20, nmk_dir=PosixPath('/tmp/dev/nmk/.nmk'), no_cache=True, no_logs=False, print=None, project='github://dynod/nmk/main/src/tests/templates/remote_repo_ref_valid.yml', root=PosixPath('/tmp/dev/nmk'), tasks=[]) - logs.py:logging_setup:63
@@ -118,11 +129,12 @@ Example:
 
 ```
 
-***
+---
 
 ## Root folder
 
 ### Defining the root folder
+
 The **`nmk`** root folder is by default located as the parent of the currently activated Python virtualenv (i.e. the one containing the currently running version of **`nmk`**). Relatively to this root folder, **`nmk`** will setup a cache folder (called **`.nmk`**) used to store logs, and temporary files to speed up following builds.
 
 This default location for the root folder has been chosen to allow multiple sub-projects to share the same Python virtualenv and cache folders.
@@ -130,9 +142,10 @@ This default location for the root folder has been chosen to allow multiple sub-
 The root folder can also be configured to a custom location using the **`-r, --root`** option.
 
 ### Clear cache
+
 When using **`--no-cache`** option, the cache folder (see above) is cleared before running the build.
 
-***
+---
 
 ## Project
 
@@ -144,21 +157,23 @@ Default project file is **`nmk.yml`** (relative to current working directory).
 
 Project file is a [YAML](https://yaml.org/) file, and has to conform with [this format](file).
 
-***
+---
 
 ## Config
 
 Configuration is handled through the **`config`** node of project files.
 
 (extra-cli-config)=
+
 ### Extra configuration
 
 In addition to project files content, extra configuration can be provided through the **`--config`** option. This option allows to define additional config items, or override config items from project files. The option value must be either:
+
 - a valid json object
 - or a K=V string, allowing to configure a K item with V string value; only following value types are allowed, other types shall be contributed through JSON format:
   - **string**
-  - **int** (if overridden existing item is an **int**)  *<span style="color:green">Added in version 1.3.1</span>*
-  - **bool** (if overridden existing item is a **bool**) *<span style="color:green">Added in version 1.3.1</span>*
+  - **int** (if overridden existing item is an **int**) _<span style="color:green">Added in version 1.3.1</span>_
+  - **bool** (if overridden existing item is a **bool**) _<span style="color:green">Added in version 1.3.1</span>_
 
 ```{note}
 - The **`--config`** options contributed configuration is applied __after__ the whole project file model has been loaded.
@@ -175,8 +190,8 @@ The **`--print`** option can be used to dump any configuration item value, after
 - On Linux (or git-bash), completion is provided for config item names
 ```
 
+---
 
-***
 ## Tasks and build
 
 ### Tasks
@@ -200,6 +215,7 @@ If the **`--force`** option is used, there are no "outputs vs inputs" checks ans
 If the **`--skip`** option is used, the specified tasks and theirs dependencies are skipped during build.
 
 Example:
+
 > ```shell
 > $ nmk --skip prologue  # skips prologue task and all tasks declared as its dependencies
 > ```

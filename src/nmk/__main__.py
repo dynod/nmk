@@ -7,6 +7,7 @@ from nmk._internal.loader import NmkLoader
 from nmk._internal.parser import NmkParser
 from nmk.errors import NmkStopHereError
 from nmk.logs import NmkLogger, logging_shutdown
+from nmk.model.config import NmkStaticConfig
 
 
 # CLI entry point
@@ -33,7 +34,11 @@ def nmk(argv: list[str]) -> int:
     finally:
         # Flush all log handlers
         if model:
-            logging_shutdown(args, {n: cast(str, v.value) for n, v in model.config.items() if v.is_final})
+            logging_shutdown(
+                args,
+                # Only static and final config items can be used as reference for log file path
+                {n: cast(str, v.static_value) for n, v in model.config.items() if v.is_final and isinstance(v, NmkStaticConfig)},
+            )
     return out
 
 
