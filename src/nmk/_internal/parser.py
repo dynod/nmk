@@ -15,7 +15,7 @@ nmk CLI parsing logic
 class NmkParser:
     def __init__(self):
         # Prepare parser
-        self.parser = ArgumentParser(description="Next-gen make-like build system")
+        self.parser = ArgumentParser(prog="nmk", description="Next-gen make-like build system")
 
         # Version handling
         self.parser.add_argument("-V", "--version", action="version", version=f"nmk version {__version__}")

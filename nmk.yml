@@ -32,3 +32,7 @@ config:
         run:
           omit:
             - src/nmk/_internal/envbackend_legacy.py
+
+  # Command snippet
+  #docSnippets:
+  #  nmk.txt: "${venvBin}/nmk --help"

@@ -1,0 +1,38 @@
+usage: nmk [-h] [-V] [-q | --info | -v] [--log-file L] [--no-logs]
+           [--log-prefix PREFIX] [-r R] [--no-cache] [-p P]
+           [--config JSON|K=V] [--print K] [--dry-run] [--force]
+           [--skip SKIPPED_TASKS]
+           [task ...]
+
+Next-gen make-like build system
+
+positional arguments:
+  task                  build task to execute
+
+options:
+  -h, --help            show this help message and exit
+  -V, --version         show program's version number and exit
+
+logging options:
+  -q, --quiet           quiet mode (only warning/error messages)
+  --info                default mode
+  -v, --verbose         verbose mode (all messages, including debug ones)
+  --log-file L          write logs to L (default: {PROJECTDIR_NMK}/nmk.log)
+  --no-logs             disable logging
+  --log-prefix PREFIX   prefix for all log messages
+
+root folder options:
+  -r R, --root R        root folder (default: virtual env parent)
+  --no-cache            clear cache before resolving references
+
+project options:
+  -p P, --project P     project file (default: nmk.yml)
+
+config options:
+  --config JSON|K=V     contribute or override config item(s)
+  --print K             print required config item(s) and exit
+
+build options:
+  --dry-run             list tasks to be executed and exit
+  --force, -f           force tasks rebuild
+  --skip SKIPPED_TASKS  skip specified task
