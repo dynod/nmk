@@ -28,7 +28,7 @@
     ],
     "python.testing.pytestEnabled": true,
     "files.watcherExclude": {
-        "**/venv/**": true
+        "**/.venv/**": true
     },
     "editor.formatOnSave": true,
     "[yaml]": {
@@ -39,22 +39,25 @@
     "terminal.integrated.profiles.linux": {
         "bash": {
             "args": [
-                "--init-file",
-                ".buildenv/shell.sh"
+                "./buildenv.sh",
+                "shell"
             ]
         }
     },
     "terminal.integrated.profiles.windows": {
         "Git Bash": {
             "args": [
-                "--init-file",
-                ".buildenv/shell.sh"
+                "./buildenv.sh",
+                "shell"
             ]
         },
         "Command Prompt": {
             "args": [
-                "/k",
-                ".buildenv\\shell.cmd"
+                "/c",
+                "buildenv.cmd",
+                "shell",
+                "--shell",
+                "cmd"
             ]
         }
     },

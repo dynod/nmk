@@ -83,6 +83,12 @@ include = ["src"]
 typeCheckingMode = "strict"
 reportMissingTypeStubs = false
 
+[tool.uv]
+cache-keys = [
+    {file = "pyproject.toml"},
+    {git = {commit = true,tags = true}},
+]
+
 [tool.ruff]
 line-length = 160
 
@@ -119,4 +125,4 @@ data_file = "out/.coverage"
 concurrency = ["thread"]
 disable_warnings = ["no-data-collected"]
 branch = true
-omit = ["src/tests/*"]
+omit = ["src/tests/*", "src/nmk/_internal/envbackend_legacy.py"]

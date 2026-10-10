@@ -13,11 +13,16 @@ author = "The dynod project"
 # Extensions configuration
 extensions = ["autoapi.extension", "myst_parser"]
 
-# HTML theme
+# HTML settings
 html_theme = "furo"
+html_static_path = [
+    "static",
+]
+html_js_files = [
+    "ext_links.js",
+]
 
 # Extra configuration
-
 autoapi_dirs = ['../src']
 autoapi_ignore = ['*tests*', '*templates*']
 autoapi_options = ['members', 'undoc-members', 'show-inheritance', 'show-module-summary']

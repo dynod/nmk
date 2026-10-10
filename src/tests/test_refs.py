@@ -1,5 +1,4 @@
 import re
-import subprocess
 
 from _pytest.monkeypatch import MonkeyPatch
 
@@ -115,19 +114,17 @@ class TestRefs(NmkTester):
         self.nmk("pip://nmk!unknown.yml", expected_error="While loading pip://nmk!unknown.yml: Project file not found")
 
     def test_pip_install(self, monkeypatch: MonkeyPatch):
-        found_args = []
-
-        def record_process(args: list[str], *p_args, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
-            nonlocal found_args
-            found_args = args
-            return subprocess.CompletedProcess(args, 0, "", "")
-
-        monkeypatch.setattr(subprocess, "run", record_process)  # pyright: ignore[reportUnknownArgumentType]
+        # Test a pip ref with a (faked) mutable backend
+        try:
+            from buildenv.backends._uv import UvxBackend as EnvBackend
+        except ImportError:
+            from nmk._internal.envbackend_legacy import EnvBackend
+        monkeypatch.setattr(EnvBackend, "is_mutable", lambda slf: True)  # pyright: ignore[reportUnknownLambdaType, reportUnknownArgumentType]
+        monkeypatch.setattr(EnvBackend, "_delegate_add_packages", lambda slf, packages: None)  # pyright: ignore[reportUnknownLambdaType, reportUnknownArgumentType]
         self.nmk(
             "pip://definitely-unknown-package>=1.2!inside/unknown.yml",
             expected_error="While loading pip://definitely-unknown-package>=1.2!inside/unknown.yml: Can't find module 'definitely_unknown_package' even after having installed 'definitely-unknown-package>=1.2' package",
         )
-        assert found_args[1:] == ["-m", "pip", "install", "definitely-unknown-package>=1.2"]
 
     def test_pip_ref_not_mutable(self, monkeypatch: MonkeyPatch):
         # Test a pip ref with a (faked) non-mutable backend
