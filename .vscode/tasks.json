@@ -5,7 +5,7 @@
         {
             "label": "nmk build",
             "type": "shell",
-            "command": "source .buildenv/activate.sh && nmk build",
+            "command": "nmk build",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -25,7 +25,7 @@
         {
             "label": "nmk clean",
             "type": "shell",
-            "command": "source .buildenv/activate.sh && nmk clean",
+            "command": "nmk clean",
             "group": "build",
             "runOptions": {
                 "runOn": "default"
@@ -42,7 +42,7 @@
         {
             "label": "nmk tests",
             "type": "shell",
-            "command": "source .buildenv/activate.sh && nmk tests",
+            "command": "nmk tests",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -62,7 +62,7 @@
         {
             "label": "setup",
             "type": "shell",
-            "command": "./buildenv.sh init",
+            "command": "nmk setup",
             "group": "build",
             "runOptions": {
                 "runOn": "folderOpen"

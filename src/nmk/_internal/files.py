@@ -104,7 +104,7 @@ class NmkModelFile:
 
                 # Also setup env backend from project directory
                 model.env_backend = EnvBackendFactory.detect(p_dir, verbose_subprocess=False)
-                if hasattr(model.env_backend, "_pip_args"):  # pragma: no branch
+                if hasattr(model.env_backend, "_pip_args"):  # pragma: no cover
                     # Legacy backend: also set legacy pip args if any
                     model.pip_args = cast(str, model.env_backend._pip_args)  # type: ignore
 
