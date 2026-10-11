@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from nmk._internal.parser import NmkParser
 from tests.utils import NmkTester
 
 
@@ -34,3 +35,9 @@ class TestBasics(NmkTester):
 
     def test_root_not_found(self):
         self.nmk("empty.yml", extra_args=["--root", "/missing/folder"], expected_rc=1)
+
+    def test_tasks_can_be_interleaved_with_options(self):
+        # Test intermixed parsing of tasks and options
+        args = NmkParser().parse(["foo", "--force", "bar"])
+        assert args.tasks == ["foo", "bar"]
+        assert args.force

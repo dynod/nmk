@@ -80,4 +80,4 @@ class NmkParser:
 
     def parse(self, argv: list[str]) -> Namespace:
         # Parse arguments
-        return self.parser.parse_args(argv)
+        return self.parser.parse_intermixed_args(argv)
